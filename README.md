@@ -34,13 +34,16 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu. O hub oferece seis minijogos:
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece quinze minijogos:
 
-- **Flappy Bird**: clique, barra de espaço ou seta para cima para voar.
-- **Campo Minado**: clique esquerdo revela casas e clique direito coloca/remove bandeiras; a primeira casa revelada é segura.
-- **Snake**: setas ou WASD para controlar a cobra; coma a comida sem bater nas paredes ou em si mesma.
-- **Pong**: mova a raquete com W/S ou ↑/↓ e marque cinco pontos contra o computador.
-- **Jogo da Memória**: encontre os oito pares clicando nas cartas.
-- **Simon**: observe e repita a sequência de cores, clicando nos painéis ou usando as teclas 1 a 4.
+- **Flappy Bird**, **Campo Minado**, **Snake**, **Pong**, **Jogo da Memória** e **Simon**.
+- **Tetris**: encaixe as peças, gire-as e complete linhas.
+- **Quebra-Blocos**: mova a raquete, lance a bola e destrua os tijolos.
+- **2048**: use as setas para unir peças iguais.
+- **Jogo da Velha** e **Ligue 4**: desafie a IA.
+- **Luzes**: apague todas as casas; cada jogada também alterna as vizinhas.
+- **Acerte a Toupeira**: clique na toupeira antes que o tempo acabe.
+- **Adivinhe o Número**: use os números e Enter para adivinhar de 1 a 100.
+- **Desvie!**: use ←/→ ou A/D para escapar dos blocos que caem.
 
-Os jogos que oferecem reinício também aceitam a tecla R; todos têm botão para voltar ao menu. O workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.
+O hub usa páginas para organizar os jogos. Os jogos têm instruções na própria tela e botão para voltar ao menu. O workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.

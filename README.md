@@ -34,9 +34,13 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu. O hub já oferece dois minijogos:
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu. O hub oferece seis minijogos:
 
-- **Flappy Bird**: clique, barra de espaço ou seta para cima para voar. `R` reinicia a partida; os botões na parte inferior reiniciam ou voltam ao menu.
-- **Campo Minado**: clique esquerdo revela uma casa e clique direito coloca/remove uma bandeira. A primeira casa revelada é sempre segura. Use **Novo jogo** para reiniciar.
+- **Flappy Bird**: clique, barra de espaço ou seta para cima para voar.
+- **Campo Minado**: clique esquerdo revela casas e clique direito coloca/remove bandeiras; a primeira casa revelada é segura.
+- **Snake**: setas ou WASD para controlar a cobra; coma a comida sem bater nas paredes ou em si mesma.
+- **Pong**: mova a raquete com W/S ou ↑/↓ e marque cinco pontos contra o computador.
+- **Jogo da Memória**: encontre os oito pares clicando nas cartas.
+- **Simon**: observe e repita a sequência de cores, clicando nos painéis ou usando as teclas 1 a 4.
 
-Os comandos do mod começam com `/mmg`, e novos jogos serão adicionados ao hub aos poucos. O workflow do GitHub Actions compila e publica o `.jar` como artefato da execução.
+Os jogos que oferecem reinício também aceitam a tecla R; todos têm botão para voltar ao menu. O workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.

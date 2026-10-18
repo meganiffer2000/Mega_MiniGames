@@ -11,8 +11,9 @@ public final class MinesweeperScreen extends Screen {
     private static final int COLUMNS = 10;
     private static final int ROWS = 10;
     private static final int MINE_COUNT = 15;
-    private static final int CELL_SIZE = 26;
-    private static final int GRID_TOP = 62;
+    private static final int MAX_CELL_SIZE = 26;
+    private static final int GRID_TOP = 52;
+    private int cellSize;
 
     private boolean[][] mines;
     private boolean[][] revealed;
@@ -29,8 +30,12 @@ public final class MinesweeperScreen extends Screen {
 
     @Override
     protected void init() {
-        gridLeft = (width - COLUMNS * CELL_SIZE) / 2;
-        int buttonY = Math.min(height - 24, GRID_TOP + ROWS * CELL_SIZE + 20);
+        int availableHeight = Math.max(ROWS * 10, height - GRID_TOP - 62);
+        int heightLimitedCell = availableHeight / ROWS;
+        int widthLimitedCell = Math.max(10, (width - 24) / COLUMNS);
+        cellSize = Math.max(10, Math.min(MAX_CELL_SIZE, Math.min(heightLimitedCell, widthLimitedCell)));
+        gridLeft = (width - COLUMNS * cellSize) / 2;
+        int buttonY = height - 25;
         int buttonWidth = 112;
         int startX = (width - buttonWidth * 2 - 8) / 2;
 
@@ -168,8 +173,7 @@ public final class MinesweeperScreen extends Screen {
             status = "Você encontrou uma mina! Tente novamente.";
             statusColor = 0xFFFF7777;
         } else {
-            status = "Minas: " + MINE_COUNT + "   Bandeiras: " + countFlags()
-                    + "   |   Esquerdo: revelar   Direito: bandeira";
+            status = "Minas " + MINE_COUNT + "  |  Bandeiras " + countFlags() + "  •  Esq. abre / Dir. marca";
             statusColor = 0xFFFFFFFF;
         }
         context.drawCenteredTextWithShadow(textRenderer, Text.literal(status), width / 2, 39, statusColor);
@@ -195,28 +199,28 @@ public final class MinesweeperScreen extends Screen {
     }
 
     private void drawCell(DrawContext context, int row, int column) {
-        int x = gridLeft + column * CELL_SIZE;
-        int y = GRID_TOP + row * CELL_SIZE;
-        int right = x + CELL_SIZE - 1;
-        int bottom = y + CELL_SIZE - 1;
+        int x = gridLeft + column * cellSize;
+        int y = GRID_TOP + row * cellSize;
+        int right = x + cellSize - 1;
+        int bottom = y + cellSize - 1;
 
         if (revealed[row][column] || (gameOver && mines[row][column])) {
             int color = mines[row][column] ? 0xFFC84B4B : 0xFFB9B9B9;
             context.fill(x, y, right, bottom, color);
             if (mines[row][column]) {
                 context.drawCenteredTextWithShadow(textRenderer, Text.literal("X"),
-                        x + CELL_SIZE / 2, y + 8, 0xFFFFFFFF);
+                        x + cellSize / 2, y + cellSize / 2 - 4, 0xFFFFFFFF);
             } else if (neighborCounts[row][column] > 0) {
                 context.drawCenteredTextWithShadow(textRenderer,
                         Text.literal(Integer.toString(neighborCounts[row][column])),
-                        x + CELL_SIZE / 2, y + 8, numberColor(neighborCounts[row][column]));
+                        x + cellSize / 2, y + cellSize / 2 - 4, numberColor(neighborCounts[row][column]));
             }
         } else {
             context.fill(x, y, right, bottom, 0xFF6E7781);
             context.fill(x + 2, y + 2, right - 2, bottom - 2, 0xFF969FA8);
             if (flagged[row][column]) {
                 context.drawCenteredTextWithShadow(textRenderer, Text.literal("F"),
-                        x + CELL_SIZE / 2, y + 8, 0xFFFF5555);
+                        x + cellSize / 2, y + cellSize / 2 - 4, 0xFFFF5555);
             }
         }
     }
@@ -240,8 +244,8 @@ public final class MinesweeperScreen extends Screen {
             return true;
         }
 
-        int column = (int) ((mouseX - gridLeft) / CELL_SIZE);
-        int row = (int) ((mouseY - GRID_TOP) / CELL_SIZE);
+        int column = (int) ((mouseX - gridLeft) / cellSize);
+        int row = (int) ((mouseY - GRID_TOP) / cellSize);
         if (mouseX >= gridLeft && mouseY >= GRID_TOP && isInside(row, column)) {
             if (button == 0) {
                 reveal(row, column);

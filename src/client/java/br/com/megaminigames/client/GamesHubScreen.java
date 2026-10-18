@@ -32,7 +32,17 @@ public final class GamesHubScreen extends Screen {
             new Game("Damas", CheckersScreen::new),
             new Game("Termo", WordleScreen::new),
             new Game("Desafio de Matemática", MathQuizScreen::new),
-            new Game("Teste de Reflexo", ReactionTestScreen::new)
+            new Game("Teste de Reflexo", ReactionTestScreen::new),
+            new Game("Blackjack", BlackjackScreen::new),
+            new Game("Forca", HangmanScreen::new),
+            new Game("Pedra, Papel e Tesoura", RockPaperScissorsScreen::new),
+            new Game("Labirinto", MazeScreen::new),
+            new Game("Mini Sudoku", MiniSudokuScreen::new),
+            new Game("Caça-Moedas", CoinCollectorScreen::new),
+            new Game("Digitação Rápida", TypingSprintScreen::new),
+            new Game("Batalha Naval", MiniBattleshipScreen::new),
+            new Game("Pular Corda", JumpRopeScreen::new),
+            new Game("Pescaria", FishingScreen::new)
     );
 
     private final int page;

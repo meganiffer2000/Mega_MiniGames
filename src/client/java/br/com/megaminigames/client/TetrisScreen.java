@@ -11,7 +11,10 @@ import org.lwjgl.glfw.GLFW;
 public final class TetrisScreen extends Screen {
     private static final int COLUMNS = 10;
     private static final int ROWS = 20;
-    private static final int CELL = 20;
+    private static final int MAX_CELL_SIZE = 20;
+    private int cellSize;
+    private int boardLeft;
+    private int boardTop;
     private static final int[][][] SHAPES = {
             {{0, 1}, {1, 1}, {2, 1}, {3, 1}},
             {{1, 0}, {2, 0}, {1, 1}, {2, 1}},
@@ -42,7 +45,13 @@ public final class TetrisScreen extends Screen {
 
     @Override
     protected void init() {
-        int buttonY = height - 25;
+        int availableHeight = Math.max(ROWS * 6, height - 74);
+        int heightLimitedCell = availableHeight / ROWS;
+        int widthLimitedCell = Math.max(6, (width - 40) / COLUMNS);
+        cellSize = Math.max(6, Math.min(MAX_CELL_SIZE, Math.min(heightLimitedCell, widthLimitedCell)));
+        boardLeft = (width - COLUMNS * cellSize) / 2;
+        boardTop = Math.max(38, (height - ROWS * cellSize - 46) / 2);
+        int buttonY = height - 22;
         addDrawableChild(ButtonWidget.builder(Text.literal("Reiniciar (R)"), button -> newGame())
                 .dimensions(width / 2 - 116, buttonY, 112, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
@@ -183,11 +192,11 @@ public final class TetrisScreen extends Screen {
                 Text.literal("Tetris  |  Pontos: " + score + "  |  ← → mover, ↓ acelerar, ↑ girar"),
                 width / 2, 12, 0xFFFFFFFF);
 
-        int left = (width - COLUMNS * CELL) / 2;
-        int top = Math.max(32, (height - ROWS * CELL) / 2 - 8);
-        context.fill(left - 3, top - 3, left + COLUMNS * CELL + 3,
-                top + ROWS * CELL + 3, 0xFF667782);
-        context.fill(left, top, left + COLUMNS * CELL, top + ROWS * CELL, 0xFF111820);
+        int left = boardLeft;
+        int top = boardTop;
+        context.fill(left - 3, top - 3, left + COLUMNS * cellSize + 3,
+                top + ROWS * cellSize + 3, 0xFF667782);
+        context.fill(left, top, left + COLUMNS * cellSize, top + ROWS * cellSize, 0xFF111820);
         for (int y = 0; y < ROWS; y++) {
             for (int x = 0; x < COLUMNS; x++) {
                 if (board[y][x] != 0) {
@@ -204,18 +213,21 @@ public final class TetrisScreen extends Screen {
                 }
             }
         } else {
-            context.fill(left, top + 180, left + COLUMNS * CELL, top + 220, 0xAA000000);
+            int centerY = top + ROWS * cellSize / 2;
+            context.fill(left, centerY - 20, left + COLUMNS * cellSize, centerY + 20, 0xAA000000);
             context.drawCenteredTextWithShadow(textRenderer, Text.literal("Fim de jogo! Pressione R"),
-                    width / 2, top + 193, 0xFFFFFFFF);
+                    width / 2, centerY - 4, 0xFFFFFFFF);
         }
         super.render(context, mouseX, mouseY, delta);
     }
 
     private void drawBlock(DrawContext context, int left, int top, int x, int y, int color) {
-        int blockX = left + x * CELL;
-        int blockY = top + y * CELL;
-        context.fill(blockX + 1, blockY + 1, blockX + CELL - 1, blockY + CELL - 1, color);
-        context.fill(blockX + 3, blockY + 3, blockX + 7, blockY + 5, 0x55FFFFFF);
+        int blockX = left + x * cellSize;
+        int blockY = top + y * cellSize;
+        context.fill(blockX + 1, blockY + 1, blockX + cellSize - 1, blockY + cellSize - 1, color);
+        if (cellSize >= 10) {
+            context.fill(blockX + 2, blockY + 2, blockX + cellSize / 2, blockY + 4, 0x55FFFFFF);
+        }
     }
 
     @Override

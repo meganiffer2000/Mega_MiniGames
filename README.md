@@ -34,14 +34,19 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece vinte minijogos. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **30 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
 
-Além de **Flappy Bird**, **Campo Minado**, **Snake**, **Pong**, **Jogo da Memória**, **Simon**, **Tetris**, **Quebra-Blocos**, **2048**, **Jogo da Velha**, **Ligue 4**, **Luzes**, **Acerte a Toupeira**, **Adivinhe o Número** e **Desvie!**, foram adicionados:
+Nesta atualização foram adicionados dez jogos:
 
-- **Invasores Espaciais**: mova a nave e atire com Espaço.
-- **Damas**: jogue contra uma IA, com capturas obrigatórias e coroação.
-- **Termo**: descubra a palavra de cinco letras em seis tentativas.
-- **Desafio de Matemática**: resolva dez contas de soma, subtração e multiplicação.
-- **Teste de Reflexo**: espere a tela ficar verde e clique o mais rápido possível.
+- **Blackjack**: compre cartas ou pare antes de passar de 21.
+- **Forca**: descubra a palavra em até sete erros.
+- **Pedra, Papel e Tesoura**: dispute uma série contra o computador.
+- **Labirinto**: encontre a saída de um mapa gerado a cada partida.
+- **Mini Sudoku**: complete o tabuleiro 4×4 com as teclas 1–4.
+- **Caça-Moedas**: colete moedas antes de o tempo acabar.
+- **Digitação Rápida**: digite o maior número de palavras em um minuto.
+- **Batalha Naval**: localize o navio escondido antes de acabarem os tiros.
+- **Pular Corda**: pressione Espaço no momento certo.
+- **Pescaria**: lance a linha e recolha quando o peixe morder.
 
-O hub usa páginas para organizar os jogos. Os jogos têm instruções na própria tela e botão para voltar ao menu. O workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.
+Também foram ajustados os tamanhos dos tabuleiros e controles de **Tetris**, **Campo Minado**, **Jogo da Memória** e **Acerte a Toupeira** para telas menores; a toupeira aparece desde o início e não some entre acertos. Outros dez jogos adicionados anteriormente são **Invasores Espaciais**, **Damas**, **Termo**, **Desafio de Matemática**, **Teste de Reflexo**, **Tetris**, **Quebra-Blocos**, **2048**, **Jogo da Velha** e **Ligue 4**. O hub usa páginas para organizar os jogos e o workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.

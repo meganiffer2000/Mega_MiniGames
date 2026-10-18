@@ -9,7 +9,8 @@ import net.minecraft.text.Text;
 /** Acerte a toupeira antes que o tempo acabe. */
 public final class WhackAMoleScreen extends Screen {
     private static final int SIDE = 3;
-    private static final int CELL = 82;
+    private static final int MAX_CELL_SIZE = 82;
+    private int cellSize;
     private int left;
     private int top;
     private int score;
@@ -25,9 +26,12 @@ public final class WhackAMoleScreen extends Screen {
 
     @Override
     protected void init() {
-        left = (width - SIDE * CELL) / 2;
-        top = Math.max(60, (height - SIDE * CELL - 68) / 2);
-        int buttonY = Math.min(height - 24, top + SIDE * CELL + 14);
+        int widthLimit = (width - 36) / SIDE;
+        int heightLimit = (height - 120) / SIDE;
+        cellSize = Math.max(30, Math.min(MAX_CELL_SIZE, Math.min(widthLimit, heightLimit)));
+        left = (width - SIDE * cellSize) / 2;
+        top = 50;
+        int buttonY = height - 25;
         addDrawableChild(ButtonWidget.builder(Text.literal("Jogar novamente"), button -> newGame())
                 .dimensions(width / 2 - 116, buttonY, 112, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
@@ -39,8 +43,8 @@ public final class WhackAMoleScreen extends Screen {
     private void newGame() {
         score = 0;
         ticksLeft = 600;
-        moleTicks = 1;
-        moleCell = -1;
+        moleCell = ThreadLocalRandom.current().nextInt(SIDE * SIDE);
+        moleTicks = 24;
         gameOver = false;
         initialized = true;
     }
@@ -49,15 +53,23 @@ public final class WhackAMoleScreen extends Screen {
     public void tick() {
         if (gameOver) return;
         ticksLeft--;
-        moleTicks--;
-        if (moleTicks <= 0) {
-            moleCell = ThreadLocalRandom.current().nextInt(SIDE * SIDE);
-            moleTicks = Math.max(9, 24 - score / 3);
+        if (moleCell < 0) {
+            if (--moleTicks <= 0) spawnMole();
+        } else if (--moleTicks <= 0) {
+            spawnMole();
         }
         if (ticksLeft <= 0) {
             gameOver = true;
             moleCell = -1;
         }
+    }
+
+    private void spawnMole() {
+        int previous = moleCell;
+        do {
+            moleCell = ThreadLocalRandom.current().nextInt(SIDE * SIDE);
+        } while (moleCell == previous);
+        moleTicks = Math.max(12, 28 - score / 3);
     }
 
     @Override
@@ -70,28 +82,34 @@ public final class WhackAMoleScreen extends Screen {
         for (int index = 0; index < SIDE * SIDE; index++) {
             int row = index / SIDE;
             int column = index % SIDE;
-            int x = left + column * CELL;
-            int y = top + row * CELL;
-            context.fill(x + 4, y + 4, x + CELL - 4, y + CELL - 4, 0xFF69472F);
-            context.fill(x + 10, y + 10, x + CELL - 10, y + CELL - 10, 0xFF49301F);
+            int x = left + column * cellSize;
+            int y = top + row * cellSize;
+            context.fill(x + 3, y + 3, x + cellSize - 3, y + cellSize - 3, 0xFF69472F);
+            context.fill(x + 8, y + 8, x + cellSize - 8, y + cellSize - 8, 0xFF49301F);
             if (index == moleCell && !gameOver) {
-                drawMole(context, x + CELL / 2, y + CELL / 2 + 3);
+                drawMole(context, x + cellSize / 2, y + cellSize / 2 + 3);
             }
         }
         if (gameOver) {
-            context.fill(left, top + CELL, left + SIDE * CELL, top + CELL * 2, 0xAA000000);
+            int centerY = top + SIDE * cellSize / 2;
+            context.fill(left, centerY - 18, left + SIDE * cellSize, centerY + 18, 0xAA000000);
             context.drawCenteredTextWithShadow(textRenderer,
-                    Text.literal("Tempo esgotado! Sua pontuação: " + score), width / 2,
-                    top + CELL + CELL / 2 - 4, 0xFFFFFFFF);
+                    Text.literal("Tempo esgotado! Pontos: " + score), width / 2,
+                    centerY - 4, 0xFFFFFFFF);
         }
         super.render(context, mouseX, mouseY, delta);
     }
 
     private void drawMole(DrawContext context, int centerX, int centerY) {
-        drawDisc(context, centerX, centerY, 22, 0xFF9A674A);
-        context.fill(centerX - 11, centerY - 9, centerX - 6, centerY - 4, 0xFF17120F);
-        context.fill(centerX + 6, centerY - 9, centerX + 11, centerY - 4, 0xFF17120F);
-        context.fill(centerX - 4, centerY + 2, centerX + 5, centerY + 6, 0xFFFFA9A2);
+        int radius = Math.max(8, Math.min(22, cellSize / 2 - 5));
+        drawDisc(context, centerX, centerY, radius, 0xFF9A674A);
+        int eye = Math.max(2, radius / 5);
+        context.fill(centerX - radius / 2 - eye, centerY - radius / 3 - eye,
+                centerX - radius / 2, centerY - radius / 3, 0xFF17120F);
+        context.fill(centerX + radius / 2, centerY - radius / 3 - eye,
+                centerX + radius / 2 + eye, centerY - radius / 3, 0xFF17120F);
+        context.fill(centerX - radius / 4, centerY + radius / 4,
+                centerX + radius / 4 + 1, centerY + radius / 4 + eye, 0xFFFFA9A2);
     }
 
     private void drawDisc(DrawContext context, int centerX, int centerY, int radius, int color) {
@@ -105,16 +123,15 @@ public final class WhackAMoleScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
         if (button != 0 || gameOver || mouseX < left || mouseY < top
-                || mouseX >= left + SIDE * CELL || mouseY >= top + SIDE * CELL) {
+                || mouseX >= left + SIDE * cellSize || mouseY >= top + SIDE * cellSize) {
             return false;
         }
-        int column = (int) ((mouseX - left) / CELL);
-        int row = (int) ((mouseY - top) / CELL);
+        int column = (int) ((mouseX - left) / cellSize);
+        int row = (int) ((mouseY - top) / cellSize);
         int clickedCell = row * SIDE + column;
         if (clickedCell == moleCell) {
             score++;
-            moleCell = -1;
-            moleTicks = 0;
+            spawnMole();
         }
         return true;
     }

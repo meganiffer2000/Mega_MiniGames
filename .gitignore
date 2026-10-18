@@ -1,0 +1,14 @@
+# Gradle
+.gradle/
+build/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Java
+*.class
+
+# Minecraft development
+run/

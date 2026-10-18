@@ -34,7 +34,7 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece quinze minijogos:
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece quinze minijogos. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
 
 - **Flappy Bird**, **Campo Minado**, **Snake**, **Pong**, **Jogo da Memória** e **Simon**.
 - **Tetris**: encaixe as peças, gire-as e complete linhas.

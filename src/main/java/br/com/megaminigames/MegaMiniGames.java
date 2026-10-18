@@ -24,7 +24,7 @@ public final class MegaMiniGames implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 dispatcher.register(literal("mmg")
                         .then(literal("games_hub").executes(context -> {
-                            ServerPlayerEntity player = context.getSource().getPlayerOrException();
+                            ServerPlayerEntity player = context.getSource().getPlayer();
                             ServerPlayNetworking.send(player, OPEN_GAMES_HUB_PACKET, PacketByteBufs.empty());
                             return Command.SINGLE_SUCCESS;
                         }))));

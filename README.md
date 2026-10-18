@@ -34,16 +34,14 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece quinze minijogos. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece vinte minijogos. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
 
-- **Flappy Bird**, **Campo Minado**, **Snake**, **Pong**, **Jogo da Memória** e **Simon**.
-- **Tetris**: encaixe as peças, gire-as e complete linhas.
-- **Quebra-Blocos**: mova a raquete, lance a bola e destrua os tijolos.
-- **2048**: use as setas para unir peças iguais.
-- **Jogo da Velha** e **Ligue 4**: desafie a IA.
-- **Luzes**: apague todas as casas; cada jogada também alterna as vizinhas.
-- **Acerte a Toupeira**: clique na toupeira antes que o tempo acabe.
-- **Adivinhe o Número**: use os números e Enter para adivinhar de 1 a 100.
-- **Desvie!**: use ←/→ ou A/D para escapar dos blocos que caem.
+Além de **Flappy Bird**, **Campo Minado**, **Snake**, **Pong**, **Jogo da Memória**, **Simon**, **Tetris**, **Quebra-Blocos**, **2048**, **Jogo da Velha**, **Ligue 4**, **Luzes**, **Acerte a Toupeira**, **Adivinhe o Número** e **Desvie!**, foram adicionados:
+
+- **Invasores Espaciais**: mova a nave e atire com Espaço.
+- **Damas**: jogue contra uma IA, com capturas obrigatórias e coroação.
+- **Termo**: descubra a palavra de cinco letras em seis tentativas.
+- **Desafio de Matemática**: resolva dez contas de soma, subtração e multiplicação.
+- **Teste de Reflexo**: espere a tela ficar verde e clique o mais rápido possível.
 
 O hub usa páginas para organizar os jogos. Os jogos têm instruções na própria tela e botão para voltar ao menu. O workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.

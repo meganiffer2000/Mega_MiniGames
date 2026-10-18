@@ -27,7 +27,12 @@ public final class GamesHubScreen extends Screen {
             new Game("Luzes", LightsOutScreen::new),
             new Game("Acerte a Toupeira", WhackAMoleScreen::new),
             new Game("Adivinhe o Número", NumberGuessScreen::new),
-            new Game("Desvie!", DodgeScreen::new)
+            new Game("Desvie!", DodgeScreen::new),
+            new Game("Invasores Espaciais", SpaceInvadersScreen::new),
+            new Game("Damas", CheckersScreen::new),
+            new Game("Termo", WordleScreen::new),
+            new Game("Desafio de Matemática", MathQuizScreen::new),
+            new Game("Teste de Reflexo", ReactionTestScreen::new)
     );
 
     private final int page;
@@ -53,7 +58,7 @@ public final class GamesHubScreen extends Screen {
         for (int index = firstIndex; index < endIndex; index++) {
             Game game = GAMES.get(index);
             int localIndex = index - firstIndex;
-            int x = left + (localIndex % 2) * (BUTTON_WIDTH + 12);
+            int x = left + (localIndex % 2) * (buttonWidth + 12);
             int y = top + (localIndex / 2) * rowStep;
             addDrawableChild(ButtonWidget.builder(Text.literal(game.name), button ->
                             client.setScreen(game.screenFactory.get()))

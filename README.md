@@ -34,7 +34,7 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **105 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **120 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
 
 Nesta atualização foram adicionados dez jogos:
 
@@ -97,3 +97,13 @@ O hub agora também tem filtros por categoria, aplicados aos jogos antigos e nov
 - **Aventura (5):** Ruínas Perdidas, Ilha Misteriosa, Fuga da Mina, Relíquias da Floresta e Mapa do Corsário.
 
 Os demais jogos também receberam categorias adequadas; o filtro **Todos** mantém o catálogo completo.
+
+Nesta etapa, entraram mais 15 jogos, distribuídos pelos gêneros do hub:
+
+- **Gerenciamento:** Livraria em Dia, Estação de Recursos e Abrigo Animal.
+- **Simulação:** Rali de Montanha, Mergulho Azul e Balão Meteorológico.
+- **Ação:** Duelo de Lasers, Chuva de Meteoros e Arco Guardião.
+- **Aventura:** Caverna do Cristal, Templo em Fuga e Expedição na Neve.
+- **Quebra-cabeça:** Mosaico 3×3, Conserte os Canos e Palavra Ponte.
+
+Cada jogo tem suas próprias regras e instruções de controle na tela.

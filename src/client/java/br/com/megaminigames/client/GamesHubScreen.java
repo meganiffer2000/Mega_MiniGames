@@ -119,7 +119,22 @@ public final class GamesHubScreen extends Screen {
             new Game("Ilha Misteriosa", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.ISLAND), Category.ADVENTURE),
             new Game("Fuga da Mina", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.MINE_ESCAPE), Category.ADVENTURE),
             new Game("Relíquias da Floresta", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.FOREST), Category.ADVENTURE),
-            new Game("Mapa do Corsário", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.PIRATE), Category.ADVENTURE)
+            new Game("Mapa do Corsário", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.PIRATE), Category.ADVENTURE),
+            new Game("Livraria em Dia", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.BOOKSHOP), Category.MANAGEMENT),
+            new Game("Estação de Recursos", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.STATION), Category.MANAGEMENT),
+            new Game("Abrigo Animal", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.SHELTER), Category.MANAGEMENT),
+            new Game("Rali de Montanha", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.RALLY), Category.SIMULATION),
+            new Game("Mergulho Azul", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.DIVE), Category.SIMULATION),
+            new Game("Balão Meteorológico", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.WEATHER_BALLOON), Category.SIMULATION),
+            new Game("Duelo de Lasers", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.LASER_DUEL), Category.ACTION),
+            new Game("Chuva de Meteoros", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.METEORS), Category.ACTION),
+            new Game("Arco Guardião", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.ARCHER), Category.ACTION),
+            new Game("Caverna do Cristal", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.CAVE), Category.ADVENTURE),
+            new Game("Templo em Fuga", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.TEMPLE), Category.ADVENTURE),
+            new Game("Expedição na Neve", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.SNOW), Category.ADVENTURE),
+            new Game("Mosaico 3×3", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.MOSAIC), Category.PUZZLE),
+            new Game("Conserte os Canos", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.PIPES), Category.PUZZLE),
+            new Game("Palavra Ponte", () -> new VarietyArcadeScreen(VarietyArcadeScreen.Game.WORD_BRIDGE), Category.PUZZLE)
     );
 
     private enum Category {
@@ -162,7 +177,7 @@ public final class GamesHubScreen extends Screen {
         String n = name.toLowerCase(java.util.Locale.ROOT);
         if (containsAny(n, "fazenda", "café", "biscoito", "cozinha", "aquário", "colônia", "trânsito", "defesa de balões", "defesa do jardim", "mini metrô", "caça-moedas")) return Category.MANAGEMENT;
         if (containsAny(n, "pescaria", "pênaltis", "mini golfe", "corrida maluca", "avião", "órbita", "clima", "equilíbrio natural", "pular corda", "pouso de precisão", "bichinho", "aquário vivo")) return Category.SIMULATION;
-        if (containsAny(n, "snake", "pong", "flappy", "tetris", "quebra-blocos", "desvie", "invasores", "toupeira", "reflexo", "estrelas", "arremesso", "jetpack", "trilho", "estilingue", "corte de frutas", "sobrevivente", "corte da corda", "azulejos", "robôs", "arco de precisão", "castelo", "duelo relâmpago", "fantasmas", "arena", "salto geométrico")) return Category.ACTION;
+        if (containsAny(n, "snake", "pong", "flappy", "quebra-blocos", "desvie", "invasores", "toupeira", "reflexo", "estrelas", "arremesso", "jetpack", "trilho", "corrida de faixas", "salto de obstáculos", "pular corda", "estilingue", "corte de frutas", "sobrevivente", "corte da corda", "azulejos", "robôs", "arco de precisão", "castelo", "duelo relâmpago", "fantasmas", "arena", "salto geométrico")) return Category.ACTION;
         if (containsAny(n, "labirinto", "sapo", "tesouro", "escavador", "escalada", "ruínas", "ilha misteriosa", "mina", "relíquias", "corsário", "resgate dos mineiros")) return Category.ADVENTURE;
         return Category.PUZZLE;
     }

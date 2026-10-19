@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   verify:
     runs-on: ubuntu-22.04
@@ -31,10 +34,14 @@ jobs:
           code=$?
           if [ "$code" -ne 0 ]; then
             echo '## Falha na compilação'
-            echo '```text'
-            grep -n -E "error:|Exception|FAILED|cannot find symbol|symbol:|location:" compile.log | tail -n 60
-            echo '```'
-            tail -n 60 compile.log
-            exit "$code"
+            tail -n 150 compile.log
+          else
+            tail -n 20 compile.log
           fi
-          tail -n 20 compile.log
+          echo "$code" > build-exit-code.txt
+          git config user.name "Arena CI"
+          git config user.email "ci@arena.local"
+          git add -f compile.log build-exit-code.txt
+          git commit -q -m "ci: log da compilação [skip ci]" || true
+          git push -q origin "HEAD:${GITHUB_REF_NAME}" || true
+          exit "$code"

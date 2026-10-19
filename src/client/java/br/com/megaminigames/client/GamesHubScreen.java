@@ -291,11 +291,11 @@ public final class GamesHubScreen extends Screen {
         int textX = heroX1 + 60;
         int textRight = heroX2 - (width >= 600 ? 112 : 10);
         context.drawTextWithShadow(textRenderer, Text.literal("MEGA MINIGAMES"), textX, heroY1 + 10, 0xFFFFE9A8);
-        String subtitle = "ARCADE  •  " + visibleGames().size() + " jogos";
+        String subtitle = "ARCADE  •  " + visibleGames().size() + " jogos  •  R surpreende";
         context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(subtitle, Math.max(30, textRight - textX))),
                 textX, heroY1 + 23, ArcadeTheme.MUTED);
         if (heroY2 - heroY1 >= 52) {
-            String hint = "Escolha um cartucho e divirta-se";
+            String hint = "Setas viram página  •  R sorteia  •  ESC fecha";
             context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(hint, Math.max(30, textRight - textX))),
                     textX, heroY1 + 35, 0xFF7FA6C9);
         }
@@ -372,10 +372,18 @@ public final class GamesHubScreen extends Screen {
         for (int line = top + 4; line < top + coverHeight - 1; line += 3) {
             context.fill(x + 3, line, x + cardWidth - 3, line + 1, 0x12000000);
         }
-        int iconSize = Math.max(6, Math.min(22, coverHeight / 2 - 3));
-        drawCategoryGlyph(context, game.category, x + cardWidth / 2, top + 2 + (coverHeight - 2) / 2, iconSize,
+        int iconSize = Math.max(8, Math.min(26, coverHeight / 2 - 2));
+        drawGameArt(context, game.name, x + cardWidth / 2, top + 2 + (coverHeight - 2) / 2, iconSize,
                 ArcadeTheme.lighten(accent, 60));
         context.drawTextWithShadow(textRenderer, Text.literal(String.format("%02d", index + 1)), x + 6, top + 5, 0x88FFFFFF);
+        if (hovered) {
+            int badgeX = x + cardWidth - 12;
+            int badgeY = top + 11;
+            ArcadeTheme.disc(context, badgeX, badgeY, 7, ArcadeTheme.GOLD);
+            context.fill(badgeX - 1, badgeY - 3, badgeX, badgeY + 4, 0xFF0A1422);
+            context.fill(badgeX, badgeY - 2, badgeX + 1, badgeY + 3, 0xFF0A1422);
+            context.fill(badgeX + 1, badgeY - 1, badgeX + 2, badgeY + 2, 0xFF0A1422);
+        }
 
         context.fill(x + 2, top + coverHeight, x + cardWidth - 2, top + cardHeight - 2, 0xF0091220);
         int textX = x + 7;
@@ -390,6 +398,198 @@ public final class GamesHubScreen extends Screen {
         }
         context.fill(x + 7, top + coverHeight + 2, x + Math.min(cardWidth - 7, 27), top + coverHeight + 3,
                 hovered ? ArcadeTheme.GOLD : accent);
+    }
+
+
+    /** Desenha uma pequena ilustração específica para cada jogo na capa do cartão. */
+    private void drawGameArt(DrawContext context, String rawName, int centerX, int centerY, int size, int color) {
+        String name = rawName.toLowerCase(java.util.Locale.ROOT);
+        int half = Math.max(4, size / 2);
+        int dark = ArcadeTheme.darken(color, 70);
+        int light = ArcadeTheme.lighten(color, 55);
+        if (name.contains("snake") || name.contains("cobrinha")) {
+            for (int index = 0; index < 4; index++) {
+                int segmentX = centerX - half + index * (half / 2);
+                int segmentY = centerY + (index % 2 == 0 ? half / 3 : -half / 3);
+                ArcadeTheme.rounded(context, segmentX - 2, segmentY - 2, segmentX + 2, segmentY + 2, 1, color);
+            }
+            ArcadeTheme.disc(context, centerX + half - 1, centerY - half / 2, 2, ArcadeTheme.GOLD);
+        } else if (name.contains("tetris")) {
+            context.fill(centerX - half, centerY, centerX - 1, centerY + half, color);
+            context.fill(centerX - 1, centerY, centerX + half, centerY + 3, color);
+            context.fill(centerX + 1, centerY + 3, centerX + half, centerY + half, light);
+            context.fill(centerX - half + 1, centerY + 1, centerX - half + 3, centerY + 3, 0x66FFFFFF);
+        } else if (name.contains("2048")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half, centerX + half, centerY + half, 2, dark);
+            ArcadeTheme.rounded(context, centerX - half + 1, centerY - half + 1, centerX - 1, centerY - 1, 2, color);
+            ArcadeTheme.rounded(context, centerX + 1, centerY - half + 1, centerX + half - 1, centerY - 1, 2, light);
+            ArcadeTheme.rounded(context, centerX - half + 1, centerY + 1, centerX - 1, centerY + half - 1, 2, light);
+            ArcadeTheme.rounded(context, centerX + 1, centerY + 1, centerX + half - 1, centerY + half - 1, 2, color);
+        } else if (name.contains("termo") || name.contains("wordle") || name.contains("forca")
+                || name.contains("digitação") || name.contains("anagrama")) {
+            for (int index = 0; index < 3; index++) {
+                int tileX = centerX - half + index * (size / 3);
+                ArcadeTheme.rounded(context, tileX, centerY - half / 2, tileX + size / 4, centerY + half / 2, 1,
+                        index == 1 ? ArcadeTheme.GOLD : color);
+            }
+        } else if (name.contains("pong")) {
+            context.fill(centerX - half, centerY - half, centerX - half + 2, centerY + half, color);
+            context.fill(centerX + half - 2, centerY - half, centerX + half, centerY + half, color);
+            ArcadeTheme.disc(context, centerX, centerY, 2, ArcadeTheme.GOLD);
+        } else if (name.contains("quebra-blocos") || name.contains("blocos")) {
+            for (int row = 0; row < 2; row++) {
+                for (int column = 0; column < 3; column++) {
+                    context.fill(centerX - half + column * (size / 3), centerY - half / 2 + row * (size / 3),
+                            centerX - half + column * (size / 3) + size / 4, centerY - half / 2 + row * (size / 3) + 3,
+                            row == 0 ? color : light);
+                }
+            }
+        } else if (name.contains("flappy") || name.contains("avião") || name.contains("pássaro")) {
+            ArcadeTheme.disc(context, centerX - half / 3, centerY, half / 2, ArcadeTheme.GOLD);
+            context.fill(centerX + half / 3, centerY - 1, centerX + half, centerY + 1, ArcadeTheme.CORAL);
+            context.fill(centerX + half - 4, centerY - half, centerX + half, centerY + half, ArcadeTheme.LIME);
+        } else if (name.contains("minado") || name.contains("mina")) {
+            ArcadeTheme.disc(context, centerX, centerY, half - 2, color);
+            for (int index = 0; index < 4; index++) {
+                int dx = index < 2 ? -1 : 1;
+                int dy = index % 2 == 0 ? -1 : 1;
+                context.fill(centerX + dx * (half - 2) - 1, centerY + dy * (half - 2) - 1,
+                        centerX + dx * (half - 2) + 2, centerY + dy * (half - 2) + 2, light);
+            }
+            ArcadeTheme.disc(context, centerX - half / 4, centerY - half / 4, 1, 0xFF0A1422);
+        } else if (name.contains("memória")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + 1, centerY + half, 2, dark);
+            context.fill(centerX - half + 1, centerY - half / 2 + 1, centerX, centerY + half - 1, color);
+            ArcadeTheme.rounded(context, centerX - 1, centerY - half, centerX + half, centerY + half / 2, 2, dark);
+            context.fill(centerX, centerY - half + 1, centerX + half - 1, centerY + half / 2 - 1, light);
+        } else if (name.contains("simon")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half, centerX - 1, centerY - 1, 2, color);
+            ArcadeTheme.rounded(context, centerX + 1, centerY - half, centerX + half, centerY - 1, 2, light);
+            ArcadeTheme.rounded(context, centerX - half, centerY + 1, centerX - 1, centerY + half, 2, ArcadeTheme.GOLD);
+            ArcadeTheme.rounded(context, centerX + 1, centerY + 1, centerX + half, centerY + half, 2,
+                    ArcadeTheme.MAGENTA);
+        } else if (name.contains("velha")) {
+            context.fill(centerX - half, centerY - 1, centerX + half, centerY + 1, color);
+            context.fill(centerX - 1, centerY - half, centerX + 1, centerY + half, color);
+            ArcadeTheme.drawX(context, centerX - half / 2, centerY - half / 2, Math.max(1, half / 3), 1, light);
+            ArcadeTheme.drawO(context, centerX + half / 2, centerY + half / 2, Math.max(1, half / 3), 1,
+                    ArcadeTheme.GOLD);
+        } else if (name.contains("ligue 4") || name.contains("quatro")) {
+            for (int index = 0; index < 4; index++) {
+                ArcadeTheme.disc(context, centerX - half + index * (size / 4), centerY + (-1 + index) * 2,
+                        Math.max(1, half / 4), index < 2 ? ArcadeTheme.CORAL : ArcadeTheme.GOLD);
+            }
+        } else if (name.contains("damas") || name.contains("xadrez")) {
+            for (int row = 0; row < 2; row++) {
+                for (int column = 0; column < 2; column++) {
+                    context.fill(centerX - half + column * half, centerY - half + row * half,
+                            centerX + column * half, centerY + row * half, (row + column) % 2 == 0 ? color : dark);
+                }
+            }
+            ArcadeTheme.disc(context, centerX - half / 2, centerY - half / 2, Math.max(1, half / 3), ArcadeTheme.GOLD);
+        } else if (name.contains("sudoku")) {
+            for (int row = 0; row < 3; row++) {
+                for (int column = 0; column < 3; column++) {
+                    context.fill(centerX - half + column * (size / 3), centerY - half + row * (size / 3),
+                            centerX - half + column * (size / 3) + 2, centerY - half + row * (size / 3) + 2,
+                            (row + column) % 2 == 0 ? color : light);
+                }
+            }
+        } else if (name.contains("batalha")) {
+            for (int row = 0; row < 3; row++) {
+                for (int column = 0; column < 3; column++) {
+                    context.fill(centerX - half + column * (size / 3), centerY - half + row * (size / 3),
+                            centerX - half + column * (size / 3) + 2, centerY - half + row * (size / 3) + 2, color);
+                }
+            }
+            ArcadeTheme.drawX(context, centerX, centerY, Math.max(2, half / 2), 1, ArcadeTheme.CORAL);
+        } else if (name.contains("blackjack") || name.contains("cartas") || name.contains("pôquer")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half, centerX + 1, centerY + half, 2, 0xFFF7F2E6);
+            ArcadeTheme.rounded(context, centerX - 1, centerY - half, centerX + half, centerY + half, 2, 0xFFE8E3D6);
+            context.fill(centerX + half - 4, centerY - half + 2, centerX + half - 1, centerY - half + 3, ArcadeTheme.CORAL);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY + 1, Math.max(1, half / 3), ArcadeTheme.CORAL);
+        } else if (name.contains("labirinto")) {
+            context.fill(centerX - half, centerY - half, centerX - half + 2, centerY + half, color);
+            context.fill(centerX - half, centerY - half, centerX + half, centerY - half + 2, color);
+            context.fill(centerX - half, centerY + 2, centerX, centerY + 4, color);
+            context.fill(centerX + half - 3, centerY - half, centerX + half - 1, centerY + 2, color);
+            context.fill(centerX + 2, centerY + 2, centerX + half, centerY + 4, light);
+        } else if (name.contains("matemática")) {
+            context.fill(centerX - half, centerY - 1, centerX - 2, centerY + 1, color);
+            context.fill(centerX - half / 2 - 1, centerY - half / 2, centerX - half / 2 + 1, centerY + half / 2, color);
+            context.fill(centerX + 1, centerY - 1, centerX + half, centerY + 1, light);
+            context.fill(centerX + half / 2, centerY - half / 2, centerX + half / 2 + 2, centerY + half / 2, light);
+        } else if (name.contains("reflexo") || name.contains("relâmpago") || name.contains("reação")) {
+            for (int index = 0; index < half; index++) {
+                context.fill(centerX + index / 2 - 2, centerY - half + index, centerX + index / 2 + 1,
+                        centerY - half + index + 2, index < half / 2 ? ArcadeTheme.GOLD : color);
+            }
+            context.fill(centerX - 2, centerY - 2, centerX + 3, centerY + 2, ArcadeTheme.GOLD);
+        } else if (name.contains("pescaria")) {
+            ArcadeTheme.disc(context, centerX - 1, centerY, half - 1, color);
+            context.fill(centerX - half, centerY - 2, centerX - half + 3, centerY + 2, dark);
+            ArcadeTheme.disc(context, centerX + 1, centerY - 1, 1, 0xFF0A1422);
+            context.fill(centerX + 2, centerY - half + 1, centerX + 4, centerY - half + 3, ArcadeTheme.SKY);
+        } else if (name.contains("dados") || name.contains("dado")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half, centerX + half, centerY + half, 2, 0xFFF2F6FB);
+            ArcadeTheme.disc(context, centerX - half / 2, centerY - half / 2, 1, 0xFF1B2430);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY + half / 2, 1, 0xFF1B2430);
+            ArcadeTheme.disc(context, centerX, centerY, 1, 0xFF1B2430);
+        } else if (name.contains("torre") || name.contains("castelo") || name.contains("escada")) {
+            for (int index = 0; index < 3; index++) {
+                context.fill(centerX - half + index, centerY + half - index * 3,
+                        centerX + half - index, centerY + half - index * 3 + 2, index == 2 ? ArcadeTheme.GOLD : color);
+            }
+        } else if (name.contains("corrida") || name.contains("trilho") || name.contains("metrô")
+                || name.contains("faixas")) {
+            context.fill(centerX - half, centerY + half / 2, centerX + half, centerY + half / 2 + 2, color);
+            context.fill(centerX - half / 3, centerY - half / 2, centerX + half / 3, centerY + half / 2, light);
+            ArcadeTheme.disc(context, centerX - half / 2, centerY + half / 2 + 2, 1, dark);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY + half / 2 + 2, 1, dark);
+        } else if (name.contains("invasores") || name.contains("nave") || name.contains("espaço")) {
+            context.fill(centerX - 2, centerY - half, centerX + 2, centerY + half / 2, color);
+            context.fill(centerX - half, centerY + half / 2, centerX + half, centerY + half / 2 + 2, light);
+            ArcadeTheme.disc(context, centerX, centerY + half / 3, 1, ArcadeTheme.GOLD);
+        } else if (name.contains("estrela")) {
+            ArcadeTheme.star(context, centerX, centerY, half, ArcadeTheme.GOLD);
+        } else if (name.contains("bolha")) {
+            ArcadeTheme.ring(context, centerX - half / 3, centerY, Math.max(2, half / 2), 1, light);
+            ArcadeTheme.ring(context, centerX + half / 2, centerY - half / 3, Math.max(1, half / 3), 1, color);
+        } else if (name.contains("fruta") || name.contains("doces") || name.contains("candy")) {
+            ArcadeTheme.disc(context, centerX, centerY + 1, half - 1, ArcadeTheme.CORAL);
+            context.fill(centerX - 1, centerY - half, centerX + 2, centerY - half + 3, ArcadeTheme.LIME);
+        } else if (name.contains("fazenda") || name.contains("jardim") || name.contains("floresta")) {
+            context.fill(centerX - 1, centerY - half / 2, centerX + 1, centerY + half, ArcadeTheme.LIME);
+            context.fill(centerX - half / 2, centerY - half / 2, centerX, centerY - half / 2 + 3, ArcadeTheme.LIME);
+            context.fill(centerX, centerY - half / 3, centerX + half / 2, centerY - half / 3 + 3, ArcadeTheme.LIME);
+        } else if (name.contains("café") || name.contains("biscoito") || name.contains("cozinha")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 3, centerX + half / 2, centerY + half, 2,
+                    0xFFF2E8D8);
+            ArcadeTheme.ring(context, centerX + half / 2, centerY + half / 4, Math.max(2, half / 3), 2,
+                    0xFFF2E8D8);
+        } else if (name.contains("aquário")) {
+            ArcadeTheme.ring(context, centerX, centerY, half - 1, 1, light);
+            ArcadeTheme.disc(context, centerX - half / 3, centerY, 1, ArcadeTheme.GOLD);
+            ArcadeTheme.disc(context, centerX + half / 3, centerY - half / 3, 1, color);
+        } else if (name.contains("robô")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + half, centerY + half, 2, color);
+            ArcadeTheme.disc(context, centerX - half / 3, centerY, 1, 0xFF0A1422);
+            ArcadeTheme.disc(context, centerX + half / 3, centerY, 1, 0xFF0A1422);
+            context.fill(centerX - 2, centerY - half, centerX + 2, centerY - half / 2, light);
+        } else if (name.contains("fantasma")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half, centerX + half, centerY + half - 2, 3, light);
+            ArcadeTheme.disc(context, centerX - half / 3, centerY - 1, 1, 0xFF0A1422);
+            ArcadeTheme.disc(context, centerX + half / 3, centerY - 1, 1, 0xFF0A1422);
+        } else if (name.contains("laser") || name.contains("fronteira")) {
+            context.fill(centerX - half, centerY - 1, centerX + half, centerY + 1, color);
+            context.fill(centerX - half, centerY - 1, centerX - half / 2, centerY + 1, light);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY, Math.max(1, half / 4), ArcadeTheme.CORAL);
+        } else if (name.contains("arco") || name.contains("arqueiro") || name.contains("pênaltis")) {
+            ArcadeTheme.ring(context, centerX - half / 3, centerY, Math.max(2, half / 2), 1, color);
+            context.fill(centerX - half / 2, centerY - 1, centerX + half, centerY + 1, light);
+        } else {
+            drawCategoryGlyph(context, categoryFor(rawName), centerX, centerY, size, color);
+        }
     }
 
     private void drawCategoryGlyph(DrawContext context, Category category, int centerX, int centerY, int size, int color) {
@@ -501,6 +701,19 @@ public final class GamesHubScreen extends Screen {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (amount > 0 && page > 0) {
+            client.setScreen(new GamesHubScreen(category, page - 1));
+            return true;
+        }
+        if (amount < 0 && page < pageCount - 1) {
+            client.setScreen(new GamesHubScreen(category, page + 1));
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     @Override

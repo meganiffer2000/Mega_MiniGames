@@ -345,6 +345,11 @@ ArcadeTheme.background(c, width, height);
             case PIRATE -> renderMap(c, 6, "PARTES DO MAPA: " + keyCount + "/2   •   Combustível " + fuel, 3);
         }
         if (gameOver) ArcadeTheme.status(c, textRenderer, Text.literal("R para jogar novamente"), width / 2, height - 45, ArcadeTheme.GOLD);
+        if (width >= 460) {
+            ArcadeTheme.pill(c, textRenderer, "PONTOS  " + score, 16, height - 22, accent);
+            ArcadeTheme.pillRight(c, textRenderer, "RODADA  " + round, width - 16, height - 22,
+                    ArcadeTheme.GOLD);
+        }
         super.render(c, mouseX, mouseY, delta);
     }
 

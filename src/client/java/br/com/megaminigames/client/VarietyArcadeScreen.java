@@ -255,6 +255,11 @@ ArcadeTheme.background(c, width, height);
             case WORD_BRIDGE -> renderWordBridge(c);
         }
         if (gameOver) ArcadeTheme.status(c, textRenderer, Text.literal("R para jogar novamente"), width / 2, height - 45, ArcadeTheme.GOLD);
+        if (width >= 460) {
+            ArcadeTheme.pill(c, textRenderer, "PONTOS  " + score, 16, height - 22, accent);
+            ArcadeTheme.pillRight(c, textRenderer, "RODADA  " + round, width - 16, height - 22,
+                    ArcadeTheme.GOLD);
+        }
         super.render(c, mouseX, mouseY, delta);
     }
 

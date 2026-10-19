@@ -435,6 +435,11 @@ ArcadeTheme.background(context, width, height);
         }
         if (gameOver) ArcadeTheme.status(context, textRenderer, Text.literal("R para jogar novamente"),
                 width / 2, height - 45, ArcadeTheme.GOLD);
+        if (width >= 460) {
+            ArcadeTheme.pill(context, textRenderer, "PONTOS  " + score, 16, height - 22, accent);
+            ArcadeTheme.pillRight(context, textRenderer, "RODADA  " + round, width - 16, height - 22,
+                    ArcadeTheme.GOLD);
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 

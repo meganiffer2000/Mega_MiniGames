@@ -80,7 +80,7 @@ public final class InspiredArcadeScreen extends Screen {
             case BLACK_TILE -> { for (int i = 0; i < rows.length; i++) rows[i] = random(4); message = "Clique no azulejo escuro da linha de baixo. Nunca toque nos claros."; }
             case SUBWAY -> { timer = 900; lane = 1; message = "←/→ muda de trilho; ↑ pula e ↓ rola. Desvie dos trens."; }
             case DIGGER -> setupDigger();
-            case SLINGSHOT -> { targetX = width / 2 + 115; targetY = height / 2 - 15; aimX = width / 2 - 95; aimY = height / 2 + 30; towerHp = 3; message = "Clique para mirar e pressione Espaço para lançar a pedra."; }
+            case SLINGSHOT -> { targetX = width / 2 + 115; targetY = height / 2 - 15; aimX = targetX; aimY = targetY; towerHp = 3; message = "Clique no ponto de mira e pressione Espaço para lançar a pedra."; }
             case MARBLE -> setupMarbles();
             case FRUIT_SLICE -> { timer = 600; spawnFruit(); message = "Clique nas frutas que aparecem; evite as bombas escuras."; }
             case SURVIVOR -> { timer = 1200; x = width / 2; y = height / 2; playerHp = 3; spawnEnemies(); message = "Mova-se com WASD/setas. Seu ataque é automático."; }
@@ -276,7 +276,12 @@ public final class InspiredArcadeScreen extends Screen {
             if (random(100) < 12) wheelLean += random(2) == 0 ? 1 : -1;
             wheelLean += Integer.compare(0, wheelLean);
             if (Math.abs(wheelLean) > 4) { gameOver = true; message = "Você perdeu o equilíbrio após " + score + " metros."; }
-            if (jumping) jumping = false;
+            if (phase == 0 && random(100) < 18) phase = 3;
+            else if (phase > 0) {
+                phase--;
+                if (phase == 0 && jumping) jumping = false;
+                else if (phase == 1 && !jumping) { gameOver = true; message = "A roda bateu no obstáculo! Distância: " + score; }
+            }
         }
     }
 
@@ -323,8 +328,8 @@ public final class InspiredArcadeScreen extends Screen {
 
     private void updateProjectile() {
         if (phase != 1 || gameOver) return;
-        x += vx; y += vy; vy++;
-        if (Math.hypot(x - targetX, y - targetY) < 24) { score++; towerHp--; phase = 0; x = aimX; y = aimY; if (towerHp <= 0) { gameOver = won = true; message = "Alvo derrubado!"; } else message = "Acerto! Restam " + towerHp + " caixas."; }
+        x += vx; y += vy; if (ticks % 3 == 0) vy++;
+        if (Math.hypot(x - targetX, y - targetY) < 28) { score++; towerHp--; phase = 0; x = aimX; y = aimY; if (towerHp <= 0) { gameOver = won = true; message = "Alvo derrubado!"; } else message = "Acerto! Restam " + towerHp + " caixas."; }
         else if (x > width || y > height || x < 0) { phase = 0; message = "Errou! Ajuste a mira e tente novamente."; }
     }
 
@@ -523,7 +528,8 @@ public final class InspiredArcadeScreen extends Screen {
         c.fill(25, cy + 32, width - 25, cy + 37, 0xFF806F58);
         disc(c, cx - 35, cy + 23, 15, 0xFF242B35); disc(c, cx + 38, cy + 23, 15, 0xFF242B35);
         c.fill(cx - 35, cy - 15, cx + 38, cy + 25, 0xFF4BAED3);
-        c.fill(cx - 25, cy - 40 - wheelLean * 5, cx - 20, cy - 5, 0xFFBEE7F7);
+        c.fill(cx - 25, cy - 40 - wheelLean * 5 - (jumping ? 18 : 0), cx - 20, cy - 5 - (jumping ? 18 : 0), 0xFFBEE7F7);
+        if (phase > 0) c.fill(cx + 70 + phase * 10, cy - 22, cx + 86 + phase * 10, cy + 24, 0xFFDC5B4D);
         c.drawCenteredTextWithShadow(textRenderer, Text.literal("Equilíbrio: " + wheelLean + " • Distância: " + score), cx, cy - 95, 0xFFFFFFFF);
     }
 
@@ -536,8 +542,9 @@ public final class InspiredArcadeScreen extends Screen {
 
     private void renderMountain(DrawContext c) {
         int ground = height / 2 + 70;
-        for (int i = 0; i < 8; i++) c.fill(30 + i * 50, ground - (i % 3) * 22, 80 + i * 50, ground + 30, 0xFF67584A);
-        c.fill(30 + x * 45, ground - y * 20 - 18, 48 + x * 45, ground - y * 20, 0xFF59B9DF);
+        int step = Math.max(24, (width - 80) / 8);
+        for (int i = 0; i < 8; i++) c.fill(30 + i * step, ground - (i % 3) * 22, 30 + (i + 1) * step, ground + 30, 0xFF67584A);
+        c.fill(30 + x * step, ground - y * 20 - 18, 48 + x * step, ground - y * 20, 0xFF59B9DF);
         c.drawCenteredTextWithShadow(textRenderer, Text.literal("Bandeira no cume →"), width - 85, ground - 100, 0xFFFFD564);
     }
 
@@ -771,7 +778,7 @@ public final class InspiredArcadeScreen extends Screen {
         }
         if (game == Game.PAPER_PLANE && keyCode == GLFW.GLFW_KEY_SPACE) { vy = -5; return true; }
         if (game == Game.HELIX) { if (keyCode == GLFW.GLFW_KEY_LEFT) lane = (lane + 7) % 8; else if (keyCode == GLFW.GLFW_KEY_RIGHT) lane = (lane + 1) % 8; else return super.keyPressed(keyCode, scanCode, modifiers); return true; }
-        if (game == Game.SLINGSHOT && keyCode == GLFW.GLFW_KEY_SPACE && phase == 0) { x = width / 2 - 95; y = height / 2 + 30; vx = Math.max(2, (x - aimX) / 8); vy = Math.min(-2, (y - aimY) / 8); phase = 1; return true; }
+        if (game == Game.SLINGSHOT && keyCode == GLFW.GLFW_KEY_SPACE && phase == 0) { x = width / 2 - 95; y = height / 2 + 30; vx = Math.max(4, (aimX - x) / 12); vy = Math.min(-3, (aimY - y) / 8); phase = 1; return true; }
         if (game == Game.SURVIVOR) {
             if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_A) x = Math.max(20, x - 14);
             else if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_D) x = Math.min(width - 20, x + 14);
@@ -783,8 +790,10 @@ public final class InspiredArcadeScreen extends Screen {
         if (game == Game.MOUNTAIN) {
             if (keyCode == GLFW.GLFW_KEY_LEFT) x = Math.max(0, x - 1);
             else if (keyCode == GLFW.GLFW_KEY_RIGHT) x = Math.min(8, x + 1);
-            else if (keyCode == GLFW.GLFW_KEY_SPACE) { y = Math.min(8, y + 2); if (y >= 8 && x >= 6) { score = 1; gameOver = won = true; message = "Você alcançou o cume!"; } return true; }
-            else return super.keyPressed(keyCode, scanCode, modifiers); return true;
+            else if (keyCode == GLFW.GLFW_KEY_SPACE) y = Math.min(8, y + 2);
+            else return super.keyPressed(keyCode, scanCode, modifiers);
+            if (y >= 8 && x >= 6) { score = 1; gameOver = won = true; message = "Você alcançou o cume!"; }
+            return true;
         }
         if (game == Game.GEOMETRY && keyCode == GLFW.GLFW_KEY_SPACE && phase == 0) { jumping = true; phase = 4; return true; }
         if (game == Game.CUT_ROPE && keyCode == GLFW.GLFW_KEY_SPACE && ropeCut == 0) { ropeCut = 1; return true; }

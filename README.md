@@ -36,7 +36,7 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **120 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
+O mod oferece **120 minijogos** em um hub paginado. Para abrir, segure o item **Game Boy** e use-o com o botão direito. Ele aparece na aba **Ferramentas** do Criativo e também pode ser fabricado com 5 barras de ferro, 2 redstones, 1 painel de vidro e 1 botão de pedra. O acesso não depende de comandos.
 
 Nesta atualização foram adicionados dez jogos:
 

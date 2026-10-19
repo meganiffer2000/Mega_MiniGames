@@ -34,7 +34,7 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **84 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **105 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
 
 Nesta atualização foram adicionados dez jogos:
 
@@ -88,3 +88,12 @@ Esta atualização adiciona mais dez jogos:
 Também foram ajustados os tamanhos dos tabuleiros e controles de **Tetris**, **Campo Minado**, **Jogo da Memória** e **Acerte a Toupeira** para telas menores; a toupeira aparece desde o início e não some entre acertos. O hub agora usa capas ilustradas e clicáveis em uma grade responsiva, com paginação adaptada ao tamanho da janela. O workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.
 
 Também foram adicionadas adaptações originais de mais 24 mecânicas solicitadas: **Jetpack Runner**, **Fábrica de Biscoitos**, **Cozinha Caótica**, **Avião de Papel**, **Queda Helicoidal**, **Toque nos Azulejos**, **Corrida no Trilho**, **Escavador**, **Estilingue de Pássaros**, **Orbes em Linha**, **Corte de Frutas**, **Sobrevivente Noturno**, **Corte da Corda**, **Combinação de Doces**, **Corrida Maluca**, **Torre de Cartas**, **Escalada da Montanha**, **Defesa de Balões**, **Defesa do Jardim**, **Resgate dos Mineiros**, **Salto Geométrico**, **Mini Metrô**, **Controle de Fronteira** e **Pôquer Roguelike**. O **Jogo da Velha** pedido já existia no hub e foi mantido, totalizando os 25 conceitos. Os novos jogos usam nomes e arte próprios; as mecânicas foram adaptadas para controles simples de teclado e mouse no Minecraft.
+
+O hub agora também tem filtros por categoria, aplicados aos jogos antigos e novos. Foram adicionados mais 21 jogos, divididos exatamente assim:
+
+- **Gerenciamento (5):** Fazenda Próspera, Café da Praça, Central de Trânsito, Aquário Vivo e Colônia Espacial.
+- **Simulação (5):** Pouso de Precisão, Meu Bichinho, Órbita Estável, Clima e Colheita e Equilíbrio Natural.
+- **Ação (6):** Arena de Robôs, Arco de Precisão, Defenda o Castelo, Duelo Relâmpago, Caça-Fantasmas e Arena de Sobrevivência.
+- **Aventura (5):** Ruínas Perdidas, Ilha Misteriosa, Fuga da Mina, Relíquias da Floresta e Mapa do Corsário.
+
+Os demais jogos também receberam categorias adequadas; o filtro **Todos** mantém o catálogo completo.

@@ -98,11 +98,43 @@ public final class GamesHubScreen extends Screen {
             new Game("Salto Geométrico", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.GEOMETRY)),
             new Game("Mini Metrô", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.MINI_METRO)),
             new Game("Controle de Fronteira", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.BORDER)),
-            new Game("Pôquer Roguelike", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.POKER))
+            new Game("Pôquer Roguelike", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.POKER)),
+            new Game("Fazenda Próspera", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.FARM), Category.MANAGEMENT),
+            new Game("Café da Praça", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.CAFE), Category.MANAGEMENT),
+            new Game("Central de Trânsito", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.TRAFFIC), Category.MANAGEMENT),
+            new Game("Aquário Vivo", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.AQUARIUM), Category.MANAGEMENT),
+            new Game("Colônia Espacial", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.COLONY), Category.MANAGEMENT),
+            new Game("Pouso de Precisão", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.FLIGHT), Category.SIMULATION),
+            new Game("Meu Bichinho", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.PET), Category.SIMULATION),
+            new Game("Órbita Estável", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.ORBIT), Category.SIMULATION),
+            new Game("Clima e Colheita", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.WEATHER), Category.SIMULATION),
+            new Game("Equilíbrio Natural", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.ECOSYSTEM), Category.SIMULATION),
+            new Game("Arena de Robôs", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.ROBOT), Category.ACTION),
+            new Game("Arco de Precisão", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.ARCHERY), Category.ACTION),
+            new Game("Defenda o Castelo", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.CASTLE), Category.ACTION),
+            new Game("Duelo Relâmpago", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.NINJA), Category.ACTION),
+            new Game("Caça-Fantasmas", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.GHOST), Category.ACTION),
+            new Game("Arena de Sobrevivência", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.ARENA), Category.ACTION),
+            new Game("Ruínas Perdidas", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.RUINS), Category.ADVENTURE),
+            new Game("Ilha Misteriosa", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.ISLAND), Category.ADVENTURE),
+            new Game("Fuga da Mina", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.MINE_ESCAPE), Category.ADVENTURE),
+            new Game("Relíquias da Floresta", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.FOREST), Category.ADVENTURE),
+            new Game("Mapa do Corsário", () -> new CategoryArcadeScreen(CategoryArcadeScreen.Game.PIRATE), Category.ADVENTURE)
     );
 
-    private final int page;
+    private enum Category {
+        ALL("Todos"), MANAGEMENT("Gerenciamento"), SIMULATION("Simulação"), ACTION("Ação"), ADVENTURE("Aventura"), PUZZLE("Quebra-cabeça");
+        private final String label;
+        Category(String label) { this.label = label; }
+    }
+
+    private final Category category;
+    private int page;
     private int columns;
+    private int chipColumns;
+    private int chipRows;
+    private int chipWidth;
+    private int chipTop;
     private int rows;
     private int pageSize;
     private int pageCount;
@@ -112,37 +144,64 @@ public final class GamesHubScreen extends Screen {
     private int gridTop;
 
     public GamesHubScreen() {
-        this(0);
+        this(Category.ALL, 0);
     }
 
-    private GamesHubScreen(int page) {
+    private GamesHubScreen(Category category, int page) {
         super(Text.literal("Mega MiniGames"));
+        this.category = category;
         this.page = page;
+    }
+
+    private List<Game> visibleGames() {
+        if (category == Category.ALL) return GAMES;
+        return GAMES.stream().filter(game -> game.category == category).toList();
+    }
+
+    private static Category categoryFor(String name) {
+        String n = name.toLowerCase(java.util.Locale.ROOT);
+        if (containsAny(n, "fazenda", "café", "biscoito", "cozinha", "aquário", "colônia", "trânsito", "defesa de balões", "defesa do jardim", "mini metrô", "caça-moedas")) return Category.MANAGEMENT;
+        if (containsAny(n, "pescaria", "pênaltis", "mini golfe", "corrida maluca", "avião", "órbita", "clima", "equilíbrio natural", "pular corda", "pouso de precisão", "bichinho", "aquário vivo")) return Category.SIMULATION;
+        if (containsAny(n, "snake", "pong", "flappy", "tetris", "quebra-blocos", "desvie", "invasores", "toupeira", "reflexo", "estrelas", "arremesso", "jetpack", "trilho", "estilingue", "corte de frutas", "sobrevivente", "corte da corda", "azulejos", "robôs", "arco de precisão", "castelo", "duelo relâmpago", "fantasmas", "arena", "salto geométrico")) return Category.ACTION;
+        if (containsAny(n, "labirinto", "sapo", "tesouro", "escavador", "escalada", "ruínas", "ilha misteriosa", "mina", "relíquias", "corsário", "resgate dos mineiros")) return Category.ADVENTURE;
+        return Category.PUZZLE;
+    }
+
+    private static boolean containsAny(String value, String... fragments) {
+        for (String fragment : fragments) if (value.contains(fragment)) return true;
+        return false;
     }
 
     @Override
     protected void init() {
         columns = width >= 780 ? 5 : width >= 620 ? 4 : width >= 420 ? 3 : 2;
-        rows = height >= 370 ? 3 : height >= 250 ? 2 : 1;
-        pageSize = columns * rows;
-        pageCount = (GAMES.size() + pageSize - 1) / pageSize;
+        chipColumns = width >= 600 ? Category.values().length : 3;
+        chipRows = (Category.values().length + chipColumns - 1) / chipColumns;
+        chipTop = 45;
+        chipWidth = (width - 32 - 6 * (chipColumns - 1)) / chipColumns;
+        gridTop = chipTop + chipRows * 19 + 8;
         cardGap = width >= 620 ? 8 : 6;
         int sidePadding = width >= 420 ? 16 : 8;
         cardWidth = Math.max(72, (width - sidePadding * 2 - cardGap * (columns - 1)) / columns);
-        cardHeight = Math.max(52, Math.min(102, (height - 125 - cardGap * (rows - 1)) / rows));
-        gridTop = 60;
+        int availableHeight = height - gridTop - 52;
+        rows = Math.max(1, Math.min(3, (availableHeight + cardGap) / (72 + cardGap)));
+        cardHeight = Math.max(52, Math.min(102, (availableHeight - cardGap * (rows - 1)) / rows));
+        pageSize = columns * rows;
+        List<Game> visible = visibleGames();
+        pageCount = Math.max(1, (visible.size() + pageSize - 1) / pageSize);
+        page = Math.min(page, pageCount - 1);
 
         int controlsY = height - 25;
         int buttonWidth = Math.min(90, Math.max(62, (width - 28) / 3));
         ButtonWidget previous = ButtonWidget.builder(Text.literal("‹ Voltar"), button ->
-                        client.setScreen(new GamesHubScreen(Math.max(0, page - 1))))
+                        client.setScreen(new GamesHubScreen(category, Math.max(0, page - 1))))
                 .dimensions(10, controlsY, buttonWidth, 20).build();
         previous.active = page > 0;
         addDrawableChild(previous);
         addDrawableChild(ButtonWidget.builder(Text.literal("Fechar"), button -> client.setScreen(null))
                 .dimensions((width - buttonWidth) / 2, controlsY, buttonWidth, 20).build());
         ButtonWidget next = ButtonWidget.builder(Text.literal("Avançar ›"), button ->
-                        client.setScreen(new GamesHubScreen(Math.min(pageCount - 1, page + 1))))
+                        client.setScreen(new GamesHubScreen(category, Math.min(pageCount - 1, page + 1))))
                 .dimensions(width - buttonWidth - 10, controlsY, buttonWidth, 20).build();
         next.active = page < pageCount - 1;
         addDrawableChild(next);
@@ -158,23 +217,37 @@ public final class GamesHubScreen extends Screen {
         }
 
         context.drawTextWithShadow(textRenderer, Text.literal("MEGA ARCADE"), 16, 13, 0xFFFFFFFF);
-        context.drawTextWithShadow(textRenderer, Text.literal(GAMES.size() + " jogos • capas clicáveis"), 17, 30, 0xFF9FB7D5);
+        List<Game> visible = visibleGames();
+        context.drawTextWithShadow(textRenderer, Text.literal(visible.size() + " jogos • escolha uma categoria"), 17, 30, 0xFF9FB7D5);
         String pageLabel = "PÁGINA " + (page + 1) + " / " + pageCount;
         context.drawTextWithShadow(textRenderer, Text.literal(pageLabel),
                 width - textRenderer.getWidth(pageLabel) - 17, 17, 0xFFFFD76C);
-        context.fill(16, 49, width - 16, 51, 0x553B8EA8);
+        drawCategoryChips(context, mouseX, mouseY);
 
         int first = page * pageSize;
-        int end = Math.min(first + pageSize, GAMES.size());
+        int end = Math.min(first + pageSize, visible.size());
         for (int index = first; index < end; index++) {
             int slot = index - first;
             int col = slot % columns;
             int row = slot / columns;
             int x = (width - columns * cardWidth - (columns - 1) * cardGap) / 2 + col * (cardWidth + cardGap);
             int y = gridTop + row * (cardHeight + cardGap);
-            drawCard(context, GAMES.get(index), index, x, y, mouseX, mouseY);
+            drawCard(context, visible.get(index), index, x, y, mouseX, mouseY);
         }
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    private void drawCategoryChips(DrawContext context, int mouseX, int mouseY) {
+        Category[] categories = Category.values();
+        for (int i = 0; i < categories.length; i++) {
+            int col = i % chipColumns, row = i / chipColumns;
+            int x = 16 + col * (chipWidth + 6), y = chipTop + row * 19;
+            boolean selected = categories[i] == category;
+            boolean hovered = mouseX >= x && mouseX < x + chipWidth && mouseY >= y && mouseY < y + 17;
+            context.fill(x, y, x + chipWidth, y + 17, selected ? 0xFF3E9C9C : hovered ? 0xFF35556D : 0xFF24374A);
+            context.fill(x, y + 15, x + chipWidth, y + 17, selected ? 0xFFFFD76C : 0xFF152535);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(categories[i].label), x + chipWidth / 2, y + 4, selected ? 0xFFFFFFFF : 0xFFD3E2EF);
+        }
     }
 
     private void drawCard(DrawContext context, Game game, int index, int x, int y, int mouseX, int mouseY) {
@@ -200,6 +273,7 @@ public final class GamesHubScreen extends Screen {
         String gameName = textRenderer.trimToWidth(game.name, maxTitleWidth);
         int titleY = y + Math.max(20, cardHeight / 2 - 6);
         context.drawTextWithShadow(textRenderer, Text.literal(gameName), textX, titleY, 0xFFFFFFFF);
+        if (cardHeight >= 72) context.drawTextWithShadow(textRenderer, Text.literal(game.category.label.toUpperCase(java.util.Locale.ROOT)), textX, y + cardHeight - 29, 0xFFFFD56A);
         String action = hovered ? "ABRIR AGORA  ›" : "JOGAR  ›";
         context.drawTextWithShadow(textRenderer, Text.literal(action), textX, y + cardHeight - 15,
                 hovered ? 0xFFFFE68A : 0xFFB9D7E8);
@@ -290,8 +364,18 @@ public final class GamesHubScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
         if (button != 0) return false;
+        Category[] categories = Category.values();
+        for (int i = 0; i < categories.length; i++) {
+            int col = i % chipColumns, row = i / chipColumns;
+            int x = 16 + col * (chipWidth + 6), y = chipTop + row * 19;
+            if (mouseX >= x && mouseX < x + chipWidth && mouseY >= y && mouseY < y + 17) {
+                client.setScreen(new GamesHubScreen(categories[i], 0));
+                return true;
+            }
+        }
+        List<Game> visible = visibleGames();
         int first = page * pageSize;
-        int end = Math.min(first + pageSize, GAMES.size());
+        int end = Math.min(first + pageSize, visible.size());
         for (int index = first; index < end; index++) {
             int slot = index - first;
             int col = slot % columns;
@@ -299,7 +383,7 @@ public final class GamesHubScreen extends Screen {
             int x = (width - columns * cardWidth - (columns - 1) * cardGap) / 2 + col * (cardWidth + cardGap);
             int y = gridTop + row * (cardHeight + cardGap);
             if (mouseX >= x && mouseX < x + cardWidth && mouseY >= y && mouseY < y + cardHeight) {
-                client.setScreen(GAMES.get(index).screenFactory.get());
+                client.setScreen(visible.get(index).screenFactory.get());
                 return true;
             }
         }
@@ -309,11 +393,11 @@ public final class GamesHubScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT && page < pageCount - 1) {
-            client.setScreen(new GamesHubScreen(page + 1));
+            client.setScreen(new GamesHubScreen(category, page + 1));
             return true;
         }
         if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT && page > 0) {
-            client.setScreen(new GamesHubScreen(page - 1));
+            client.setScreen(new GamesHubScreen(category, page - 1));
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -324,5 +408,9 @@ public final class GamesHubScreen extends Screen {
         return false;
     }
 
-    private record Game(String name, Supplier<Screen> screenFactory) { }
+    private record Game(String name, Supplier<Screen> screenFactory, Category category) {
+        private Game(String name, Supplier<Screen> screenFactory) {
+            this(name, screenFactory, categoryFor(name));
+        }
+    }
 }

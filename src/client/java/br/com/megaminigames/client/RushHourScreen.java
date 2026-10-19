@@ -54,7 +54,7 @@ public final class RushHourScreen extends ArcadeScreen {
 
     @Override
     protected void init() {
-        cell = Math.max(28, Math.min(58, Math.min((width - 60) / SIZE, (height - 168) / SIZE)));
+        cell = Math.max(14, Math.min(56, Math.min((width - 60) / SIZE, (height - 132) / SIZE)));
         boardLeft = (width - cell * SIZE) / 2;
         boardTop = 66;
         addFooterButtons(height - 26, this::restartLevel);

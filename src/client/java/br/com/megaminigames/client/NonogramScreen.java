@@ -38,13 +38,12 @@ public final class NonogramScreen extends ArcadeScreen {
 
     @Override
     protected void init() {
-        int availableWidth = width - 96;
-        int availableHeight = height - 176;
-        cell = Math.max(11, Math.min(24, Math.min(availableWidth / SIZE, availableHeight / SIZE)));
-        clueLeft = Math.max(26, (int) (cell * 1.9F));
-        clueTop = Math.max(22, (int) (cell * 1.6F));
+        int budget = Math.min(width - 36, height - 96);
+        cell = Math.max(9, Math.min(22, budget / (SIZE + 3)));
+        clueLeft = cell * 2 + 4;
+        clueTop = cell * 2 + 4;
         gridLeft = (width - (clueLeft + cell * SIZE)) / 2;
-        gridTop = 70 + clueTop;
+        gridTop = 62 + clueTop;
         addFooterButtons(height - 26, this::newPuzzle);
         newPuzzle();
     }
@@ -233,20 +232,25 @@ public final class NonogramScreen extends ArcadeScreen {
             context.fill(gridLeft, y, gridLeft + cell * SIZE, y + 1, step % 5 == 0 ? 0xFF6C7FA0 : 0x55FFFFFF);
         }
 
+        int rowSpacing = Math.max(7, Math.min(cell / 2 + 3, 18));
         for (int row = 0; row < SIZE; row++) {
             int[] clues = rowClues[row];
+            int spacing = clues.length <= 1 ? rowSpacing
+                    : Math.min(rowSpacing, (clueLeft - 8) / clues.length);
             int y = gridTop + row * cell + cell / 2 - 4;
             for (int index = 0; index < clues.length; index++) {
-                int x = clueLeft - 6 - (clues.length - 1 - index) * (cell / 2 + 3);
+                int x = clueLeft - 7 - (clues.length - 1 - index) * spacing;
                 context.drawCenteredTextWithShadow(textRenderer, Text.literal(Integer.toString(clues[index])),
                         x, y, ArcadeTheme.TEXT);
             }
         }
         for (int column = 0; column < SIZE; column++) {
             int[] clues = columnClues[column];
+            int spacing = clues.length <= 1 ? rowSpacing
+                    : Math.min(rowSpacing, (clueTop - 8) / clues.length);
             int x = gridLeft + column * cell + cell / 2;
             for (int index = 0; index < clues.length; index++) {
-                int y = clueTop - 4 - (clues.length - 1 - index) * (cell / 2 + 3);
+                int y = gridTop - 6 - (clues.length - 1 - index) * spacing;
                 context.drawCenteredTextWithShadow(textRenderer, Text.literal(Integer.toString(clues[index])),
                         x, y, ArcadeTheme.TEXT);
             }

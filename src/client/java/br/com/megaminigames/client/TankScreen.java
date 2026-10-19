@@ -53,7 +53,7 @@ public final class TankScreen extends ArcadeScreen {
 
     @Override
     protected void init() {
-        cell = Math.max(14, Math.min(30, Math.min((width - 36) / COLS, (height - 168) / ROWS)));
+        cell = Math.max(10, Math.min(30, Math.min((width - 40) / COLS, (height - 132) / ROWS)));
         boardLeft = (width - cell * COLS) / 2;
         boardTop = 62;
         addFooterButtons(height - 26, this::restart);

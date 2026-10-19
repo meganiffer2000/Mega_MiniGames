@@ -55,9 +55,9 @@ public final class PinballScreen extends ArcadeScreen {
     @Override
     protected void init() {
         tableWidth = Math.min(width - 36, 320);
-        tableHeight = height - 138;
+        tableHeight = height - 94;
         left = (width - tableWidth) / 2;
-        top = 54;
+        top = 60;
         right = left + tableWidth;
         bottom = top + tableHeight;
         bumperX[0] = left + tableWidth * 0.30F;
@@ -112,7 +112,11 @@ public final class PinballScreen extends ArcadeScreen {
     }
 
     private float flipperLength() {
-        return tableWidth * 0.175F;
+        return Math.min(tableWidth * 0.175F, tableHeight * 0.24F);
+    }
+
+    private float bumperRadius() {
+        return Math.min(tableWidth * 0.072F, tableHeight * 0.13F);
     }
 
     @Override
@@ -197,7 +201,7 @@ public final class PinballScreen extends ArcadeScreen {
 
     private void collideBumpers() {
         for (int index = 0; index < 3; index++) {
-            float radius = tableWidth * 0.072F;
+            float radius = bumperRadius();
             float dx = ballX - bumperX[index];
             float dy = ballY - bumperY[index];
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
@@ -281,7 +285,7 @@ public final class PinballScreen extends ArcadeScreen {
     }
 
     private void collideSlingshots() {
-        float radius = tableWidth * 0.028F;
+        float radius = Math.min(tableWidth * 0.028F, tableHeight * 0.06F);
         float y1 = bottom - tableHeight * 0.20F;
         float y2 = bottom - tableHeight * 0.42F;
         bounceSegment(left + tableWidth * 0.11F, y1, left + tableWidth * 0.20F, y2, radius, 1.9F);
@@ -434,7 +438,7 @@ public final class PinballScreen extends ArcadeScreen {
     }
 
     private void drawBumper(DrawContext context, int index) {
-        int radius = (int) (tableWidth * 0.072F);
+        int radius = (int) bumperRadius();
         int x = (int) bumperX[index];
         int y = (int) bumperY[index];
         int color = index == 0 ? ArcadeTheme.SKY : index == 1 ? ArcadeTheme.MAGENTA : ArcadeTheme.LIME;

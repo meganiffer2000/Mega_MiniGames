@@ -49,9 +49,9 @@ public final class AirHockeyScreen extends ArcadeScreen {
     @Override
     protected void init() {
         int tableWidth = Math.min(width - 36, 330);
-        int tableHeight = height - 122;
+        int tableHeight = height - 94;
         left = (width - tableWidth) / 2;
-        top = 56;
+        top = 60;
         right = left + tableWidth;
         bottom = top + tableHeight;
         midY = (top + bottom) / 2;

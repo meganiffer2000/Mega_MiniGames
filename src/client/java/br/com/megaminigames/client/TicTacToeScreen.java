@@ -2,16 +2,21 @@ package br.com.megaminigames.client;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 
 /** Jogo da velha contra uma IA que avalia todas as possibilidades. */
 public final class TicTacToeScreen extends Screen {
-    private static final int CELL = 82;
     private final int[][] board = new int[3][3];
+    private int cell = 82;
     private int boardLeft;
     private int boardTop;
     private int result;
+    private int lastRow = -1;
+    private int lastColumn = -1;
+    private boolean statsCounted;
+    private static int wins;
+    private static int losses;
+    private static int draws;
 
     public TicTacToeScreen() {
         super(Text.literal("Jogo da Velha"));
@@ -19,14 +24,15 @@ public final class TicTacToeScreen extends Screen {
 
     @Override
     protected void init() {
-        boardLeft = (width - CELL * 3) / 2;
-        boardTop = Math.max(58, (height - CELL * 3 - 55) / 2);
-        int buttonY = Math.min(height - 24, boardTop + CELL * 3 + 20);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Nova partida"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        cell = Math.max(44, Math.min(92, Math.min((width - 60) / 3, (height - 150) / 3)));
+        boardLeft = (width - cell * 3) / 2;
+        boardTop = Math.max(76, (height - cell * 3 - 110) / 2 + 18);
+        int buttonY = Math.min(height - 26, boardTop + cell * 3 + 24);
+        int buttonWidth = Math.min(112, Math.max(76, (width - 40) / 2));
+        addDrawableChild(ArcadeTheme.button(width / 2 - buttonWidth - 4, buttonY, buttonWidth, 20,
+                Text.literal("Nova partida"), this::newGame));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, buttonWidth, 20,
+                Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
     }
 
     private void newGame() {
@@ -34,41 +40,111 @@ public final class TicTacToeScreen extends Screen {
             java.util.Arrays.fill(row, 0);
         }
         result = 0;
+        lastRow = -1;
+        lastColumn = -1;
+        statsCounted = false;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 15, 0xFFFFFFFF);
+        ArcadeTheme.background(context, width, height);
+        int accent = ArcadeTheme.TEAL;
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, accent);
+
         String status = switch (result) {
-            case 1 -> "Você venceu!";
-            case 2 -> "O computador venceu.";
-            case 3 -> "Empate!";
-            default -> "Você é X • Clique em uma casa";
+            case 1 -> "Você venceu! Que jogada!";
+            case 2 -> "O computador venceu. Revanche?";
+            case 3 -> "Empate! Ninguém cedeu.";
+            default -> "Você é X  •  clique em uma casa";
         };
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal(status), width / 2, 36,
-                result == 1 ? 0xFF6DEE83 : 0xFFFFFFFF);
+        int statusColor = result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER
+                : result == 3 ? ArcadeTheme.GOLD : ArcadeTheme.MUTED;
+        ArcadeTheme.status(context, textRenderer, Text.literal(status), width / 2, 34, statusColor);
+
+        int statsY = 50;
+        String stats = "V " + wins + "   •   E " + draws + "   •   D " + losses;
+        ArcadeTheme.pill(context, textRenderer, stats, (width - textRenderer.getWidth(stats) - 18) / 2, statsY, ArcadeTheme.GOLD);
+
+        // Moldura do tabuleiro.
+        int pad = 8;
+        ArcadeTheme.rounded(context, boardLeft - pad + 2, boardTop - pad + 4, boardLeft + cell * 3 + pad + 2,
+                boardTop + cell * 3 + pad + 4, 12, 0x55000000);
+        ArcadeTheme.rounded(context, boardLeft - pad, boardTop - pad, boardLeft + cell * 3 + pad,
+                boardTop + cell * 3 + pad, 12, 0x66FFFFFF);
+        ArcadeTheme.rounded(context, boardLeft - pad + 1, boardTop - pad + 1, boardLeft + cell * 3 + pad - 1,
+                boardTop + cell * 3 + pad - 1, 11, 0xF00B1626);
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 3; column++) {
-                int x = boardLeft + column * CELL;
-                int y = boardTop + row * CELL;
-                context.fill(x + 2, y + 2, x + CELL - 2, y + CELL - 2, 0xFF273744);
+                int x = boardLeft + column * cell;
+                int y = boardTop + row * cell;
+                int inset = 4;
+                boolean hovered = result == 0 && board[row][column] == 0
+                        && mouseX >= x && mouseX < x + cell && mouseY >= y && mouseY < y + cell;
+                int fill = hovered ? 0xFF1D3B4B : 0xFF122334;
+                ArcadeTheme.rounded(context, x + inset, y + inset, x + cell - inset, y + cell - inset, 8, fill);
+                ArcadeTheme.rounded(context, x + inset, y + inset, x + cell - inset, y + cell / 2, 8, 0x08FFFFFF);
+                if ((row == lastRow && column == lastColumn) && board[row][column] != 0) {
+                    ArcadeTheme.rounded(context, x + inset, y + inset, x + cell - inset, y + cell - inset, 8, 0x22FFD66B);
+                }
                 if (board[row][column] != 0) {
-                    String symbol = board[row][column] == 1 ? "X" : "O";
-                    int color = board[row][column] == 1 ? 0xFF55D9E8 : 0xFFFF9A62;
-                    context.drawCenteredTextWithShadow(textRenderer, Text.literal(symbol),
-                            x + CELL / 2, y + CELL / 2 - 9, color);
+                    boolean player = board[row][column] == 1;
+                    int color = player ? ArcadeTheme.TEAL : ArcadeTheme.CORAL;
+                    if (player) {
+                        ArcadeTheme.drawX(context, x + cell / 2, y + cell / 2, cell / 2 - 16,
+                                Math.max(3, cell / 14), color);
+                    } else {
+                        ArcadeTheme.drawO(context, x + cell / 2, y + cell / 2, cell / 2 - 14,
+                                Math.max(3, cell / 14), color);
+                    }
+                } else if (hovered) {
+                    ArcadeTheme.drawX(context, x + cell / 2, y + cell / 2, cell / 2 - 16,
+                            Math.max(2, cell / 18), 0x44FFFFFF);
                 }
             }
         }
-        for (int i = 1; i < 3; i++) {
-            context.fill(boardLeft + i * CELL - 2, boardTop, boardLeft + i * CELL + 2,
-                    boardTop + CELL * 3, 0xFFE4EDF0);
-            context.fill(boardLeft, boardTop + i * CELL - 2, boardLeft + CELL * 3,
-                    boardTop + i * CELL + 2, 0xFFE4EDF0);
+
+        if (result != 0 && result != 3) {
+            int[][] line = winningLine();
+            if (line != null) {
+                int startX = boardLeft + line[0][1] * cell + cell / 2;
+                int startY = boardTop + line[0][0] * cell + cell / 2;
+                int endX = boardLeft + line[2][1] * cell + cell / 2;
+                int endY = boardTop + line[2][0] * cell + cell / 2;
+                int steps = Math.max(Math.abs(endX - startX), Math.abs(endY - startY));
+                for (int i = 0; i <= steps; i++) {
+                    int px = startX + (endX - startX) * i / Math.max(1, steps);
+                    int py = startY + (endY - startY) * i / Math.max(1, steps);
+                    ArcadeTheme.disc(context, px, py, 4, ArcadeTheme.GOLD);
+                }
+            }
+        }
+        if (result != 0) {
+            String bannerTitle = result == 1 ? "VOCÊ VENCEU!" : result == 2 ? "CPU VENCEU" : "EMPATE";
+            ArcadeTheme.banner(context, textRenderer, bannerTitle, "R para jogar novamente",
+                    width / 2, boardTop + cell * 3 / 2,
+                    Math.min(width - 24, 250), result == 1 ? ArcadeTheme.SUCCESS
+                            : result == 2 ? ArcadeTheme.CORAL : ArcadeTheme.GOLD);
         }
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    private int[][] winningLine() {
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] != 0 && board[i][0] == board[i][1] && board[i][1] == board[i][2]) {
+                return new int[][]{{i, 0}, {i, 1}, {i, 2}};
+            }
+            if (board[0][i] != 0 && board[0][i] == board[1][i] && board[1][i] == board[2][i]) {
+                return new int[][]{{0, i}, {1, i}, {2, i}};
+            }
+        }
+        if (board[0][0] != 0 && board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
+            return new int[][]{{0, 0}, {1, 1}, {2, 2}};
+        }
+        if (board[0][2] != 0 && board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
+            return new int[][]{{0, 2}, {1, 1}, {2, 0}};
+        }
+        return null;
     }
 
     @Override
@@ -77,21 +153,34 @@ public final class TicTacToeScreen extends Screen {
             return true;
         }
         if (button != 0 || result != 0 || mouseX < boardLeft || mouseY < boardTop
-                || mouseX >= boardLeft + CELL * 3 || mouseY >= boardTop + CELL * 3) {
+                || mouseX >= boardLeft + cell * 3 || mouseY >= boardTop + cell * 3) {
             return false;
         }
-        int row = (int) ((mouseY - boardTop) / CELL);
-        int column = (int) ((mouseX - boardLeft) / CELL);
+        int row = (int) ((mouseY - boardTop) / cell);
+        int column = (int) ((mouseX - boardLeft) / cell);
         if (board[row][column] != 0) {
             return true;
         }
         board[row][column] = 1;
+        lastRow = row;
+        lastColumn = column;
         result = winner(board);
         if (result == 0) {
             aiMove();
             result = winner(board);
         }
+        countStats();
         return true;
+    }
+
+    private void countStats() {
+        if (result == 0 || statsCounted) {
+            return;
+        }
+        statsCounted = true;
+        if (result == 1) wins++;
+        else if (result == 2) losses++;
+        else if (result == 3) draws++;
     }
 
     private void aiMove() {
@@ -114,6 +203,8 @@ public final class TicTacToeScreen extends Screen {
         }
         if (bestRow >= 0) {
             board[bestRow][bestColumn] = 2;
+            lastRow = bestRow;
+            lastColumn = bestColumn;
         }
     }
 
@@ -153,8 +244,8 @@ public final class TicTacToeScreen extends Screen {
             return state[0][2];
         }
         for (int[] row : state) {
-            for (int cell : row) {
-                if (cell == 0) return 0;
+            for (int cellValue : row) {
+                if (cellValue == 0) return 0;
             }
         }
         return 3;

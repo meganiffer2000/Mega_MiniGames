@@ -19,6 +19,8 @@ public final class SnakeScreen extends Screen {
     private int boardLeft;
     private int boardTop;
     private Cell food;
+    private boolean golden;
+    private int goldenTicks;
     private Direction direction = Direction.RIGHT;
     private Direction queuedDirection = Direction.RIGHT;
     private int ticksUntilMove;
@@ -32,16 +34,13 @@ public final class SnakeScreen extends Screen {
 
     @Override
     protected void init() {
-        cellSize = Math.max(8, Math.min(24, Math.min((width - 40) / COLUMNS, (height - 112) / ROWS)));
+        cellSize = Math.max(8, Math.min(24, Math.min((width - 44) / COLUMNS, (height - 168) / ROWS)));
         boardLeft = (width - COLUMNS * cellSize) / 2;
-        boardTop = Math.max(42, (height - ROWS * cellSize) / 2 - 8);
-
-        int buttonY = Math.min(height - 24, boardTop + ROWS * cellSize + 18);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Reiniciar (R)"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        boardTop = Math.max(82, (height - ROWS * cellSize - 104) / 2 + 16);
+        int buttonY = Math.min(height - 26, boardTop + ROWS * cellSize + 18);
+        int buttonWidth = Math.min(112, Math.max(76, (width - 44) / 2));
+        addDrawableChild(ArcadeTheme.button(width / 2 - buttonWidth - 4, buttonY, buttonWidth, 20, Text.literal("Reiniciar (R)"), () -> newGame()));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, buttonWidth, 20, Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
         if (!initialized) {
             newGame();
         }
@@ -66,12 +65,17 @@ public final class SnakeScreen extends Screen {
             food = new Cell(ThreadLocalRandom.current().nextInt(COLUMNS),
                     ThreadLocalRandom.current().nextInt(ROWS));
         } while (snake.contains(food));
+        golden = score > 0 && ThreadLocalRandom.current().nextInt(100) < 26;
+        goldenTicks = 120;
     }
 
     @Override
     public void tick() {
         if (gameOver) {
             return;
+        }
+        if (golden && --goldenTicks <= 0) {
+            golden = false;
         }
         if (++ticksUntilMove < Math.max(3, 7 - score / 4)) {
             return;
@@ -92,7 +96,8 @@ public final class SnakeScreen extends Screen {
 
         snake.addFirst(next);
         if (eating) {
-            score++;
+            score += golden ? 3 : 1;
+            golden = false;
             if (snake.size() == COLUMNS * ROWS) {
                 gameOver = true;
             } else {
@@ -103,42 +108,113 @@ public final class SnakeScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.fill(0, 0, width, height, 0xFF101820);
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal("Snake  |  Pontos: " + score),
-                width / 2, 14, 0xFFFFFFFF);
-        context.drawCenteredTextWithShadow(textRenderer,
-                Text.literal("Setas ou WASD para mover • R para reiniciar"), width / 2, 30, 0xFFCCDDDD);
+        ArcadeTheme.background(context, width, height);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, ArcadeTheme.LIME);
 
         int boardRight = boardLeft + COLUMNS * cellSize;
         int boardBottom = boardTop + ROWS * cellSize;
-        context.fill(boardLeft - 2, boardTop - 2, boardRight + 2, boardBottom + 2, 0xFF62717A);
-        context.fill(boardLeft, boardTop, boardRight, boardBottom, 0xFF20333B);
+        String scoreLabel = "PONTOS " + score;
+        ArcadeTheme.pill(context, textRenderer, scoreLabel, boardLeft, 32, ArcadeTheme.LIME);
+        int level = Math.max(1, 7 - Math.max(3, 7 - score / 4));
+        String levelLabel = golden ? "OURO x3  •  " + Math.max(0, goldenTicks / 20) + "s" : "VELOCIDADE " + level;
+        ArcadeTheme.pillRight(context, textRenderer, levelLabel, boardRight, 32, ArcadeTheme.GOLD);
+        context.drawCenteredTextWithShadow(textRenderer,
+                Text.literal("Setas ou WASD  •  R reinicia"), width / 2, 54, ArcadeTheme.MUTED);
+
+        int pad = 6;
+        ArcadeTheme.rounded(context, boardLeft - pad + 2, boardTop - pad + 4, boardRight + pad + 2,
+                boardBottom + pad + 4, 12, 0x55000000);
+        ArcadeTheme.rounded(context, boardLeft - pad, boardTop - pad, boardRight + pad, boardBottom + pad,
+                12, 0x6635C8B9);
+        ArcadeTheme.rounded(context, boardLeft - pad + 1, boardTop - pad + 1, boardRight + pad - 1,
+                boardBottom + pad - 1, 11, 0xF00A1422);
+        context.fillGradient(boardLeft, boardTop, boardRight, boardBottom, 0xFF10263A, 0xFF0A1626);
 
         for (int row = 0; row < ROWS; row++) {
             for (int column = 0; column < COLUMNS; column++) {
                 if ((row + column) % 2 == 0) {
                     int x = boardLeft + column * cellSize;
                     int y = boardTop + row * cellSize;
-                    context.fill(x, y, x + cellSize, y + cellSize, 0xFF263B42);
+                    context.fill(x, y, x + cellSize, y + cellSize, 0x06FFFFFF);
                 }
             }
         }
 
-        drawCell(context, food, 0xFFE94B5A);
+        drawFood(context);
         boolean isHead = true;
+        int index = 0;
+        int total = snake.size();
         for (Cell segment : snake) {
-            drawCell(context, segment, isHead ? 0xFF9BE564 : 0xFF5DBB53);
+            int color = isHead ? 0xFFB9F26B : ArcadeTheme.mix(0xFF6ED36A, 0xFF2E9E6B, (float) index / Math.max(1, total));
+            drawSegment(context, segment, color);
+            if (isHead) {
+                drawEyes(context, segment);
+            }
             isHead = false;
+            index++;
         }
 
         if (gameOver) {
-            context.fill(boardLeft, (boardTop + boardBottom) / 2 - 28,
-                    boardRight, (boardTop + boardBottom) / 2 + 28, 0xAA000000);
-            context.drawCenteredTextWithShadow(textRenderer,
-                    Text.literal(snake.size() == COLUMNS * ROWS ? "Você venceu!" : "Fim de jogo!"),
-                    width / 2, (boardTop + boardBottom) / 2 - 5, 0xFFFFFFFF);
+            int bannerWidth = Math.min(boardRight - boardLeft - 12, 230);
+            int cx = width / 2;
+            int cy = (boardTop + boardBottom) / 2;
+            boolean victory = snake.size() == COLUMNS * ROWS;
+            ArcadeTheme.rounded(context, cx - bannerWidth / 2, cy - 30, cx + bannerWidth / 2, cy + 30, 12, 0xEE08111E);
+            ArcadeTheme.rounded(context, cx - bannerWidth / 2, cy - 30, cx + bannerWidth / 2, cy - 28, 12,
+                    victory ? ArcadeTheme.GOLD : ArcadeTheme.DANGER);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(victory ? "VOCÊ VENCEU!" : "FIM DE JOGO"),
+                    cx, cy - 17, victory ? ArcadeTheme.GOLD : ArcadeTheme.DANGER);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Pontos: " + score), cx, cy - 3, ArcadeTheme.TEXT);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Pressione R para jogar de novo"), cx,
+                    cy + 10, ArcadeTheme.MUTED);
         }
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    private void drawFood(DrawContext context) {
+        if (food == null) return;
+        int x = boardLeft + food.x * cellSize + cellSize / 2;
+        int y = boardTop + food.y * cellSize + cellSize / 2;
+        int radius = Math.max(3, cellSize / 2 - 3);
+        if (golden) {
+            ArcadeTheme.glow(context, x, y, radius + 6, 0xCCFFD66B);
+            ArcadeTheme.star(context, x, y, radius + 1, ArcadeTheme.GOLD);
+            ArcadeTheme.disc(context, x, y, Math.max(1, radius / 2), 0xFFFFF3C4);
+            return;
+        }
+        ArcadeTheme.glow(context, x, y, radius + 3, ArcadeTheme.MAGENTA);
+        ArcadeTheme.disc(context, x, y + 1, radius, 0xFFB3273F);
+        ArcadeTheme.disc(context, x, y, radius, 0xFFFF4D6D);
+        ArcadeTheme.disc(context, x - radius / 3, y - radius / 3, Math.max(1, radius / 3), 0x99FFFFFF);
+        context.fill(x, y - radius - 2, x + 2, y - radius + 1, 0xFF6FE58E);
+        context.fill(x + 1, y - radius - 3, x + 4, y - radius - 1, 0xFF3FAE67);
+    }
+
+    private void drawSegment(DrawContext context, Cell cell, int color) {
+        int x = boardLeft + cell.x * cellSize;
+        int y = boardTop + cell.y * cellSize;
+        int inset = Math.max(1, cellSize / 12);
+        ArcadeTheme.rounded(context, x + inset, y + inset, x + cellSize - inset, y + cellSize - inset,
+                Math.max(2, cellSize / 4), ArcadeTheme.darken(color, 45));
+        ArcadeTheme.rounded(context, x + inset + 1, y + inset + 1, x + cellSize - inset - 1,
+                y + cellSize - inset - 1, Math.max(2, cellSize / 4), color);
+        ArcadeTheme.rounded(context, x + inset + 1, y + inset + 1, x + cellSize - inset - 1,
+                y + cellSize / 2, Math.max(2, cellSize / 4), 0x18FFFFFF);
+    }
+
+    private void drawEyes(DrawContext context, Cell head) {
+        int x = boardLeft + head.x * cellSize + cellSize / 2;
+        int y = boardTop + head.y * cellSize + cellSize / 2;
+        int offset = Math.max(2, cellSize / 5);
+        int eye = Math.max(1, cellSize / 8);
+        int dx = direction.dx;
+        int dy = direction.dy;
+        int eye1X = x + dx * offset / 2 - dy * offset;
+        int eye1Y = y + dy * offset / 2 - dx * offset;
+        int eye2X = x + dx * offset / 2 + dy * offset;
+        int eye2Y = y + dy * offset / 2 + dx * offset;
+        context.fill(eye1X - eye, eye1Y - eye, eye1X + eye, eye1Y + eye, 0xFF0A1422);
+        context.fill(eye2X - eye, eye2Y - eye, eye2X + eye, eye2Y + eye, 0xFF0A1422);
     }
 
     private void drawCell(DrawContext context, Cell cell, int color) {

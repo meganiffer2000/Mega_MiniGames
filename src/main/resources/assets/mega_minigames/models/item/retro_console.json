@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "mega_minigames:item/game_boy"
+    "layer0": "mega_minigames:item/retro_console"
   }
 }

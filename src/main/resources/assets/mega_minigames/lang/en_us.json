@@ -1,3 +1,24 @@
 {
-  "item.mega_minigames.game_boy": "Game Boy"
+  "item.mega_minigames.retro_console": "Retro Console",
+  "item.mega_minigames.retro_console.tip1": "Right-click to open the arcade hub",
+  "item.mega_minigames.retro_console.tip2": "166 action, puzzle and adventure minigames",
+  "item.mega_minigames.retro_console.tip3": "Sneak + right-click opens a random game",
+  "mega_minigames.category.all": "All",
+  "mega_minigames.category.management": "Management",
+  "mega_minigames.category.simulation": "Simulation",
+  "mega_minigames.category.action": "Action",
+  "mega_minigames.category.adventure": "Adventure",
+  "mega_minigames.category.puzzle": "Puzzle",
+  "mega_minigames.hub.previous": "‹ Previous",
+  "mega_minigames.hub.next": "Next ›",
+  "mega_minigames.hub.close": "Close",
+  "mega_minigames.hub.random": "RANDOM",
+  "mega_minigames.hub.open": "OPEN  ›",
+  "mega_minigames.hub.subtitle": "ARCADE  •  %s games  •  R surprises",
+  "mega_minigames.hub.hint": "Arrows flip pages  •  R picks one  •  ESC closes",
+  "mega_minigames.hub.page": "PAGE %s/%s",
+  "item.mega_minigames.retro_console.tip4": "Also found in the Creative Tools tab",
+  "advancements.mega_minigames.retro_console.title": "Retro Console",
+  "advancements.mega_minigames.retro_console.description": "Get the Retro Console and open the minigame hub.",
+  "mega_minigames.hub.new": "NEW"
 }

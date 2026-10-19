@@ -11,13 +11,16 @@ import net.minecraft.text.Text;
 /** Damas contra uma IA simples; capturas obrigatórias e coroação de damas incluídas. */
 public final class CheckersScreen extends Screen {
     private static final int SIDE = 8;
-    private static final int CELL = 42;
+    private int cell = 42;
     private final int[][] board = new int[SIDE][SIDE];
     private int left;
     private int top;
     private int selectedRow = -1;
     private int selectedColumn = -1;
     private int result;
+    private boolean statsCounted;
+    private static int wins;
+    private static int losses;
 
     public CheckersScreen() {
         super(Text.literal("Damas"));
@@ -25,18 +28,18 @@ public final class CheckersScreen extends Screen {
 
     @Override
     protected void init() {
-        left = (width - SIDE * CELL) / 2;
-        top = Math.max(54, (height - SIDE * CELL - 60) / 2);
-        int buttonY = Math.min(height - 24, top + SIDE * CELL + 12);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Nova partida"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        cell = Math.max(26, Math.min(44, Math.min((width - 44) / SIDE, (height - 156) / SIDE)));
+        left = (width - SIDE * cell) / 2;
+        top = Math.max(78, (height - SIDE * cell - 110) / 2 + 14);
+        int buttonY = Math.min(height - 26, top + SIDE * cell + 16);
+        int buttonWidth = Math.min(112, Math.max(76, (width - 44) / 2));
+        addDrawableChild(ArcadeTheme.button(width / 2 - buttonWidth - 4, buttonY, buttonWidth, 20, Text.literal("Nova partida"), () -> newGame()));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, buttonWidth, 20, Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
         newGame();
     }
 
     private void newGame() {
+        statsCounted = false;
         for (int[] row : board) java.util.Arrays.fill(row, 0);
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < SIDE; column++) {
@@ -107,35 +110,82 @@ public final class CheckersScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 12, 0xFFFFFFFF);
+        ArcadeTheme.background(context, width, height);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 10, ArcadeTheme.GOLD);
         String status = switch (result) {
             case 1 -> "Você venceu!";
             case 2 -> "A IA venceu.";
             case 3 -> "Empate.";
-            default -> "Você joga com as peças claras • Clique para selecionar e mover";
+            default -> "Peças claras  •  clique para selecionar e mover";
         };
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal(status), width / 2, 31, 0xFFE8E8E8);
+        int statusColor = result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER
+                : result == 3 ? ArcadeTheme.GOLD : ArcadeTheme.MUTED;
+        ArcadeTheme.status(context, textRenderer, Text.literal(status), width / 2, 31, statusColor);
+        int lightPieces = 0;
+        int darkPieces = 0;
+        for (int[] row : board) {
+            for (int piece : row) {
+                if (piece > 0) lightPieces++;
+                else if (piece < 0) darkPieces++;
+            }
+        }
+        ArcadeTheme.pill(context, textRenderer, "CLARAS " + lightPieces, left, Math.max(44, top - 22),
+                ArcadeTheme.GOLD);
+        ArcadeTheme.pillRight(context, textRenderer, "ESCURAS " + darkPieces, left + SIDE * cell,
+                Math.max(44, top - 22), ArcadeTheme.PURPLE);
 
+        int pad = 7;
+        ArcadeTheme.rounded(context, left - pad + 2, top - pad + 5, left + SIDE * cell + pad + 2,
+                top + SIDE * cell + pad + 5, 12, 0x55000000);
+        ArcadeTheme.rounded(context, left - pad, top - pad, left + SIDE * cell + pad, top + SIDE * cell + pad,
+                12, 0x99FFD66B);
+        ArcadeTheme.rounded(context, left - pad + 1, top - pad + 1, left + SIDE * cell + pad - 1,
+                top + SIDE * cell + pad - 1, 11, 0xF00B1626);
+
+        List<Move> targets = selectedRow >= 0 ? legalMoves(1) : List.of();
         for (int row = 0; row < SIDE; row++) {
             for (int column = 0; column < SIDE; column++) {
-                int x = left + column * CELL;
-                int y = top + row * CELL;
+                int x = left + column * cell;
+                int y = top + row * cell;
                 boolean dark = (row + column) % 2 == 1;
-                context.fill(x, y, x + CELL, y + CELL, dark ? 0xFF76563F : 0xFFE5D1AE);
+                ArcadeTheme.rounded(context, x + 1, y + 1, x + cell - 1, y + cell - 1, 3,
+                        dark ? 0xFF5E4433 : 0xFFE8D6B4);
+                if (dark) {
+                    ArcadeTheme.rounded(context, x + 1, y + 1, x + cell - 1, y + cell / 2, 3, 0x10FFFFFF);
+                }
                 if (row == selectedRow && column == selectedColumn) {
-                    context.fill(x + 2, y + 2, x + CELL - 2, y + CELL - 2, 0xAA75D66A);
+                    ArcadeTheme.rounded(context, x + 2, y + 2, x + cell - 2, y + cell - 2, 4, 0xAA35C8B9);
+                }
+                for (Move move : targets) {
+                    if (move.fromRow == selectedRow && move.fromColumn == selectedColumn
+                            && move.toRow == row && move.toColumn == column) {
+                        ArcadeTheme.disc(context, x + cell / 2, y + cell / 2, Math.max(3, cell / 8), 0xCCFFD66B);
+                        ArcadeTheme.ring(context, x + cell / 2, y + cell / 2, Math.max(5, cell / 5), 1, 0x88FFD66B);
+                    }
                 }
                 int piece = board[row][column];
                 if (piece != 0) {
-                    int color = piece > 0 ? 0xFFF2EDE0 : 0xFF292D35;
-                    drawDisc(context, x + CELL / 2, y + CELL / 2, CELL / 2 - 5, color);
+                    int centerX = x + cell / 2;
+                    int centerY = y + cell / 2;
+                    int radius = cell / 2 - 4;
+                    boolean light = piece > 0;
+                    int base = light ? 0xFFF4EFE2 : 0xFF2B3038;
+                    ArcadeTheme.disc(context, centerX, centerY + 1, radius, 0x55000000);
+                    ArcadeTheme.disc(context, centerX, centerY, radius, ArcadeTheme.darken(base, 35));
+                    ArcadeTheme.disc(context, centerX, centerY - 1, radius - 2, base);
+                    ArcadeTheme.ring(context, centerX, centerY - 1, radius - 2, 2, light ? 0xFFCDBE9D : 0xFF444C58);
                     if (Math.abs(piece) == 2) {
-                        context.drawCenteredTextWithShadow(textRenderer, Text.literal("K"),
-                                x + CELL / 2, y + CELL / 2 - 4, piece > 0 ? 0xFF333333 : 0xFFFFFFFF);
+                        ArcadeTheme.star(context, centerX, centerY - 1, Math.max(2, cell / 9), ArcadeTheme.GOLD);
                     }
                 }
             }
+        }
+        if (result != 0) {
+            ArcadeTheme.banner(context, textRenderer,
+                    result == 1 ? "VOCÊ VENCEU!" : result == 2 ? "A IA VENCEU" : "EMPATE",
+                    result == 1 ? "Todas as peças escuras capturadas" : "Tente outra estratégia",
+                    width / 2, top + SIDE * cell / 2, Math.min(width - 24, SIDE * cell + 40),
+                    result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER : ArcadeTheme.GOLD);
         }
         super.render(context, mouseX, mouseY, delta);
     }
@@ -151,9 +201,9 @@ public final class CheckersScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
         if (button != 0 || result != 0 || mouseX < left || mouseY < top
-                || mouseX >= left + SIDE * CELL || mouseY >= top + SIDE * CELL) return false;
-        int row = (int) ((mouseY - top) / CELL);
-        int column = (int) ((mouseX - left) / CELL);
+                || mouseX >= left + SIDE * cell || mouseY >= top + SIDE * cell) return false;
+        int row = (int) ((mouseY - top) / cell);
+        int column = (int) ((mouseX - left) / cell);
         if (selectedRow < 0) {
             if (board[row][column] == 1 || board[row][column] == 2) {
                 selectedRow = row;
@@ -179,12 +229,22 @@ public final class CheckersScreen extends Screen {
                     aiMove();
                     if (!hasPieces(1) || legalMoves(1).isEmpty()) result = 2;
                 }
+                countStats();
                 return true;
             }
         }
         selectedRow = -1;
         selectedColumn = -1;
         return true;
+    }
+
+    private void countStats() {
+        if (statsCounted) {
+            return;
+        }
+        statsCounted = true;
+        if (result == 1) wins++;
+        else if (result == 2) losses++;
     }
 
     @Override

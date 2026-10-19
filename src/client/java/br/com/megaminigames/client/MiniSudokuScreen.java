@@ -1,8 +1,8 @@
 package br.com.megaminigames.client;
 
+import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -15,12 +15,16 @@ public final class MiniSudokuScreen extends Screen {
     };
     private final int[][] board = new int[SIDE][SIDE];
     private final boolean[][] fixed = new boolean[SIDE][SIDE];
-    private int cellSize;
+    private final int[][] solution = new int[SIDE][SIDE];
+    private int cellSize = 48;
     private int left;
     private int top;
+    private int padY;
+    private int padSize = 26;
     private int selectedRow = -1;
     private int selectedColumn = -1;
     private boolean won;
+    private boolean initialized;
 
     public MiniSudokuScreen() {
         super(Text.literal("Mini Sudoku"));
@@ -28,30 +32,47 @@ public final class MiniSudokuScreen extends Screen {
 
     @Override
     protected void init() {
-        cellSize = Math.max(28, Math.min(MAX_CELL, Math.min((width - 36) / SIDE, (height - 112) / SIDE)));
+        cellSize = Math.max(24, Math.min(MAX_CELL, Math.min((width - 44) / SIDE, (height - 178) / SIDE)));
         left = (width - SIDE * cellSize) / 2;
-        top = Math.max(56, (height - SIDE * cellSize - 65) / 2);
-        int buttonY = height - 25;
-        addDrawableChild(ButtonWidget.builder(Text.literal("Novo jogo"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        top = Math.max(78, (height - SIDE * cellSize - 110) / 2 + 14);
+        padSize = Math.max(20, Math.min(30, cellSize / 2));
+        padY = top + SIDE * cellSize + 12;
+        if (padY + padSize > height - 34) {
+            padY = 0;
+        }
+        int buttonY = height - 26;
+        int buttonWidth = Math.min(112, Math.max(74, (width - 46) / 2));
+        addDrawableChild(ArcadeTheme.button(width / 2 - buttonWidth - 4, buttonY, buttonWidth, 20,
+                Text.literal("Novo jogo"), this::newGame));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, buttonWidth, 20,
+                Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
         if (!initialized) {
             newGame();
             initialized = true;
         }
     }
 
-    private boolean initialized;
-
     private void newGame() {
+        int[] digits = {1, 2, 3, 4};
+        for (int i = digits.length - 1; i > 0; i--) {
+            int other = ThreadLocalRandom.current().nextInt(i + 1);
+            int value = digits[i];
+            digits[i] = digits[other];
+            digits[other] = value;
+        }
+        for (int row = 0; row < SIDE; row++) {
+            for (int column = 0; column < SIDE; column++) {
+                solution[row][column] = digits[SOLUTION[row][column] - 1];
+            }
+        }
         int[][] puzzle = {
                 {1, 0, 0, 4}, {0, 4, 1, 0}, {2, 0, 0, 3}, {0, 3, 2, 0}
         };
         for (int row = 0; row < SIDE; row++) {
-            System.arraycopy(puzzle[row], 0, board[row], 0, SIDE);
-            for (int column = 0; column < SIDE; column++) fixed[row][column] = board[row][column] != 0;
+            for (int column = 0; column < SIDE; column++) {
+                board[row][column] = puzzle[row][column] == 0 ? 0 : digits[puzzle[row][column] - 1];
+                fixed[row][column] = board[row][column] != 0;
+            }
         }
         selectedRow = -1;
         selectedColumn = -1;
@@ -68,7 +89,7 @@ public final class MiniSudokuScreen extends Screen {
     private void checkWin() {
         for (int row = 0; row < SIDE; row++) {
             for (int column = 0; column < SIDE; column++) {
-                if (board[row][column] != SOLUTION[row][column]) return;
+                if (board[row][column] != solution[row][column]) return;
             }
         }
         won = true;
@@ -76,23 +97,39 @@ public final class MiniSudokuScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 15, 0xFFFFFFFF);
-        context.drawCenteredTextWithShadow(textRenderer,
+        ArcadeTheme.background(context, width, height);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, ArcadeTheme.SKY);
+        ArcadeTheme.status(context, textRenderer,
                 Text.literal(won ? "Correto! Sudoku resolvido!" : "Clique em uma casa vazia e digite 1–4"),
-                width / 2, 36, won ? 0xFF71E98A : 0xFFE8E8E8);
+                width / 2, 33, won ? ArcadeTheme.SUCCESS : ArcadeTheme.MUTED);
+
+        int pad = 7;
+        ArcadeTheme.rounded(context, left - pad + 2, top - pad + 4, left + SIDE * cellSize + pad + 2,
+                top + SIDE * cellSize + pad + 4, 12, 0x55000000);
+        ArcadeTheme.rounded(context, left - pad, top - pad, left + SIDE * cellSize + pad,
+                top + SIDE * cellSize + pad, 12, 0x666CC9F5);
+        ArcadeTheme.rounded(context, left - pad + 1, top - pad + 1, left + SIDE * cellSize + pad - 1,
+                top + SIDE * cellSize + pad - 1, 11, 0xF00B1626);
+
         for (int row = 0; row < SIDE; row++) {
             for (int column = 0; column < SIDE; column++) {
                 int x = left + column * cellSize;
                 int y = top + row * cellSize;
-                int background = row == selectedRow && column == selectedColumn
-                        ? 0xFF526C89 : ((row / 2 + column / 2) % 2 == 0 ? 0xFFE9E5DC : 0xFFD7D1C5);
-                context.fill(x, y, x + cellSize, y + cellSize, background);
+                boolean selected = row == selectedRow && column == selectedColumn;
+                boolean sameRow = row == selectedRow;
+                boolean sameColumn = column == selectedColumn;
+                boolean sameBlock = selectedRow >= 0 && row / 2 == selectedRow / 2 && column / 2 == selectedColumn / 2;
+                int fill = ((row / 2 + column / 2) % 2 == 0 ? 0xFF1A2C42 : 0xFF16263A);
+                if (sameRow || sameColumn || sameBlock) fill = 0xFF203A56;
+                if (selected) fill = 0xFF2E6C8C;
+                ArcadeTheme.rounded(context, x + 2, y + 2, x + cellSize - 2, y + cellSize - 2, 4, fill);
                 if (board[row][column] != 0) {
+                    int color = fixed[row][column] ? 0xFFF2F7FF : (won ? ArcadeTheme.SUCCESS : ArcadeTheme.SKY);
                     context.drawCenteredTextWithShadow(textRenderer,
                             Text.literal(Integer.toString(board[row][column])),
-                            x + cellSize / 2, y + cellSize / 2 - 4,
-                            fixed[row][column] ? 0xFF202832 : 0xFF62B8FF);
+                            x + cellSize / 2, y + cellSize / 2 - 4, color);
+                } else if (sameRow || sameColumn || sameBlock) {
+                    ArcadeTheme.disc(context, x + cellSize / 2, y + cellSize / 2, 1, 0x44FFFFFF);
                 }
             }
         }
@@ -101,9 +138,35 @@ public final class MiniSudokuScreen extends Screen {
             int lineX = left + index * cellSize;
             int lineY = top + index * cellSize;
             context.fill(lineX - thickness / 2, top, lineX + (thickness + 1) / 2,
-                    top + SIDE * cellSize, 0xFF273440);
+                    top + SIDE * cellSize, 0xFF7FD0F0);
             context.fill(left, lineY - thickness / 2, left + SIDE * cellSize,
-                    lineY + (thickness + 1) / 2, 0xFF273440);
+                    lineY + (thickness + 1) / 2, 0xFF7FD0F0);
+        }
+
+        if (padY > 0) {
+            int total = SIDE * padSize + (SIDE - 1) * 6 + 8 + padSize + 12;
+            int startX = (width - total) / 2;
+            for (int number = 1; number <= SIDE; number++) {
+                int x = startX + (number - 1) * (padSize + 6);
+                boolean hovered = mouseX >= x && mouseX < x + padSize && mouseY >= padY && mouseY < padY + padSize;
+                ArcadeTheme.rounded(context, x, padY, x + padSize, padY + padSize, 6,
+                        hovered ? 0xFF2E4B69 : 0xFF1B2E44);
+                ArcadeTheme.rounded(context, x + 1, padY + 1, x + padSize - 1, padY + padSize - 1, 5, 0x10FFFFFF);
+                context.drawCenteredTextWithShadow(textRenderer, Text.literal(Integer.toString(number)),
+                        x + padSize / 2, padY + padSize / 2 - 4, ArcadeTheme.SKY);
+            }
+            int eraseX = startX + SIDE * (padSize + 6) + 8;
+            boolean hovered = mouseX >= eraseX && mouseX < eraseX + padSize && mouseY >= padY && mouseY < padY + padSize;
+            ArcadeTheme.rounded(context, eraseX, padY, eraseX + padSize, padY + padSize, 6,
+                    hovered ? 0xFF4A2B35 : 0xFF2A2230);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("X"), eraseX + padSize / 2,
+                    padY + padSize / 2 - 4, ArcadeTheme.DANGER);
+        }
+
+        if (won) {
+            ArcadeTheme.banner(context, textRenderer, "SUDOKU RESOLVIDO!",
+                    "R para outro desafio", width / 2, top + SIDE * cellSize / 2,
+                    Math.min(width - 24, 260), ArcadeTheme.GOLD);
         }
         super.render(context, mouseX, mouseY, delta);
     }
@@ -111,7 +174,24 @@ public final class MiniSudokuScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
-        if (button == 0 && mouseX >= left && mouseX < left + SIDE * cellSize
+        if (button != 0) return false;
+        if (padY > 0 && mouseY >= padY && mouseY < padY + padSize) {
+            int total = SIDE * padSize + (SIDE - 1) * 6 + 8 + padSize + 12;
+            int startX = (width - total) / 2;
+            for (int number = 1; number <= SIDE; number++) {
+                int x = startX + (number - 1) * (padSize + 6);
+                if (mouseX >= x && mouseX < x + padSize) {
+                    enterNumber(number);
+                    return true;
+                }
+            }
+            int eraseX = startX + SIDE * (padSize + 6) + 8;
+            if (mouseX >= eraseX && mouseX < eraseX + padSize) {
+                enterNumber(0);
+                return true;
+            }
+        }
+        if (mouseX >= left && mouseX < left + SIDE * cellSize
                 && mouseY >= top && mouseY < top + SIDE * cellSize) {
             selectedColumn = (int) ((mouseX - left) / cellSize);
             selectedRow = (int) ((mouseY - top) / cellSize);
@@ -130,10 +210,8 @@ public final class MiniSudokuScreen extends Screen {
             enterNumber(keyCode - GLFW.GLFW_KEY_0);
             return true;
         }
-        if ((keyCode == GLFW.GLFW_KEY_BACKSPACE || keyCode == GLFW.GLFW_KEY_DELETE)
-                && selectedRow >= 0 && !fixed[selectedRow][selectedColumn]) {
-            board[selectedRow][selectedColumn] = 0;
-            won = false;
+        if (keyCode == GLFW.GLFW_KEY_BACKSPACE || keyCode == GLFW.GLFW_KEY_DELETE) {
+            enterNumber(0);
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

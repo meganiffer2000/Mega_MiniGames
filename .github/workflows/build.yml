@@ -1,4 +1,4 @@
-name: Build Mega MiniGames
+name: Build JAR
 
 on:
   push:
@@ -7,110 +7,64 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configurar JDK 17 (obrigatório para Minecraft 1.20.1)
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Cache do Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/loom-cache
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle.properties', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
-
-      - name: Dar permissão ao gradlew
-        run: chmod +x ./gradlew
-
-      # Compilar as classes numa etapa própria mantém cada processo abaixo do limite do runner.
-      - name: Preparar daemon e compilar classes
+      - name: Checkout sem actions externas
         shell: bash
         run: |
-          set +e
-          ./gradlew --daemon classes clientClasses --console=plain > gradle-compile.log 2>&1
-          compile_exit_code=$?
-          if [ "$compile_exit_code" -ne 0 ]; then
-            {
-              echo '## Falha ao compilar classes'
-              echo 'Últimas linhas do log:'
-              echo '```text'
-              tail -n 120 gradle-compile.log
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-            relevant=$(grep -n -E "error:|Exception|FAILED|BUILD FAILED|Caused by|OutOfMemory|Killed|cannot find symbol|cannot override|symbol:|location:" gradle-compile.log | tail -n 40)
-            if [ -z "$relevant" ]; then
-              relevant=$(tail -n 25 gradle-compile.log)
-            fi
-            safe_block="${relevant//'%'/'%25'}"
-            safe_block="${safe_block//$'\r'/'%0D'}"
-            safe_block="${safe_block//$'\n'/'%0A'}"
-            echo "::error title=Gradle compile::$safe_block"
-            exit "$compile_exit_code"
-          fi
-          tail -n 40 gradle-compile.log
+          git init -q .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch -q --depth 1 origin "${{ github.sha }}"
+          git checkout -q FETCH_HEAD
 
-      - name: Publicar log de compilação quando falhar
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-compile-log
-          path: gradle-compile.log
-          if-no-files-found: ignore
-
-      - name: Testes e JAR executável
+      - name: Instalar JDK 17
         shell: bash
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openjdk-17-jdk-headless
+          JDK17=/usr/lib/jvm/java-17-openjdk-amd64
+          "$JDK17/bin/javac" -version
+          echo "JAVA_HOME=$JDK17" >> "$GITHUB_ENV"
+          echo "$JDK17/bin" >> "$GITHUB_PATH"
+
+      - name: Compilar e empacotar o mod
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+          export PATH="$JAVA_HOME/bin:$PATH"
+          java -version
           set +e
-          ./gradlew --daemon test --console=plain > gradle-build.log 2>&1
-          build_exit_code=$?
-          if [ "$build_exit_code" -eq 0 ]; then
-            ./gradlew --daemon remapJar --console=plain >> gradle-build.log 2>&1
-            build_exit_code=$?
+          ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" build --console=plain > build.log 2>&1
+          code=$?
+          tail -n 80 build.log
+          echo "$code" > build-exit-code.txt
+          if [ "$code" -ne 0 ]; then
+            git config user.name "Arena CI"
+            git config user.email "ci@arena.local"
+            git add -f build.log build-exit-code.txt
+            git commit -q -m "ci: log do build [skip ci]" || true
+            git push -q origin "HEAD:${GITHUB_REF_NAME}" || true
+            exit "$code"
           fi
-          if [ "$build_exit_code" -ne 0 ]; then
-            {
-              echo '## Falha no build do Gradle'
-              echo 'Últimas linhas do log:'
-              echo '```text'
-              tail -n 80 gradle-build.log
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-            relevant=$(grep -n -E "error:|Exception|FAILED|BUILD FAILED|Caused by|OutOfMemory|Killed|cannot find symbol|cannot override|AssertionFailedError|symbol:|location:" gradle-build.log | tail -n 40)
-            if [ -z "$relevant" ]; then
-              relevant=$(tail -n 25 gradle-build.log)
-            fi
-            safe_block="${relevant//'%'/'%25'}"
-            safe_block="${safe_block//$'\r'/'%0D'}"
-            safe_block="${safe_block//$'\n'/'%0A'}"
-            echo "::error title=Gradle build::$safe_block"
-            exit "$build_exit_code"
-          fi
-          tail -n 40 gradle-build.log
+          ls -l build/libs
 
-      - name: Publicar log do Gradle quando o build falhar
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-build-log
-          path: gradle-build.log
-          if-no-files-found: ignore
-
-      - name: Publicar artefato
-        uses: actions/upload-artifact@v4
-        with:
-          name: mega-minigames-jar
-          path: build/libs/*.jar
-          if-no-files-found: error
+      - name: Publicar o jar na release
+        if: github.event_name != 'pull_request' && success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(sed -n 's/^mod_version=//p' gradle.properties)
+          JAR=$(ls build/libs/*.jar | grep -v sources | head -n 1)
+          echo "Publicando $JAR na release v$VERSION"
+          gh release view "v$VERSION" >/dev/null 2>&1 \
+            || gh release create "v$VERSION" --target "$GITHUB_SHA" \
+                 --title "Mega MiniGames v$VERSION" --notes "Build automático do Mega MiniGames."
+          gh release upload "v$VERSION" "$JAR" --clobber
+          gh release edit "v$VERSION" \
+            --notes "Última compilação: ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} (run ${GITHUB_RUN_NUMBER}). Baixe o jar em Assets."

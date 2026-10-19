@@ -12,8 +12,9 @@ public final class MinesweeperScreen extends Screen {
     private static final int ROWS = 10;
     private static final int MINE_COUNT = 15;
     private static final int MAX_CELL_SIZE = 26;
-    private static final int GRID_TOP = 52;
     private int cellSize;
+    private int gridTop = 78;
+    private int timeTicks;
 
     private boolean[][] mines;
     private boolean[][] revealed;
@@ -30,22 +31,18 @@ public final class MinesweeperScreen extends Screen {
 
     @Override
     protected void init() {
-        int availableHeight = Math.max(ROWS * 10, height - GRID_TOP - 62);
+        int availableHeight = Math.max(ROWS * 10, height - 158);
         int heightLimitedCell = availableHeight / ROWS;
-        int widthLimitedCell = Math.max(10, (width - 24) / COLUMNS);
+        int widthLimitedCell = Math.max(10, (width - 30) / COLUMNS);
         cellSize = Math.max(10, Math.min(MAX_CELL_SIZE, Math.min(heightLimitedCell, widthLimitedCell)));
         gridLeft = (width - COLUMNS * cellSize) / 2;
-        int buttonY = height - 25;
-        int buttonWidth = 112;
+        gridTop = Math.max(80, (height - ROWS * cellSize - 96) / 2 + 14);
+        int buttonY = height - 26;
+        int buttonWidth = Math.min(112, Math.max(76, (width - 44) / 2));
         int startX = (width - buttonWidth * 2 - 8) / 2;
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Novo jogo"), button -> newGame())
-                .dimensions(startX, buttonY, buttonWidth, 20)
-                .build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(startX + buttonWidth + 8, buttonY, buttonWidth, 20)
-                .build());
+        addDrawableChild(ArcadeTheme.button(startX, buttonY, buttonWidth, 20, Text.literal("Novo jogo"), () -> newGame()));
+        addDrawableChild(ArcadeTheme.button(startX + buttonWidth + 8, buttonY, buttonWidth, 20, Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
 
         if (mines == null) {
             newGame();
@@ -60,6 +57,7 @@ public final class MinesweeperScreen extends Screen {
         gameOver = false;
         won = false;
         firstReveal = true;
+        timeTicks = 0;
 
         int placed = 0;
         while (placed < MINE_COUNT) {
@@ -160,30 +158,78 @@ public final class MinesweeperScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 16, 0xFFFFFF);
+    public void tick() {
+        if (!gameOver && !firstReveal) {
+            timeTicks++;
+        }
+    }
 
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        ArcadeTheme.background(context, width, height);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, ArcadeTheme.TEAL);
+
+        int boardRight = gridLeft + COLUMNS * cellSize;
+        int boardBottom = gridTop + ROWS * cellSize;
+        String minesLeft = "MINAS " + Math.max(0, MINE_COUNT - countFlags());
+        ArcadeTheme.pill(context, textRenderer, minesLeft, gridLeft, 31, ArcadeTheme.MAGENTA);
+        String timer = "TEMPO " + (timeTicks / 20);
+        ArcadeTheme.pillRight(context, textRenderer, timer, boardRight, 31, ArcadeTheme.GOLD);
         String status;
         int statusColor;
         if (won) {
             status = "Você venceu! Todas as casas seguras foram reveladas.";
-            statusColor = 0xFF77FF77;
+            statusColor = ArcadeTheme.SUCCESS;
         } else if (gameOver) {
             status = "Você encontrou uma mina! Tente novamente.";
-            statusColor = 0xFFFF7777;
+            statusColor = ArcadeTheme.DANGER;
         } else {
-            status = "Minas " + MINE_COUNT + "  |  Bandeiras " + countFlags() + "  •  Esq. abre / Dir. marca";
-            statusColor = 0xFFFFFFFF;
+            status = "Esquerdo revela  •  Direito marca  •  Meio abre vizinhos";
+            statusColor = ArcadeTheme.MUTED;
         }
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal(status), width / 2, 39, statusColor);
+        ArcadeTheme.status(context, textRenderer, Text.literal(textRenderer.trimToWidth(status, width - 20)),
+                width / 2, 52, statusColor);
+
+        int pad = 6;
+        ArcadeTheme.rounded(context, gridLeft - pad + 2, gridTop - pad + 4, boardRight + pad + 2,
+                boardBottom + pad + 4, 12, 0x55000000);
+        ArcadeTheme.rounded(context, gridLeft - pad, gridTop - pad, boardRight + pad, boardBottom + pad,
+                12, 0x5535C8B9);
+        ArcadeTheme.rounded(context, gridLeft - pad + 1, gridTop - pad + 1, boardRight + pad - 1,
+                boardBottom + pad - 1, 11, 0xF00A1422);
 
         for (int row = 0; row < ROWS; row++) {
             for (int column = 0; column < COLUMNS; column++) {
-                drawCell(context, row, column);
+                drawCell(context, row, column, mouseX, mouseY);
             }
         }
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    /** Abre os vizinhos quando o número de bandeiras ao redor já bate com a pista. */
+    private void chord(int row, int column) {
+        if (gameOver || !revealed[row][column] || mines[row][column]) return;
+        int flags = 0;
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int neighborRow = row + dy;
+                int neighborColumn = column + dx;
+                if (isInside(neighborRow, neighborColumn) && flagged[neighborRow][neighborColumn]) {
+                    flags++;
+                }
+            }
+        }
+        if (flags != neighborCounts[row][column]) return;
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int neighborRow = row + dy;
+                int neighborColumn = column + dx;
+                if (isInside(neighborRow, neighborColumn) && !flagged[neighborRow][neighborColumn]) {
+                    reveal(neighborRow, neighborColumn);
+                    if (gameOver) return;
+                }
+            }
+        }
     }
 
     private int countFlags() {
@@ -198,29 +244,53 @@ public final class MinesweeperScreen extends Screen {
         return count;
     }
 
-    private void drawCell(DrawContext context, int row, int column) {
+    private void drawCell(DrawContext context, int row, int column, int mouseX, int mouseY) {
         int x = gridLeft + column * cellSize;
-        int y = GRID_TOP + row * cellSize;
-        int right = x + cellSize - 1;
-        int bottom = y + cellSize - 1;
+        int y = gridTop + row * cellSize;
+        int inset = 1;
+        boolean hovered = mouseX >= x && mouseX < x + cellSize && mouseY >= y && mouseY < y + cellSize;
+        boolean isMine = mines[row][column];
+        boolean open = revealed[row][column] || (gameOver && isMine);
 
-        if (revealed[row][column] || (gameOver && mines[row][column])) {
-            int color = mines[row][column] ? 0xFFC84B4B : 0xFFB9B9B9;
-            context.fill(x, y, right, bottom, color);
-            if (mines[row][column]) {
-                context.drawCenteredTextWithShadow(textRenderer, Text.literal("X"),
-                        x + cellSize / 2, y + cellSize / 2 - 4, 0xFFFFFFFF);
+        if (open) {
+            ArcadeTheme.rounded(context, x + inset, y + inset, x + cellSize - inset, y + cellSize - inset, 4,
+                    isMine ? 0xFF6E2230 : 0xFF16283C);
+            if (isMine) {
+                int cx = x + cellSize / 2;
+                int cy = y + cellSize / 2;
+                int radius = Math.max(2, cellSize / 4);
+                ArcadeTheme.disc(context, cx, cy, radius, 0xFF0A1422);
+                for (int d = -radius; d <= radius; d += 2) {
+                    context.fill(cx + d, cy - radius - 2, cx + d + 1, cy + radius + 3, 0xFF0A1422);
+                    context.fill(cx - radius - 2, cy + d, cx + radius + 3, cy + d + 1, 0xFF0A1422);
+                }
+                context.fill(cx - radius / 2, cy - radius / 2, cx - radius / 2 + 1, cy - radius / 2 + 1, 0xFFFFFFFF);
             } else if (neighborCounts[row][column] > 0) {
                 context.drawCenteredTextWithShadow(textRenderer,
                         Text.literal(Integer.toString(neighborCounts[row][column])),
                         x + cellSize / 2, y + cellSize / 2 - 4, numberColor(neighborCounts[row][column]));
+            } else {
+                ArcadeTheme.disc(context, x + cellSize / 2, y + cellSize / 2, Math.max(1, cellSize / 12), 0xFF2A3F57);
             }
         } else {
-            context.fill(x, y, right, bottom, 0xFF6E7781);
-            context.fill(x + 2, y + 2, right - 2, bottom - 2, 0xFF969FA8);
+            ArcadeTheme.rounded(context, x + inset, y + inset, x + cellSize - inset, y + cellSize - inset, 4,
+                    hovered ? 0xFF3A6285 : 0xFF2B5878);
+            ArcadeTheme.rounded(context, x + inset + 1, y + inset + 1, x + cellSize - inset - 1,
+                    y + cellSize / 2, 3, 0x1FFFFFFF);
+            ArcadeTheme.rounded(context, x + inset + 1, y + inset + 1, x + cellSize - inset - 1,
+                    y + cellSize - inset - 1, 3, hovered ? 0x0DFFFFFF : 0x00000000);
             if (flagged[row][column]) {
-                context.drawCenteredTextWithShadow(textRenderer, Text.literal("F"),
-                        x + cellSize / 2, y + cellSize / 2 - 4, 0xFFFF5555);
+                int cx = x + cellSize / 2;
+                int cy = y + cellSize / 2;
+                boolean wrong = gameOver && !isMine;
+                context.fill(cx, cy - cellSize / 4, cx + 2, cy + cellSize / 4, 0xFFE8EDF5);
+                for (int i = 0; i < Math.max(3, cellSize / 3); i++) {
+                    context.fill(cx - i, cy - cellSize / 4 + i, cx - i + 2, cy - cellSize / 4 + i + 1,
+                            wrong ? ArcadeTheme.DANGER : ArcadeTheme.MAGENTA);
+                }
+                if (wrong) {
+                    ArcadeTheme.drawX(context, cx + 1, cy + cellSize / 6, Math.max(2, cellSize / 8), 1, ArcadeTheme.DANGER);
+                }
             }
         }
     }
@@ -245,14 +315,18 @@ public final class MinesweeperScreen extends Screen {
         }
 
         int column = (int) ((mouseX - gridLeft) / cellSize);
-        int row = (int) ((mouseY - GRID_TOP) / cellSize);
-        if (mouseX >= gridLeft && mouseY >= GRID_TOP && isInside(row, column)) {
+        int row = (int) ((mouseY - gridTop) / cellSize);
+        if (mouseX >= gridLeft && mouseY >= gridTop && isInside(row, column)) {
             if (button == 0) {
                 reveal(row, column);
                 return true;
             }
             if (button == 1) {
                 toggleFlag(row, column);
+                return true;
+            }
+            if (button == 2) {
+                chord(row, column);
                 return true;
             }
         }

@@ -1,0 +1,31 @@
+{
+  "display": {
+    "icon": {
+      "item": "mega_minigames:retro_console"
+    },
+    "title": {
+      "translate": "advancements.mega_minigames.retro_console.title"
+    },
+    "description": {
+      "translate": "advancements.mega_minigames.retro_console.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png"
+  },
+  "criteria": {
+    "has_console": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "mega_minigames:retro_console"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -5,19 +5,26 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 /** 2048: deslize e una peças iguais para alcançar 2048. */
 public final class Game2048Screen extends Screen {
     private static final int SIDE = 4;
-    private static final int CELL = 68;
+    private static int bestScore;
     private final int[][] board = new int[SIDE][SIDE];
+    private int cell = 64;
+    private int left;
+    private int top;
     private int score;
     private boolean gameOver;
     private boolean reached2048;
     private boolean initialized;
+    private int spawnRow = -1;
+    private int spawnColumn = -1;
+    private int spawnTicks;
+    private int[][] undoBoard;
+    private int undoScore;
 
     public Game2048Screen() {
         super(Text.literal("2048"));
@@ -25,13 +32,15 @@ public final class Game2048Screen extends Screen {
 
     @Override
     protected void init() {
-        int top = Math.max(55, (height - SIDE * CELL - 70) / 2);
-        int buttonY = Math.min(height - 24, top + SIDE * CELL + 20);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Novo jogo (R)"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        cell = Math.max(34, Math.min(70, Math.min((width - 56) / SIDE, (height - 172) / SIDE)));
+        left = (width - SIDE * cell) / 2;
+        top = Math.max(82, (height - SIDE * cell - 112) / 2 + 18);
+        int buttonY = Math.min(height - 26, top + SIDE * cell + 20);
+        int buttonWidth = Math.min(118, Math.max(76, (width - 44) / 2));
+        addDrawableChild(ArcadeTheme.button(width / 2 - buttonWidth - 4, buttonY, buttonWidth, 20,
+                Text.literal("Novo jogo (R)"), this::newGame));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, buttonWidth, 20,
+                Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
         if (!initialized) {
             newGame();
         }
@@ -44,6 +53,9 @@ public final class Game2048Screen extends Screen {
         score = 0;
         gameOver = false;
         reached2048 = false;
+        spawnRow = -1;
+        spawnTicks = 0;
+        undoBoard = null;
         initialized = true;
         spawnTile();
         spawnTile();
@@ -59,8 +71,11 @@ public final class Game2048Screen extends Screen {
             }
         }
         if (!empty.isEmpty()) {
-            int[] cell = empty.get(ThreadLocalRandom.current().nextInt(empty.size()));
-            board[cell[0]][cell[1]] = ThreadLocalRandom.current().nextInt(10) == 0 ? 4 : 2;
+            int[] cellPosition = empty.get(ThreadLocalRandom.current().nextInt(empty.size()));
+            board[cellPosition[0]][cellPosition[1]] = ThreadLocalRandom.current().nextInt(10) == 0 ? 4 : 2;
+            spawnRow = cellPosition[0];
+            spawnColumn = cellPosition[1];
+            spawnTicks = 10;
         }
     }
 
@@ -68,6 +83,11 @@ public final class Game2048Screen extends Screen {
         if (gameOver) {
             return;
         }
+        int[][] snapshot = new int[SIDE][SIDE];
+        for (int row = 0; row < SIDE; row++) {
+            System.arraycopy(board[row], 0, snapshot[row], 0, SIDE);
+        }
+        int previousScore = score;
         boolean changed = false;
         for (int line = 0; line < SIDE; line++) {
             int[] values = new int[SIDE];
@@ -100,17 +120,32 @@ public final class Game2048Screen extends Screen {
             }
         }
         if (changed) {
+            undoBoard = snapshot;
+            undoScore = previousScore;
+            bestScore = Math.max(bestScore, score);
             spawnTile();
             gameOver = !hasMoves();
         }
     }
 
+    private void undo() {
+        if (undoBoard == null || gameOver) return;
+        for (int row = 0; row < SIDE; row++) {
+            System.arraycopy(undoBoard[row], 0, board[row], 0, SIDE);
+        }
+        score = undoScore;
+        undoBoard = null;
+        gameOver = false;
+        spawnRow = -1;
+        spawnTicks = 0;
+    }
+
     private int getCell(int line, int position, int direction) {
         return switch (direction) {
-            case 0 -> board[line][position]; // esquerda
-            case 1 -> board[line][SIDE - 1 - position]; // direita
-            case 2 -> board[position][line]; // cima
-            default -> board[SIDE - 1 - position][line]; // baixo
+            case 0 -> board[line][position];
+            case 1 -> board[line][SIDE - 1 - position];
+            case 2 -> board[position][line];
+            default -> board[SIDE - 1 - position][line];
         };
     }
 
@@ -141,39 +176,76 @@ public final class Game2048Screen extends Screen {
     }
 
     @Override
+    public void tick() {
+        if (spawnTicks > 0) {
+            spawnTicks--;
+        }
+    }
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 12, 0xFFFFFFFF);
-        String instruction = reached2048 ? "2048 alcançado! Continue jogando ou reinicie."
-                : "Pontos: " + score + "  •  Use as setas para mover as peças";
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal(instruction),
-                width / 2, 31, reached2048 ? 0xFF61CC75 : 0xFFE7E7E7);
-        int left = (width - SIDE * CELL) / 2;
-        int top = Math.max(55, (height - SIDE * CELL - 70) / 2);
-        context.fill(left - 6, top - 6, left + SIDE * CELL + 6, top + SIDE * CELL + 6, 0xFF8D7868);
+        ArcadeTheme.background(context, width, height);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, ArcadeTheme.GOLD);
+
+        String scoreLabel = "PONTOS " + score;
+        int scoreWidth = textRenderer.getWidth(scoreLabel) + 18;
+        ArcadeTheme.pill(context, textRenderer, scoreLabel, left, 34, ArcadeTheme.GOLD);
+        String bestLabel = "RECORDE " + bestScore;
+        ArcadeTheme.pill(context, textRenderer, bestLabel, left + SIDE * cell - textRenderer.getWidth(bestLabel) - 18,
+                34, ArcadeTheme.TEAL);
+        context.drawCenteredTextWithShadow(textRenderer,
+                Text.literal(reached2048 ? "2048 alcançado! Continue ou reinicie."
+                        : "Setas ou WASD deslizam  •  Z desfaz a última jogada"),
+                width / 2, 55, reached2048 ? ArcadeTheme.SUCCESS : ArcadeTheme.MUTED);
+
+        int pad = 8;
+        ArcadeTheme.rounded(context, left - pad + 2, top - pad + 4, left + SIDE * cell + pad + 2,
+                top + SIDE * cell + pad + 4, 14, 0x55000000);
+        ArcadeTheme.rounded(context, left - pad, top - pad, left + SIDE * cell + pad, top + SIDE * cell + pad,
+                14, 0x66FFD66B);
+        ArcadeTheme.rounded(context, left - pad + 1, top - pad + 1, left + SIDE * cell + pad - 1,
+                top + SIDE * cell + pad - 1, 13, 0xF00B1626);
+
         for (int row = 0; row < SIDE; row++) {
             for (int column = 0; column < SIDE; column++) {
                 int value = board[row][column];
-                int x = left + column * CELL;
-                int y = top + row * CELL;
-                context.fill(x + 2, y + 2, x + CELL - 2, y + CELL - 2, tileColor(value));
+                int x = left + column * cell;
+                int y = top + row * cell;
+                int inset = 3;
+                ArcadeTheme.rounded(context, x + inset, y + inset, x + cell - inset, y + cell - inset, 7,
+                        value == 0 ? 0xFF16273A : ArcadeTheme.darken(tileColor(value), 28));
                 if (value > 0) {
+                    ArcadeTheme.rounded(context, x + inset + 1, y + inset + 1, x + cell - inset - 1,
+                            y + cell - inset - 1, 6, tileColor(value));
+                    ArcadeTheme.rounded(context, x + inset + 2, y + inset + 2, x + cell - inset - 2,
+                            y + cell / 2, 6, 0x33FFFFFF);
                     context.drawCenteredTextWithShadow(textRenderer, Text.literal(Integer.toString(value)),
-                            x + CELL / 2, y + CELL / 2 - 4, value <= 4 ? 0xFF62594F : 0xFFFFFFFF);
+                            x + cell / 2, y + cell / 2 - 4, value <= 4 ? 0xFF5C5348 : 0xFFFFFFFF);
+                } else {
+                    ArcadeTheme.disc(context, x + cell / 2, y + cell / 2, Math.max(2, cell / 14), 0xFF1E3247);
+                }
+                if (spawnTicks > 0 && row == spawnRow && column == spawnColumn) {
+                    ArcadeTheme.ring(context, x + cell / 2, y + cell / 2, cell / 2 - 5, 2,
+                            ArcadeTheme.alpha(ArcadeTheme.GOLD, 0x66 + spawnTicks * 12));
                 }
             }
         }
+
         if (gameOver) {
-            context.fill(left, top + 110, left + SIDE * CELL, top + 162, 0xAA000000);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Sem movimentos! Pressione R"),
-                    width / 2, top + 132, 0xFFFFFFFF);
+            int bannerWidth = Math.min(width - 40, 240);
+            int cx = width / 2;
+            int cy = top + SIDE * cell / 2;
+            ArcadeTheme.rounded(context, cx - bannerWidth / 2, cy - 26, cx + bannerWidth / 2, cy + 26, 12, 0xEE0A1422);
+            ArcadeTheme.rounded(context, cx - bannerWidth / 2, cy - 26, cx + bannerWidth / 2, cy + 26, 12, 0x88FF7373);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("SEM MOVIMENTOS!"), cx, cy - 13, ArcadeTheme.DANGER);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Pressione R para recomeçar"), cx, cy + 3, ArcadeTheme.TEXT);
         }
         super.render(context, mouseX, mouseY, delta);
     }
 
     private int tileColor(int value) {
         return switch (value) {
-            case 0 -> 0xFFBBAE9F;
+            case 0 -> 0xFF16273A;
             case 2 -> 0xFFEDE4D8;
             case 4 -> 0xFFE9D9B9;
             case 8 -> 0xFFF1B67B;
@@ -199,7 +271,10 @@ public final class Game2048Screen extends Screen {
             case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D -> move(1);
             case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> move(2);
             case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> move(3);
-            default -> { return super.keyPressed(keyCode, scanCode, modifiers); }
+            case GLFW.GLFW_KEY_Z -> undo();
+            default -> {
+                return super.keyPressed(keyCode, scanCode, modifiers);
+            }
         }
         return true;
     }

@@ -2,18 +2,23 @@ package br.com.megaminigames.client;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 
 /** Ligue 4 contra uma IA que procura vitórias e bloqueios imediatos. */
 public final class ConnectFourScreen extends Screen {
     private static final int ROWS = 6;
     private static final int COLUMNS = 7;
-    private static final int CELL = 42;
     private final int[][] board = new int[ROWS][COLUMNS];
+    private int cell = 42;
     private int boardLeft;
     private int boardTop;
     private int result;
+    private int lastMoveColumn;
+    private int lastMoveRow = -1;
+    private boolean statsCounted;
+    private static int wins;
+    private static int losses;
+    private static int draws;
 
     public ConnectFourScreen() {
         super(Text.literal("Ligue 4"));
@@ -21,14 +26,15 @@ public final class ConnectFourScreen extends Screen {
 
     @Override
     protected void init() {
-        boardLeft = (width - COLUMNS * CELL) / 2;
-        boardTop = Math.max(54, (height - ROWS * CELL - 60) / 2);
-        int buttonY = Math.min(height - 24, boardTop + ROWS * CELL + 14);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Nova partida"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        cell = Math.max(32, Math.min(52, Math.min((width - 56) / COLUMNS, (height - 168) / ROWS)));
+        boardLeft = (width - COLUMNS * cell) / 2;
+        boardTop = Math.max(82, (height - ROWS * cell - 110) / 2 + 16);
+        int buttonY = Math.min(height - 26, boardTop + ROWS * cell + 20);
+        int buttonWidth = Math.min(112, Math.max(76, (width - 40) / 2));
+        addDrawableChild(ArcadeTheme.button(width / 2 - buttonWidth - 4, buttonY, buttonWidth, 20,
+                Text.literal("Nova partida"), this::newGame));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, buttonWidth, 20,
+                Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
     }
 
     private void newGame() {
@@ -36,42 +42,122 @@ public final class ConnectFourScreen extends Screen {
             java.util.Arrays.fill(row, 0);
         }
         result = 0;
+        lastMoveRow = -1;
+        statsCounted = false;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 14, 0xFFFFFFFF);
+        ArcadeTheme.background(context, width, height);
+        int accent = ArcadeTheme.SKY;
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, accent);
         String status = switch (result) {
             case 1 -> "Você conectou quatro!";
             case 2 -> "O computador venceu.";
-            case 3 -> "Empate!";
-            default -> "Você é vermelho • Clique em uma coluna";
+            case 3 -> "Empate! Tabuleiro cheio.";
+            default -> "Você é vermelho  •  clique em uma coluna";
         };
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal(status), width / 2, 34, 0xFFE8F0FF);
+        int statusColor = result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER
+                : result == 3 ? ArcadeTheme.GOLD : ArcadeTheme.MUTED;
+        ArcadeTheme.status(context, textRenderer, Text.literal(status), width / 2, 34, statusColor);
+        ArcadeTheme.pill(context, textRenderer, "VITÓRIAS " + wins, boardLeft, 50, ArcadeTheme.TEAL);
+        ArcadeTheme.pillRight(context, textRenderer, "DERROTAS " + losses, boardLeft + COLUMNS * cell, 50,
+                ArcadeTheme.CORAL);
 
-        context.fill(boardLeft, boardTop, boardLeft + COLUMNS * CELL,
-                boardTop + ROWS * CELL, 0xFF2872C9);
+        int hoveredColumn = result == 0 && mouseY < boardTop && mouseX >= boardLeft
+                && mouseX < boardLeft + COLUMNS * cell ? (int) ((mouseX - boardLeft) / cell) : -1;
+
+        int pad = 8;
+        ArcadeTheme.rounded(context, boardLeft - pad + 2, boardTop - pad + 5, boardLeft + COLUMNS * cell + pad + 2,
+                boardTop + ROWS * cell + pad + 5, 14, 0x55000000);
+        ArcadeTheme.rounded(context, boardLeft - pad, boardTop - pad, boardLeft + COLUMNS * cell + pad,
+                boardTop + ROWS * cell + pad, 14, 0x882872C9);
+        ArcadeTheme.rounded(context, boardLeft - pad + 1, boardTop - pad + 1, boardLeft + COLUMNS * cell + pad - 1,
+                boardTop + ROWS * cell + pad - 1, 13, 0xF01B4E92);
+        context.fillGradient(boardLeft, boardTop, boardLeft + COLUMNS * cell, boardTop + ROWS * cell,
+                0xFF2C74C4, 0xFF1A3F79);
+
+        int[][] winning = winningCells();
         for (int row = 0; row < ROWS; row++) {
             for (int column = 0; column < COLUMNS; column++) {
-                int centerX = boardLeft + column * CELL + CELL / 2;
-                int centerY = boardTop + row * CELL + CELL / 2;
-                int color = switch (board[row][column]) {
-                    case 1 -> 0xFFEF4D4D;
-                    case 2 -> 0xFFFFD447;
-                    default -> 0xFF172434;
-                };
-                drawDisc(context, centerX, centerY, CELL / 2 - 5, color);
+                int centerX = boardLeft + column * cell + cell / 2;
+                int centerY = boardTop + row * cell + cell / 2;
+                int radius = cell / 2 - 4;
+                ArcadeTheme.disc(context, centerX, centerY, radius + 1, 0xFF0B2340);
+                int value = board[row][column];
+                int piece = value == 1 ? 0xFFEF4D4D : 0xFFFFD447;
+                if (value == 0) {
+                    ArcadeTheme.disc(context, centerX, centerY, radius, 0xFF0E1B30);
+                    ArcadeTheme.disc(context, centerX, centerY - 1, radius - 2, 0xFF15263E);
+                } else {
+                    ArcadeTheme.disc(context, centerX, centerY, radius, ArcadeTheme.darken(piece, 45));
+                    ArcadeTheme.disc(context, centerX, centerY - 1, radius - 1, piece);
+                    ArcadeTheme.disc(context, centerX - radius / 3, centerY - radius / 3, Math.max(2, radius / 4), 0x55FFFFFF);
+                    if (row == lastMoveRow && column == lastMoveColumn) {
+                        ArcadeTheme.ring(context, centerX, centerY, radius - 1, 2, 0xAAFFFFFF);
+                    }
+                    if (winning != null && contains(winning, row, column)) {
+                        ArcadeTheme.ring(context, centerX, centerY, radius + 1, 2, ArcadeTheme.GOLD);
+                    }
+                }
             }
+        }
+        if (hoveredColumn >= 0) {
+            int row = firstEmptyRow(hoveredColumn);
+            if (row >= 0) {
+                int centerX = boardLeft + hoveredColumn * cell + cell / 2;
+                int centerY = boardTop + row * cell + cell / 2;
+                context.fill(boardLeft + hoveredColumn * cell, boardTop - 8, boardLeft + (hoveredColumn + 1) * cell,
+                        boardTop - 4, 0x88FFD66B);
+                ArcadeTheme.disc(context, centerX, centerY, cell / 2 - 6, 0x55EF4D4D);
+                ArcadeTheme.ring(context, centerX, centerY, cell / 2 - 5, 2, 0xAAFFFFFF);
+            }
+        }
+        if (result != 0) {
+            String title = result == 1 ? "VOCÊ VENCEU!" : result == 2 ? "CPU VENCEU" : "EMPATE";
+            String subtitle = result == 1 ? "Quatro em linha!" : result == 2 ? "Tente outra coluna" : "Tabuleiro cheio";
+            ArcadeTheme.banner(context, textRenderer, title, subtitle, width / 2,
+                    boardTop + ROWS * cell / 2, Math.min(width - 24, COLUMNS * cell + 40),
+                    result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER : ArcadeTheme.GOLD);
         }
         super.render(context, mouseX, mouseY, delta);
     }
 
-    private void drawDisc(DrawContext context, int centerX, int centerY, int radius, int color) {
-        for (int dy = -radius; dy <= radius; dy++) {
-            int halfWidth = (int) Math.sqrt(radius * radius - dy * dy);
-            context.fill(centerX - halfWidth, centerY + dy, centerX + halfWidth + 1, centerY + dy + 1, color);
+    private boolean contains(int[][] cells, int row, int column) {
+        for (int[] piece : cells) {
+            if (piece[0] == row && piece[1] == column) return true;
         }
+        return false;
+    }
+
+    private int[][] winningCells() {
+        int[][] directions = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
+        for (int row = 0; row < ROWS; row++) {
+            for (int column = 0; column < COLUMNS; column++) {
+                int player = board[row][column];
+                if (player == 0) continue;
+                for (int[] direction : directions) {
+                    int[][] line = new int[4][2];
+                    boolean ok = true;
+                    for (int step = 0; step < 4; step++) {
+                        int nextRow = row + direction[0] * step;
+                        int nextColumn = column + direction[1] * step;
+                        if (nextRow < 0 || nextRow >= ROWS || nextColumn < 0 || nextColumn >= COLUMNS
+                                || board[nextRow][nextColumn] != player) {
+                            ok = false;
+                            break;
+                        }
+                        line[step] = new int[]{nextRow, nextColumn};
+                    }
+                    if (ok) return line;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void drawDisc(DrawContext context, int centerX, int centerY, int radius, int color) {
+        ArcadeTheme.disc(context, centerX, centerY, radius, color);
     }
 
     @Override
@@ -79,11 +165,11 @@ public final class ConnectFourScreen extends Screen {
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if (button != 0 || result != 0 || mouseX < boardLeft || mouseX >= boardLeft + COLUMNS * CELL
-                || mouseY < boardTop || mouseY >= boardTop + ROWS * CELL) {
+        if (button != 0 || result != 0 || mouseX < boardLeft || mouseX >= boardLeft + COLUMNS * cell
+                || mouseY < boardTop || mouseY >= boardTop + ROWS * cell) {
             return false;
         }
-        int column = (int) ((mouseX - boardLeft) / CELL);
+        int column = (int) ((mouseX - boardLeft) / cell);
         if (!drop(column, 1)) {
             return true;
         }
@@ -92,16 +178,33 @@ public final class ConnectFourScreen extends Screen {
             aiMove();
             result = checkResult(lastMoveColumn);
         }
+        countStats();
         return true;
     }
 
-    private int lastMoveColumn;
+    private void countStats() {
+        if (result == 0 || statsCounted) {
+            return;
+        }
+        statsCounted = true;
+        if (result == 1) wins++;
+        else if (result == 2) losses++;
+        else draws++;
+    }
+
+    private int firstEmptyRow(int column) {
+        for (int row = ROWS - 1; row >= 0; row--) {
+            if (board[row][column] == 0) return row;
+        }
+        return -1;
+    }
 
     private boolean drop(int column, int player) {
         for (int row = ROWS - 1; row >= 0; row--) {
             if (board[row][column] == 0) {
                 board[row][column] = player;
                 lastMoveColumn = column;
+                lastMoveRow = row;
                 return true;
             }
         }

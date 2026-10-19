@@ -1,0 +1,10 @@
+name: Diag Checkout
+on:
+  push:
+    branches: ['**']
+jobs:
+  diag:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo ok

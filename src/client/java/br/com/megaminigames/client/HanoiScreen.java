@@ -114,7 +114,7 @@ public final class HanoiScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && mouseY > 60) {
+        if (button == 0 && mouseY > 60 && mouseY < baseY + 14) {
             for (int peg = 0; peg < 3; peg++) {
                 int x1 = pegLeft + peg * pegWidth;
                 if (mouseX >= x1 - 6 && mouseX <= x1 + pegWidth + 6) {

@@ -58,6 +58,7 @@ public final class BowlingScreen extends Screen {
     }
 
     private void newGame() {
+        aimX = laneLeft + laneWidth / 2.0F;
         score = 0;
         frame = 1;
         roll = 1;
@@ -190,7 +191,11 @@ public final class BowlingScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0 || gameOver) return super.mouseClicked(mouseX, mouseY, button);
+        boolean inLane = mouseX >= laneLeft - 6 && mouseX <= laneLeft + laneWidth + 18
+                && mouseY >= laneTop - 8 && mouseY <= laneTop + laneHeight + 10;
+        if (!inLane && mouseY >= laneTop + laneHeight + 4) return super.mouseClicked(mouseX, mouseY, button);
         if (phase == 0) {
+            if (!inLane) return super.mouseClicked(mouseX, mouseY, button);
             float clamped = (float) Math.max(laneLeft + 12, Math.min(laneLeft + laneWidth - 12, mouseX));
             aimX = clamped;
             ballX = clamped;

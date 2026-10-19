@@ -24,17 +24,20 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq openjdk-17-jdk-headless
-          JDK17="$(dirname "$(dirname "$(readlink -f "$(which javac)")")")"
-          if [ ! -x "$JDK17/bin/javac" ]; then JDK17=/usr/lib/jvm/java-17-openjdk-amd64; fi
+          JDK17=/usr/lib/jvm/java-17-openjdk-amd64
+          ls /usr/lib/jvm
+          "$JDK17/bin/javac" -version
           echo "JAVA_HOME=$JDK17" >> "$GITHUB_ENV"
           echo "$JDK17/bin" >> "$GITHUB_PATH"
-          "$JDK17/bin/java" -version
       - name: Compilar com Gradle
         shell: bash
         run: |
           chmod +x ./gradlew
+          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+          export PATH="$JAVA_HOME/bin:$PATH"
+          java -version
           set +e
-          ./gradlew --no-daemon classes clientClasses --console=plain > compile.log 2>&1
+          ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" classes clientClasses --console=plain > compile.log 2>&1
           code=$?
           if [ "$code" -ne 0 ]; then
             echo '## Falha na compilação'

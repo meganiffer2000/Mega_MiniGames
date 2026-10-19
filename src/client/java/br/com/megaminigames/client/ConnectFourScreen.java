@@ -15,6 +15,10 @@ public final class ConnectFourScreen extends Screen {
     private int result;
     private int lastMoveColumn;
     private int lastMoveRow = -1;
+    private boolean statsCounted;
+    private static int wins;
+    private static int losses;
+    private static int draws;
 
     public ConnectFourScreen() {
         super(Text.literal("Ligue 4"));
@@ -39,6 +43,7 @@ public final class ConnectFourScreen extends Screen {
         }
         result = 0;
         lastMoveRow = -1;
+        statsCounted = false;
     }
 
     @Override
@@ -55,6 +60,9 @@ public final class ConnectFourScreen extends Screen {
         int statusColor = result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER
                 : result == 3 ? ArcadeTheme.GOLD : ArcadeTheme.MUTED;
         ArcadeTheme.status(context, textRenderer, Text.literal(status), width / 2, 34, statusColor);
+        ArcadeTheme.pill(context, textRenderer, "VITÓRIAS " + wins, boardLeft, 50, ArcadeTheme.TEAL);
+        ArcadeTheme.pillRight(context, textRenderer, "DERROTAS " + losses, boardLeft + COLUMNS * cell, 50,
+                ArcadeTheme.CORAL);
 
         int hoveredColumn = result == 0 && mouseY < boardTop && mouseX >= boardLeft
                 && mouseX < boardLeft + COLUMNS * cell ? (int) ((mouseX - boardLeft) / cell) : -1;
@@ -104,6 +112,13 @@ public final class ConnectFourScreen extends Screen {
                 ArcadeTheme.disc(context, centerX, centerY, cell / 2 - 6, 0x55EF4D4D);
                 ArcadeTheme.ring(context, centerX, centerY, cell / 2 - 5, 2, 0xAAFFFFFF);
             }
+        }
+        if (result != 0) {
+            String title = result == 1 ? "VOCÊ VENCEU!" : result == 2 ? "CPU VENCEU" : "EMPATE";
+            String subtitle = result == 1 ? "Quatro em linha!" : result == 2 ? "Tente outra coluna" : "Tabuleiro cheio";
+            ArcadeTheme.banner(context, textRenderer, title, subtitle, width / 2,
+                    boardTop + ROWS * cell / 2, Math.min(width - 24, COLUMNS * cell + 40),
+                    result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER : ArcadeTheme.GOLD);
         }
         super.render(context, mouseX, mouseY, delta);
     }
@@ -163,7 +178,18 @@ public final class ConnectFourScreen extends Screen {
             aiMove();
             result = checkResult(lastMoveColumn);
         }
+        countStats();
         return true;
+    }
+
+    private void countStats() {
+        if (result == 0 || statsCounted) {
+            return;
+        }
+        statsCounted = true;
+        if (result == 1) wins++;
+        else if (result == 2) losses++;
+        else draws++;
     }
 
     private int firstEmptyRow(int column) {

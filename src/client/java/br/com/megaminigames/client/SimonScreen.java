@@ -26,6 +26,7 @@ public final class SimonScreen extends Screen {
     private int boardTop;
     private int boardSize;
     private int mode;
+    private static int best;
     private int showPosition;
     private int phaseTicks;
     private int inputPosition;
@@ -55,6 +56,9 @@ public final class SimonScreen extends Screen {
     }
 
     private void nextRound() {
+        if (!sequence.isEmpty()) {
+            best = Math.max(best, sequence.size());
+        }
         sequence.add(ThreadLocalRandom.current().nextInt(4));
         showPosition = 0;
         phaseTicks = 0;
@@ -87,6 +91,7 @@ public final class SimonScreen extends Screen {
             return;
         }
         if (sequence.get(inputPosition) != pad) {
+            best = Math.max(best, sequence.size() - 1);
             mode = LOST;
             return;
         }
@@ -111,6 +116,10 @@ public final class SimonScreen extends Screen {
 
         int gap = Math.max(4, boardSize * PAD_GAP / (PAD_SIZE * 2 + PAD_GAP));
         int cellSize = (boardSize - gap) / 2;
+        ArcadeTheme.pill(context, textRenderer, "RODADA " + sequence.size(), boardLeft,
+                Math.max(44, boardTop - 22), ArcadeTheme.GOLD);
+        ArcadeTheme.pillRight(context, textRenderer, "RECORDE " + best, boardLeft + boardSize,
+                Math.max(44, boardTop - 22), ArcadeTheme.SKY);
         int lit = litPad();
         ArcadeTheme.rounded(context, boardLeft - 8, boardTop - 8, boardLeft + boardSize + 8,
                 boardTop + boardSize + 8, 18, 0x55000000);
@@ -145,6 +154,11 @@ public final class SimonScreen extends Screen {
         ArcadeTheme.ring(context, hubX, hubY, hubRadius, 3, 0xFF35C8B9);
         context.drawCenteredTextWithShadow(textRenderer, Text.literal("SIMON"), hubX, hubY - 8, ArcadeTheme.GOLD);
         context.drawCenteredTextWithShadow(textRenderer, Text.literal("R" + sequence.size()), hubX, hubY + 3, ArcadeTheme.TEXT);
+        if (mode == LOST) {
+            ArcadeTheme.banner(context, textRenderer, "SEQUÊNCIA ERRADA",
+                    "Você chegou à rodada " + Math.max(1, sequence.size()) + " — R para tentar de novo",
+                    width / 2, boardTop + boardSize / 2, Math.min(width - 24, boardSize + 20), ArcadeTheme.DANGER);
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 

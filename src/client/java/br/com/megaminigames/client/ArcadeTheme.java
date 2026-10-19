@@ -129,6 +129,29 @@ public final class ArcadeTheme {
                 0x00000000);
     }
 
+    /** Painel central usado para vitória, derrota e fim de jogo. */
+    public static void banner(DrawContext context, TextRenderer font, String title, String subtitle,
+                              int centerX, int centerY, int maxWidth, int accent) {
+        int width = Math.min(maxWidth, Math.max(font.getWidth(title), font.getWidth(subtitle)) + 44);
+        width = Math.max(width, 120);
+        int height = subtitle == null || subtitle.isEmpty() ? 38 : 52;
+        int left = centerX - width / 2;
+        int right = centerX + width / 2;
+        int top = centerY - height / 2;
+        int bottom = centerY + height / 2;
+        glow(context, centerX, centerY, Math.max(30, width / 2), alpha(accent, 90));
+        rounded(context, left + 2, top + 3, right + 2, bottom + 3, 12, 0x66000000);
+        rounded(context, left, top, right, bottom, 12, accent);
+        rounded(context, left + 1, top + 1, right - 1, bottom - 1, 11, 0xF00A1422);
+        context.fillGradient(left + 2, top + 2, right - 2, top + 12, alpha(accent, 70), 0x00000000);
+        context.fill(left + 14, top + 1, right - 14, top + 3, accent);
+        context.drawCenteredTextWithShadow(font, Text.literal(title), centerX,
+                subtitle == null || subtitle.isEmpty() ? top + 15 : top + 12, TEXT);
+        if (subtitle != null && !subtitle.isEmpty()) {
+            context.drawCenteredTextWithShadow(font, Text.literal(subtitle), centerX, top + 28, MUTED);
+        }
+    }
+
     public static void status(DrawContext context, TextRenderer font, Text text, int centerX, int y, int color) {
         context.drawCenteredTextWithShadow(font, text, centerX, y, color);
     }
@@ -200,7 +223,7 @@ public final class ArcadeTheme {
         private boolean primary;
 
         private ArcadeButton(int x, int y, int width, int height, Text label, Runnable action) {
-            super(x, y, width, height, label, button -> action.run(), supplier -> label);
+            super(x, y, width, height, label, button -> action.run(), supplier -> Text.literal(label.getString()));
         }
 
         @Override
@@ -216,22 +239,22 @@ public final class ArcadeTheme {
                 top = 0xFF17202D;
                 bottom = 0xFF101722;
             }
-            rounded(context, this.x, this.y + 2, this.x + this.width, this.y + this.height + 2, 6, 0x55000000);
-            rounded(context, this.x, this.y, this.x + this.width, this.y + this.height, 6,
+            rounded(context, getX(), getY() + 2, getX() + getWidth(), getY() + getHeight() + 2, 6, 0x55000000);
+            rounded(context, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 6,
                     this.active ? (hovered ? (this.primary ? lighten(accent, 60) : accent) : BORDER) : 0x22FFFFFF);
-            rounded(context, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, 5,
+            rounded(context, getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 1, 5,
                     this.active ? bottom : 0xFF1A2430);
-            context.fillGradient(this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 2, top,
+            context.fillGradient(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 2, top,
                     this.active ? bottom : 0xFF1A2430);
-            context.fill(this.x + 3, this.y + 2, this.x + this.width - 3, this.y + 3,
+            context.fill(getX() + 3, getY() + 2, getX() + getWidth() - 3, getY() + 3,
                     this.active ? 0x33FFFFFF : 0x11FFFFFF);
             if (hovered) {
-                context.fill(this.x + 3, this.y + this.height - 3, this.x + this.width - 3,
-                        this.y + this.height - 2, 0x88FFFFFF);
+                context.fill(getX() + 3, getY() + getHeight() - 3, getX() + getWidth() - 3,
+                        getY() + getHeight() - 2, 0x88FFFFFF);
             }
             int textColor = !this.active ? 0xFF6C7E93 : this.primary ? 0xFF0A1A1C : TEXT;
             context.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, getMessage(),
-                    this.x + this.width / 2, this.y + (this.height - 8) / 2, textColor);
+                    getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, textColor);
         }
     }
 

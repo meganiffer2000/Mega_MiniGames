@@ -18,6 +18,9 @@ public final class CheckersScreen extends Screen {
     private int selectedRow = -1;
     private int selectedColumn = -1;
     private int result;
+    private boolean statsCounted;
+    private static int wins;
+    private static int losses;
 
     public CheckersScreen() {
         super(Text.literal("Damas"));
@@ -36,6 +39,7 @@ public final class CheckersScreen extends Screen {
     }
 
     private void newGame() {
+        statsCounted = false;
         for (int[] row : board) java.util.Arrays.fill(row, 0);
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < SIDE; column++) {
@@ -117,6 +121,18 @@ public final class CheckersScreen extends Screen {
         int statusColor = result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER
                 : result == 3 ? ArcadeTheme.GOLD : ArcadeTheme.MUTED;
         ArcadeTheme.status(context, textRenderer, Text.literal(status), width / 2, 31, statusColor);
+        int lightPieces = 0;
+        int darkPieces = 0;
+        for (int[] row : board) {
+            for (int piece : row) {
+                if (piece > 0) lightPieces++;
+                else if (piece < 0) darkPieces++;
+            }
+        }
+        ArcadeTheme.pill(context, textRenderer, "CLARAS " + lightPieces, left, Math.max(44, top - 22),
+                ArcadeTheme.GOLD);
+        ArcadeTheme.pillRight(context, textRenderer, "ESCURAS " + darkPieces, left + SIDE * cell,
+                Math.max(44, top - 22), ArcadeTheme.PURPLE);
 
         int pad = 7;
         ArcadeTheme.rounded(context, left - pad + 2, top - pad + 5, left + SIDE * cell + pad + 2,
@@ -164,6 +180,13 @@ public final class CheckersScreen extends Screen {
                 }
             }
         }
+        if (result != 0) {
+            ArcadeTheme.banner(context, textRenderer,
+                    result == 1 ? "VOCÊ VENCEU!" : result == 2 ? "A IA VENCEU" : "EMPATE",
+                    result == 1 ? "Todas as peças escuras capturadas" : "Tente outra estratégia",
+                    width / 2, top + SIDE * cell / 2, Math.min(width - 24, SIDE * cell + 40),
+                    result == 1 ? ArcadeTheme.SUCCESS : result == 2 ? ArcadeTheme.DANGER : ArcadeTheme.GOLD);
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 
@@ -206,12 +229,22 @@ public final class CheckersScreen extends Screen {
                     aiMove();
                     if (!hasPieces(1) || legalMoves(1).isEmpty()) result = 2;
                 }
+                countStats();
                 return true;
             }
         }
         selectedRow = -1;
         selectedColumn = -1;
         return true;
+    }
+
+    private void countStats() {
+        if (statsCounted) {
+            return;
+        }
+        statsCounted = true;
+        if (result == 1) wins++;
+        else if (result == 2) losses++;
     }
 
     @Override

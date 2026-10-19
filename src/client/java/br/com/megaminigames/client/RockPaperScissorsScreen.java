@@ -96,6 +96,13 @@ public final class RockPaperScissorsScreen extends Screen {
                 : "Você: " + CHOICES[playerChoice] + "   •   CPU: " + CHOICES[computerChoice];
         context.drawCenteredTextWithShadow(textRenderer, Text.literal(lastRound), width / 2,
                 top + cardHeight + 40, ArcadeTheme.TEXT);
+        if (finished) {
+            ArcadeTheme.banner(context, textRenderer,
+                    playerScore == 3 ? "SÉRIE GANHA!" : "SÉRIE PERDIDA",
+                    "Placar final " + playerScore + " x " + computerScore + " — clique em Nova série",
+                    width / 2, top + cardHeight / 2, Math.min(width - 24, cardWidth * 2 + gap + 30),
+                    playerScore == 3 ? ArcadeTheme.SUCCESS : ArcadeTheme.DANGER);
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 

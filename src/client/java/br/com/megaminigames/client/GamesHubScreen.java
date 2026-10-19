@@ -74,7 +74,31 @@ public final class GamesHubScreen extends Screen {
             new Game("Quiz de Bandeiras", () -> new BonusArcadeScreen(BonusArcadeScreen.Game.FLAG_QUIZ)),
             new Game("Toque Rápido", () -> new BonusArcadeScreen(BonusArcadeScreen.Game.TAP_CHALLENGE)),
             new Game("Torre Perfeita", () -> new BonusArcadeScreen(BonusArcadeScreen.Game.TOWER_STACK)),
-            new Game("Estoure as Bolhas", () -> new BonusArcadeScreen(BonusArcadeScreen.Game.BUBBLE_POP))
+            new Game("Estoure as Bolhas", () -> new BonusArcadeScreen(BonusArcadeScreen.Game.BUBBLE_POP)),
+            new Game("Jetpack Runner", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.JETPACK)),
+            new Game("Fábrica de Biscoitos", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.COOKIE)),
+            new Game("Cozinha Caótica", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.KITCHEN)),
+            new Game("Avião de Papel", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.PAPER_PLANE)),
+            new Game("Queda Helicoidal", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.HELIX)),
+            new Game("Toque nos Azulejos", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.BLACK_TILE)),
+            new Game("Corrida no Trilho", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.SUBWAY)),
+            new Game("Escavador", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.DIGGER)),
+            new Game("Estilingue de Pássaros", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.SLINGSHOT)),
+            new Game("Orbes em Linha", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.MARBLE)),
+            new Game("Corte de Frutas", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.FRUIT_SLICE)),
+            new Game("Sobrevivente Noturno", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.SURVIVOR)),
+            new Game("Corte da Corda", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.CUT_ROPE)),
+            new Game("Combinação de Doces", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.CANDY_MATCH)),
+            new Game("Corrida Maluca", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.WHEEL)),
+            new Game("Torre de Cartas", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.DECK_CLIMB)),
+            new Game("Escalada da Montanha", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.MOUNTAIN)),
+            new Game("Defesa de Balões", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.BALLOON_TD)),
+            new Game("Defesa do Jardim", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.GARDEN_TD)),
+            new Game("Resgate dos Mineiros", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.LEMMINGS)),
+            new Game("Salto Geométrico", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.GEOMETRY)),
+            new Game("Mini Metrô", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.MINI_METRO)),
+            new Game("Controle de Fronteira", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.BORDER)),
+            new Game("Pôquer Roguelike", () -> new InspiredArcadeScreen(InspiredArcadeScreen.Game.POKER))
     );
 
     private final int page;
@@ -134,7 +158,7 @@ public final class GamesHubScreen extends Screen {
         }
 
         context.drawTextWithShadow(textRenderer, Text.literal("MEGA ARCADE"), 16, 13, 0xFFFFFFFF);
-        context.drawTextWithShadow(textRenderer, Text.literal("60 jogos • capas clicáveis"), 17, 30, 0xFF9FB7D5);
+        context.drawTextWithShadow(textRenderer, Text.literal(GAMES.size() + " jogos • capas clicáveis"), 17, 30, 0xFF9FB7D5);
         String pageLabel = "PÁGINA " + (page + 1) + " / " + pageCount;
         context.drawTextWithShadow(textRenderer, Text.literal(pageLabel),
                 width - textRenderer.getWidth(pageLabel) - 17, 17, 0xFFFFD76C);

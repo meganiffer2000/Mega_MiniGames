@@ -110,6 +110,14 @@ public final class HangmanScreen extends Screen {
         }
 
         drawKeyboard(context, mouseX, mouseY, startX);
+        if (gameOver) {
+            int boardCenter = (panelTop + panelBottom) / 2;
+            ArcadeTheme.banner(context, textRenderer,
+                    won ? "VOCÊ SALVOU O BONECO" : "FIM DE JOGO",
+                    won ? "A palavra era " + word : "A palavra era " + word + " — R para outra",
+                    width / 2, boardCenter, Math.min(width - 24, panelWidth + 20),
+                    won ? ArcadeTheme.SUCCESS : ArcadeTheme.DANGER);
+        }
         if (!gameOver) {
             context.drawCenteredTextWithShadow(textRenderer, Text.literal("Clique nas letras ou use o teclado"),
                     width / 2, keyboardTop + 3 * (keyHeight + keyGap) + 2, ArcadeTheme.DIM);

@@ -94,6 +94,20 @@ public final class BlackjackScreen extends Screen {
         context.fillGradient(feltLeft + 1, feltTop + 1, feltLeft + feltWidth - 1, feltBottom - 1,
                 0xFF116040, 0xFF0A3A29);
         ArcadeTheme.ring(context, feltLeft + feltWidth / 2, feltTop + 12, 10, 2, 0x33FFFFFF);
+        ArcadeTheme.glow(context, feltLeft + feltWidth / 2, feltTop + 60, Math.max(40, feltWidth / 3), 0x2210FFC0);
+        int chipsX = feltLeft + feltWidth - 46;
+        int chipsY = feltTop + 30;
+        for (int index = 0; index < 4; index++) {
+            ArcadeTheme.disc(context, chipsX, chipsY + (3 - index) * 2, 5, 0xFFB83A3A);
+            ArcadeTheme.disc(context, chipsX, chipsY + (3 - index) * 2, 3, 0xFFE86A5E);
+        }
+        for (int index = 0; index < 3; index++) {
+            ArcadeTheme.disc(context, chipsX + 13, chipsY + 4 + (2 - index) * 2, 5, 0xFFB8932E);
+            ArcadeTheme.disc(context, chipsX + 13, chipsY + 4 + (2 - index) * 2, 3, ArcadeTheme.GOLD);
+        }
+        ArcadeTheme.rounded(context, chipsX + 4, chipsY + 18, chipsX + 12, chipsY + 31, 2, 0xFF1B7D78);
+        ArcadeTheme.pillRight(context, textRenderer, "BARALHO " + deck.size(), feltLeft + feltWidth - 12,
+                feltTop + 10, ArcadeTheme.SKY);
 
         String dealerLabel = "DEALER  •  " + (state == 0 ? "?" : handValue(dealer));
         ArcadeTheme.pill(context, textRenderer, dealerLabel, feltLeft + 12, feltTop + 10, ArcadeTheme.CORAL);

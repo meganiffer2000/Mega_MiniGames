@@ -30,6 +30,7 @@ public final class WordleScreen extends Screen {
     private int keyHeight = 17;
     private final int keyGap = 3;
     private boolean gameOver;
+    private boolean solved;
     private String message = "Digite letras e pressione Enter";
 
     public WordleScreen() {
@@ -105,6 +106,7 @@ public final class WordleScreen extends Screen {
         }
         if (guess.equals(target)) {
             message = "Acertou! A palavra era " + target + ".";
+            solved = true;
             gameOver = true;
         } else {
             currentRow++;
@@ -166,6 +168,14 @@ public final class WordleScreen extends Screen {
             }
         }
         drawKeyboard(context, mouseX, mouseY);
+        if (gameOver) {
+            int boardHeight = ROWS * tile + (ROWS - 1) * gap;
+            ArcadeTheme.banner(context, textRenderer,
+                    solved ? "PALAVRA CERTA!" : "FIM DE TENTATIVAS",
+                    solved ? "Resolvido em " + (currentRow + 1) + " tentativa(s)" : "A palavra era " + target,
+                    width / 2, top + boardHeight / 2, Math.min(width - 30, COLS * tile + 76),
+                    solved ? ArcadeTheme.SUCCESS : ArcadeTheme.CORAL);
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 

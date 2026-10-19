@@ -162,6 +162,12 @@ public final class TypingSprintScreen extends Screen {
                     Text.literal("Letras certas em verde, erradas em vermelho"),
                     width / 2, statsY + 14, ArcadeTheme.DIM);
         }
+        if (gameOver) {
+            ArcadeTheme.banner(context, textRenderer, "TEMPO ESGOTADO",
+                    score + " palavras • " + mistakes + " erro(s)",
+                    width / 2, (cardTop + cardBottom) / 2, Math.min(width - 24, cardWidth + 10),
+                    score >= 10 ? ArcadeTheme.SUCCESS : ArcadeTheme.GOLD);
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 

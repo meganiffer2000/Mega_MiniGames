@@ -153,6 +153,12 @@ public final class NumberGuessScreen extends Screen {
             ArcadeTheme.disc(context, dotX + 3, 136, 3, color);
         }
 
+        if (gameOver) {
+            ArcadeTheme.banner(context, textRenderer, won ? "NÚMERO ENCONTRADO!" : "TENTATIVAS ESGOTADAS",
+                    won ? "Em " + attempts + " tentativa(s)" : "O número secreto era " + secret,
+                    width / 2, 112, Math.min(width - 24, 250),
+                    won ? ArcadeTheme.SUCCESS : ArcadeTheme.DANGER);
+        }
         int chipWidth = 40;
         int chipStart = width / 2 - (history.size() * (chipWidth + 4)) / 2;
         for (int index = 0; index < history.size(); index++) {

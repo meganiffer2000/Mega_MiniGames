@@ -11,6 +11,11 @@ import net.minecraft.text.Text;
 /** Hub em grade de capas clicáveis, com filtros por categoria e visual neon arcade. */
 public final class GamesHubScreen extends Screen {
     private static final List<Game> GAMES = List.of(
+            new Game("Come-Come", PacManScreen::new, Category.ACTION),
+            new Game("Asteroides", AsteroidsScreen::new, Category.ACTION),
+            new Game("Boliche", BowlingScreen::new, Category.SIMULATION),
+            new Game("Reversi", ReversiScreen::new, Category.PUZZLE),
+            new Game("Torre de Hanói", HanoiScreen::new, Category.PUZZLE),
             new Game("Flappy Bird", FlappyBirdScreen::new),
             new Game("Campo Minado", MinesweeperScreen::new),
             new Game("Snake", SnakeScreen::new),
@@ -407,7 +412,48 @@ public final class GamesHubScreen extends Screen {
         int half = Math.max(4, size / 2);
         int dark = ArcadeTheme.darken(color, 70);
         int light = ArcadeTheme.lighten(color, 55);
-        if (name.contains("snake") || name.contains("cobrinha")) {
+        if (name.contains("come-come") || name.contains("pac-man")) {
+            ArcadeTheme.disc(context, centerX, centerY, half, ArcadeTheme.GOLD);
+            int[] mouthX = {centerX, centerX + half + 2, centerX + half + 2};
+            int[] mouthY = {centerY, centerY - half / 2, centerY + half / 2};
+            ArcadeTheme.polygon(context, mouthX, mouthY, ArcadeTheme.PANEL_DEEP);
+            ArcadeTheme.disc(context, centerX - half / 4, centerY - half / 2, 1, 0xFF201A05);
+            for (int index = 0; index < 3; index++) {
+                ArcadeTheme.disc(context, centerX - half - 3 - index * 4, centerY + half / 3, 1, 0x88FFF0C0);
+            }
+        } else if (name.contains("asteroides")) {
+            int[] rockX = {centerX - half, centerX - half / 2, centerX + half / 2, centerX + half,
+                    centerX + half / 3, centerX - half / 2};
+            int[] rockY = {centerY, centerY - half, centerY - half / 2, centerY + half / 3,
+                    centerY + half, centerY + half / 3};
+            ArcadeTheme.polygon(context, rockX, rockY, ArcadeTheme.darken(color, 40));
+            ArcadeTheme.disc(context, centerX - half / 3, centerY, 2, ArcadeTheme.PANEL_DEEP);
+            ArcadeTheme.disc(context, centerX + half / 4, centerY + half / 3, 1, ArcadeTheme.PANEL_DEEP);
+            context.fill(centerX + half + 2, centerY - half - 3, centerX + half + 3, centerY - 2, ArcadeTheme.SKY);
+        } else if (name.contains("reversi")) {
+            ArcadeTheme.disc(context, centerX - half / 2, centerY - half / 2, half / 2, 0xFF0C1420);
+            ArcadeTheme.disc(context, centerX - half / 2 - 1, centerY - half / 2 - 1, Math.max(1, half / 4),
+                    0x88A9C2E0);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY - half / 2, half / 2, 0xFFFFFFFF);
+            ArcadeTheme.disc(context, centerX - half / 2, centerY + half / 2, half / 2, 0xFFFFFFFF);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY + half / 2, half / 2, 0xFF0C1420);
+        } else if (name.contains("hanói") || name.contains("hanoi")) {
+            for (int index = 0; index < 3; index++) {
+                int barWidth = half - index * (half / 3);
+                int barY = centerY + half - index * (half / 2) - 3;
+                ArcadeTheme.rounded(context, centerX - barWidth, barY, centerX + barWidth, barY + half / 3, 2,
+                        index == 0 ? ArcadeTheme.CORAL : index == 1 ? ArcadeTheme.GOLD : ArcadeTheme.LIME);
+            }
+            context.fill(centerX - 1, centerY - half, centerX + 1, centerY + half, ArcadeTheme.BORDER);
+        } else if (name.contains("boliche")) {
+            ArcadeTheme.disc(context, centerX - half / 3, centerY + half / 3, half - 1, 0xFF16233A);
+            ArcadeTheme.disc(context, centerX - half / 3 - 1, centerY + half / 3 - 1, half - 3, 0xFF3E5A86);
+            for (int index = 0; index < 3; index++) {
+                ArcadeTheme.disc(context, centerX - half / 3 - 2 + index * 3, centerY + half / 4, 1, 0xFF08111E);
+            }
+            context.fill(centerX + half - 2, centerY - half, centerX + half, centerY - 2, 0xFFF7FAFF);
+            context.fill(centerX + half - 3, centerY - half / 3, centerX + half + 1, centerY - half / 3 + 2, 0xFFE0465C);
+        } else if (name.contains("snake") || name.contains("cobrinha")) {
             for (int index = 0; index < 4; index++) {
                 int segmentX = centerX - half + index * (half / 2);
                 int segmentY = centerY + (index % 2 == 0 ? half / 3 : -half / 3);

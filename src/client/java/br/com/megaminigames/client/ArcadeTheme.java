@@ -333,6 +333,35 @@ public final class ArcadeTheme {
         ring(context, centerX, centerY, radius, thickness, color);
     }
 
+    /** Preenche um polígono simples usando varredura horizontal. */
+    public static void polygon(DrawContext context, int[] xs, int[] ys, int color) {
+        if (xs.length < 3 || xs.length != ys.length) return;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        for (int value : ys) {
+            minY = Math.min(minY, value);
+            maxY = Math.max(maxY, value);
+        }
+        for (int py = minY; py <= maxY; py++) {
+            int start = Integer.MAX_VALUE;
+            int end = Integer.MIN_VALUE;
+            for (int index = 0; index < xs.length; index++) {
+                int x1 = xs[index];
+                int y1 = ys[index];
+                int x2 = xs[(index + 1) % xs.length];
+                int y2 = ys[(index + 1) % xs.length];
+                if (y1 == y2) continue;
+                if (py >= Math.min(y1, y2) && py < Math.max(y1, y2)) {
+                    float ratio = (py - y1) / (float) (y2 - y1);
+                    int x = Math.round(x1 + ratio * (x2 - x1));
+                    start = Math.min(start, x);
+                    end = Math.max(end, x);
+                }
+            }
+            if (start <= end) context.fill(start, py, end + 1, py + 1, color);
+        }
+    }
+
     public static void drawCheck(DrawContext context, int x, int y, int color) {
         for (int step = 0; step < 4; step++) {
             context.fill(x + step, y + 2 + step / 2, x + step + 1, y + 4 + step / 2, color);

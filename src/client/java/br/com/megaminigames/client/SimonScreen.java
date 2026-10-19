@@ -37,10 +37,10 @@ public final class SimonScreen extends Screen {
 
     @Override
     protected void init() {
-        boardSize = Math.min(PAD_SIZE * 2 + PAD_GAP, Math.min(width - 40, height - 122));
+        boardSize = Math.min(PAD_SIZE * 2 + PAD_GAP, Math.min(width - 40, height - 160));
         boardSize = Math.max(120, boardSize);
         boardLeft = (width - boardSize) / 2;
-        boardTop = Math.max(56, (height - boardSize - 70) / 2);
+        boardTop = Math.max(68, (height - boardSize - 90) / 2 + 10);
         int buttonY = Math.min(height - 24, boardTop + boardSize + 18);
         addDrawableChild(ArcadeTheme.button(width / 2 - 116, buttonY, 112, 20, Text.literal("Reiniciar (R)"), () -> newGame()));
         addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, 112, 20, Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));

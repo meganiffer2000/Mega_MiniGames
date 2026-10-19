@@ -189,6 +189,12 @@ public final class MathQuizScreen extends Screen {
                 width / 2, cardBottom - 18, waitingNext ? ArcadeTheme.SUCCESS
                         : gameOver ? ArcadeTheme.GOLD : ArcadeTheme.MUTED);
 
+        if (gameOver) {
+            ArcadeTheme.banner(context, textRenderer, "DESAFIO CONCLUÍDO",
+                    "Você acertou " + score + " de " + TOTAL + " contas",
+                    width / 2, cardTop + 40, Math.min(width - 24, cardWidth + 10),
+                    score >= 7 ? ArcadeTheme.SUCCESS : score >= 4 ? ArcadeTheme.GOLD : ArcadeTheme.CORAL);
+        }
         if (keypadTop > 0) {
             String[] keys = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "APAGAR", "ENTER"};
             for (int index = 0; index < keys.length; index++) {

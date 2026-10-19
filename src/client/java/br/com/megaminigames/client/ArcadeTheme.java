@@ -93,6 +93,16 @@ public final class ArcadeTheme {
         for (int y = 0; y < height; y += 3) {
             context.fill(0, y, width, y + 1, 0x05000000);
         }
+
+        // Vinheta: escurece as bordas para dar profundidade ao gabinete.
+        context.fillGradient(0, 0, width, 22, 0x66000000, 0x00000000);
+        context.fillGradient(0, height - 26, width, height, 0x00000000, 0x77000000);
+        context.fillGradient(0, 0, 18, height, 0x55000000, 0x00000000);
+        context.fillGradient(width - 18, 0, width, height, 0x00000000, 0x55000000);
+
+        // Faixa de luz que percorre a tela, como o refresco de um monitor.
+        int sweepY = (int) ((time * 42.0F) % Math.max(1, height));
+        context.fillGradient(0, sweepY, width, Math.min(height, sweepY + 16), 0x09FFFFFF, 0x00FFFFFF);
     }
 
     /* ------------------------------------------------------------------ */
@@ -113,6 +123,8 @@ public final class ArcadeTheme {
     public static void header(DrawContext context, TextRenderer font, Text title, int centerX, int y, int accent) {
         String label = title.getString();
         int textWidth = font.getWidth(label);
+        float pulse = (float) (0.5 + 0.5 * Math.sin((System.currentTimeMillis() % 2600L) / 2600.0F * 6.2832F));
+        glow(context, centerX, y + 4, textWidth / 2 + 26, alpha(accent, 26 + (int) (pulse * 22)));
         int left = centerX - textWidth / 2 - 16;
         int right = centerX + textWidth / 2 + 16;
 
@@ -139,7 +151,10 @@ public final class ArcadeTheme {
         int right = centerX + width / 2;
         int top = centerY - height / 2;
         int bottom = centerY + height / 2;
-        glow(context, centerX, centerY, Math.max(30, width / 2), alpha(accent, 90));
+        float pulse = (float) (0.5 + 0.5 * Math.sin((System.currentTimeMillis() % 1800L) / 1800.0F * 6.2832F));
+        glow(context, centerX, centerY, Math.max(30, width / 2 + (int) (pulse * 8)), alpha(accent, 80));
+        disc(context, left - 5, centerY, 2, alpha(accent, 170));
+        disc(context, right + 5, centerY, 2, alpha(accent, 170));
         rounded(context, left + 2, top + 3, right + 2, bottom + 3, 12, 0x66000000);
         rounded(context, left, top, right, bottom, 12, accent);
         rounded(context, left + 1, top + 1, right - 1, bottom - 1, 11, 0xF00A1422);
@@ -166,7 +181,9 @@ public final class ArcadeTheme {
         rounded(context, x, y, x + width, y + 15, 7, 0xD90B1626);
         rounded(context, x, y, x + width, y + 15, 7, (accent & 0x00FFFFFF) | 0x55000000);
         rounded(context, x + 1, y + 1, x + width - 1, y + 14, 6, 0xE8122236);
+        context.fillGradient(x + 2, y + 1, x + width - 2, y + 7, 0x18FFFFFF, 0x00000000);
         context.fill(x + 5, y + 5, x + 8, y + 10, accent);
+        context.fill(x + 5, y + 5, x + 6, y + 10, lighten(accent, 70));
         context.drawTextWithShadow(font, Text.literal(label), x + 12, y + 4, TEXT);
         return width;
     }
@@ -185,6 +202,12 @@ public final class ArcadeTheme {
             rounded(context, x, y, x + Math.max(height, filled), y + height, height / 2, accent);
             context.fill(x + 1, y + 1, x + Math.max(1, filled - 1), y + Math.max(1, height / 2),
                     (accent & 0x00FFFFFF) | 0x44000000);
+            int shimmer = (int) ((System.currentTimeMillis() / 14) % Math.max(1, filled + 24)) - 18;
+            int shimmerX = x + shimmer;
+            if (shimmerX > x && shimmerX + 14 < x + filled) {
+                context.fillGradient(shimmerX, y + 1, shimmerX + 14, y + height - 1, 0x00FFFFFF,
+                        0x55FFFFFF);
+            }
         }
         rounded(context, x, y, x + width, y + height, height / 2, BORDER_SOFT);
     }
@@ -247,7 +270,9 @@ public final class ArcadeTheme {
             context.fillGradient(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 2, top,
                     this.active ? bottom : 0xFF1A2430);
             context.fill(getX() + 3, getY() + 2, getX() + getWidth() - 3, getY() + 3,
-                    this.active ? 0x33FFFFFF : 0x11FFFFFF);
+                    this.active ? 0x44FFFFFF : 0x11FFFFFF);
+            context.fillGradient(getX() + 2, getY() + 3, getX() + getWidth() - 2, getY() + 9,
+                    0x14FFFFFF, 0x00000000);
             if (hovered) {
                 context.fill(getX() + 3, getY() + getHeight() - 3, getX() + getWidth() - 3,
                         getY() + getHeight() - 2, 0x88FFFFFF);
@@ -359,6 +384,68 @@ public final class ArcadeTheme {
                 }
             }
             if (start <= end) context.fill(start, py, end + 1, py + 1, color);
+        }
+    }
+
+    /** Desenha uma carta de baralho; naipes são formas, não caracteres. */
+    public static void playingCard(DrawContext context, TextRenderer font, int x, int y, int width, int height,
+                                   String rank, int suit, boolean faceDown) {
+        rounded(context, x + 1, y + 2, x + width + 1, y + height + 2, Math.max(2, width / 10), 0x55000000);
+        rounded(context, x, y, x + width, y + height, Math.max(2, width / 10), 0xFF9FB0C8);
+        rounded(context, x, y, x + width, y + height - 1, Math.max(2, width / 10), 0xFFF7FAFF);
+        if (faceDown) {
+            rounded(context, x + 2, y + 2, x + width - 2, y + height - 2, Math.max(1, width / 12), 0xFF264C8F);
+            context.fillGradient(x + 2, y + 2, x + width - 2, y + height - 2, 0x44FFFFFF, 0x00000000);
+            int step = Math.max(4, width / 5);
+            for (int line = 2; line < height - 3; line += step) {
+                context.fill(x + 3, y + line, x + width - 3, y + line + 1, 0x224FF0FF);
+            }
+            rectDiamond(context, x + width / 2, y + height / 2, Math.max(2, width / 6), 0x99FFD66B);
+            return;
+        }
+        int color = suit == 1 || suit == 0 ? 0xFFD84454 : 0xFF22334A;
+        if (height >= 34) {
+            context.drawTextWithShadow(font, Text.literal(rank), x + 3, y + 3, color);
+            int suitSize = Math.max(2, Math.min(width, height) / 10);
+            drawSuitShape(context, x + 4 + suitSize, y + 13 + suitSize, suitSize, suit, color);
+        }
+        int centerSize = Math.max(2, Math.min(width, height) / 5);
+        drawSuitShape(context, x + width / 2, y + height / 2, centerSize, suit, alpha(color, 220));
+    }
+
+    /** Naipes: 0 copas, 1 ouros, 2 paus, 3 espadas. */
+    public static void drawSuitShape(DrawContext context, int centerX, int centerY, int size, int suit, int color) {
+        if (suit == 1) {
+            rectDiamond(context, centerX, centerY, size, color);
+        } else if (suit == 0) {
+            int radius = Math.max(1, size / 2);
+            disc(context, centerX - radius, centerY - radius / 2, radius, color);
+            disc(context, centerX + radius, centerY - radius / 2, radius, color);
+            for (int row = 0; row < size; row++) {
+                int half = Math.max(1, size - row);
+                context.fill(centerX - half, centerY + row / 2, centerX + half, centerY + row / 2 + 1, color);
+            }
+        } else if (suit == 2) {
+            int radius = Math.max(1, size / 2);
+            disc(context, centerX, centerY - radius, radius, color);
+            disc(context, centerX - size, centerY + radius / 2, radius, color);
+            disc(context, centerX + size, centerY + radius / 2, radius, color);
+            context.fill(centerX - Math.max(1, size / 3), centerY, centerX + Math.max(1, size / 3),
+                    centerY + size, color);
+        } else {
+            int radius = Math.max(1, size / 2);
+            disc(context, centerX, centerY + radius / 2, radius, color);
+            polygon(context, new int[]{centerX, centerX - size, centerX + size},
+                    new int[]{centerY - size * 2, centerY + radius, centerY + radius}, color);
+            context.fill(centerX - Math.max(1, size / 3), centerY, centerX + Math.max(1, size / 3),
+                    centerY + size, color);
+        }
+    }
+
+    public static void rectDiamond(DrawContext context, int centerX, int centerY, int size, int color) {
+        for (int row = -size; row <= size; row++) {
+            int half = size - Math.abs(row);
+            context.fill(centerX - half, centerY + row, centerX + half + 1, centerY + row + 1, color);
         }
     }
 

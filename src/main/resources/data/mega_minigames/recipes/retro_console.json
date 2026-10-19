@@ -12,7 +12,7 @@
     "P": { "item": "minecraft:stone_button" }
   },
   "result": {
-    "item": "mega_minigames:game_boy",
+    "item": "mega_minigames:retro_console",
     "count": 1
   }
 }

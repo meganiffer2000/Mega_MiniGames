@@ -119,6 +119,13 @@ public final class TicTacToeScreen extends Screen {
                 }
             }
         }
+        if (result != 0) {
+            String bannerTitle = result == 1 ? "VOCÊ VENCEU!" : result == 2 ? "CPU VENCEU" : "EMPATE";
+            ArcadeTheme.banner(context, textRenderer, bannerTitle, "R para jogar novamente",
+                    width / 2, boardTop + cell * 3 / 2,
+                    Math.min(width - 24, 250), result == 1 ? ArcadeTheme.SUCCESS
+                            : result == 2 ? ArcadeTheme.CORAL : ArcadeTheme.GOLD);
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 

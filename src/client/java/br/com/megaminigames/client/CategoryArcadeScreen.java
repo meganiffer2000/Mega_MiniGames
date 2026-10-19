@@ -344,7 +344,9 @@ ArcadeTheme.background(c, width, height);
             case FOREST -> renderMap(c, 6, "RELÍQUIAS: " + keyCount + "/3", 3);
             case PIRATE -> renderMap(c, 6, "PARTES DO MAPA: " + keyCount + "/2   •   Combustível " + fuel, 3);
         }
-        if (gameOver) ArcadeTheme.status(c, textRenderer, Text.literal("R para jogar novamente"), width / 2, height - 45, ArcadeTheme.GOLD);
+        if (gameOver) ArcadeTheme.banner(c, textRenderer, won ? "VOCÊ VENCEU!" : "FIM DE JOGO",
+                "R para jogar novamente", width / 2, 62 + (height - 102) / 2, Math.min(width - 20, 280),
+                won ? ArcadeTheme.SUCCESS : ArcadeTheme.GOLD);
         if (width >= 460) {
             ArcadeTheme.pill(c, textRenderer, "PONTOS  " + score, 16, height - 22, accent);
             ArcadeTheme.pillRight(c, textRenderer, "RODADA  " + round, width - 16, height - 22,

@@ -164,12 +164,9 @@ public final class MiniSudokuScreen extends Screen {
         }
 
         if (won) {
-            int bannerWidth = Math.min(width - 40, 230);
-            int cx = width / 2;
-            int cy = top + SIDE * cellSize / 2;
-            ArcadeTheme.rounded(context, cx - bannerWidth / 2, cy - 18, cx + bannerWidth / 2, cy + 18, 10, 0xEE0A1422);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("SUDOKU RESOLVIDO!"), cx, cy - 8, ArcadeTheme.GOLD);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Pressione R para outro"), cx, cy + 4, ArcadeTheme.TEXT);
+            ArcadeTheme.banner(context, textRenderer, "SUDOKU RESOLVIDO!",
+                    "R para outro desafio", width / 2, top + SIDE * cellSize / 2,
+                    Math.min(width - 24, 260), ArcadeTheme.GOLD);
         }
         super.render(context, mouseX, mouseY, delta);
     }

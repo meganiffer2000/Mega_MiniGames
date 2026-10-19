@@ -11,6 +11,16 @@ import net.minecraft.text.Text;
 /** Hub em grade de capas clicáveis, com filtros por categoria e visual neon arcade. */
 public final class GamesHubScreen extends Screen {
     private static final List<Game> GAMES = List.of(
+            new Game("Empurra-Caixas", SokobanScreen::new, Category.PUZZLE),
+            new Game("Senha Secreta", MastermindScreen::new, Category.PUZZLE),
+            new Game("Bomba!", BombermanScreen::new, Category.ACTION),
+            new Game("Salto nas Nuvens", DoodleJumpScreen::new, Category.ACTION),
+            new Game("Batida Perfeita", RhythmScreen::new, Category.ACTION),
+            new Game("Dominó", DominoScreen::new, Category.PUZZLE),
+            new Game("Paciência", KlondikeScreen::new, Category.PUZZLE),
+            new Game("Sinuca", PoolScreen::new, Category.SIMULATION),
+            new Game("Duelo de Heróis", HeroDuelScreen::new, Category.ADVENTURE),
+            new Game("Mini Plataforma", PlatformerScreen::new, Category.ACTION),
             new Game("Come-Come", PacManScreen::new, Category.ACTION),
             new Game("Asteroides", AsteroidsScreen::new, Category.ACTION),
             new Game("Boliche", BowlingScreen::new, Category.SIMULATION),
@@ -412,7 +422,79 @@ public final class GamesHubScreen extends Screen {
         int half = Math.max(4, size / 2);
         int dark = ArcadeTheme.darken(color, 70);
         int light = ArcadeTheme.lighten(color, 55);
-        if (name.contains("come-come") || name.contains("pac-man")) {
+        if (name.contains("empurra-caixas") || name.contains("sokoban")) {
+            ArcadeTheme.rounded(context, centerX - half + 2, centerY - half + 2, centerX + half - 2,
+                    centerY + half - 2, 2, 0xFFC58B4E);
+            ArcadeTheme.rounded(context, centerX - half + 3, centerY - half + 3, centerX + half - 3,
+                    centerY + half - 3, 1, 0xFFE0A968);
+            context.fill(centerX - half + 4, centerY - half + 4, centerX + half - 4,
+                    centerY - half + 5, 0xFF8A5A2E);
+            context.fill(centerX - half + 4, centerY + half - 5, centerX + half - 4,
+                    centerY + half - 4, 0xFF8A5A2E);
+            ArcadeTheme.ring(context, centerX, centerY + half + 4, 3, 1, ArcadeTheme.GOLD);
+        } else if (name.contains("senha secreta") || name.contains("mastermind")) {
+            for (int index = 0; index < 4; index++) {
+                ArcadeTheme.disc(context, centerX - half + index * (half * 2 / 4), centerY - 3, 3,
+                        index % 2 == 0 ? ArcadeTheme.CORAL : ArcadeTheme.SKY);
+            }
+            ArcadeTheme.disc(context, centerX - half / 2, centerY + half / 2, 2, 0xFFFFFFFF);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY + half / 2, 2, 0xFFFFFFFF);
+            ArcadeTheme.ring(context, centerX + half / 2, centerY + half / 2, 2, 1, ArcadeTheme.GOLD);
+        } else if (name.contains("bomba!")) {
+            ArcadeTheme.disc(context, centerX, centerY + half / 3, half - 2, 0xFF1B2230);
+            ArcadeTheme.disc(context, centerX - half / 4, centerY + half / 4, 1, 0x88FFFFFF);
+            context.fill(centerX, centerY - half, centerX + 1, centerY, 0xFFB98A5A);
+            ArcadeTheme.glow(context, centerX, centerY - half, 4, 0xAAFFD66B);
+            ArcadeTheme.disc(context, centerX, centerY - half, 1, 0xFFFFF3C4);
+        } else if (name.contains("salto nas nuvens") || name.contains("doodle")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY + half / 2, centerX + half,
+                    centerY + half / 2 + 3, 1, ArcadeTheme.LIME);
+            ArcadeTheme.rounded(context, centerX - half / 3, centerY - half / 2, centerX + half / 3,
+                    centerY + half / 2, 3, ArcadeTheme.LIME);
+            ArcadeTheme.disc(context, centerX - 2, centerY - half / 4, 1, 0xFFFFFFFF);
+            ArcadeTheme.disc(context, centerX + 2, centerY - half / 4, 1, 0xFFFFFFFF);
+            context.fill(centerX - half - 2, centerY - half - 4, centerX, centerY - half - 2, ArcadeTheme.GOLD);
+        } else if (name.contains("batida perfeita") || name.contains("ritmo")) {
+            for (int lane = 0; lane < 4; lane++) {
+                int laneX = centerX - half + lane * (half * 2 / 4);
+                context.fill(laneX, centerY - half, laneX + 2, centerY + half, 0x22FFFFFF);
+                context.fill(laneX, centerY + half - 4 - lane * 2, laneX + 2, centerY + half - 1,
+                        lane == 1 ? ArcadeTheme.GOLD : lane == 3 ? ArcadeTheme.MAGENTA : ArcadeTheme.TEAL);
+            }
+        } else if (name.contains("dominó") || name.contains("domino")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + half,
+                    centerY + half / 2, 2, 0xFFF3F0E4);
+            context.fill(centerX, centerY - half / 2 + 1, centerX + 1, centerY + half / 2 - 1, 0xFF9E9785);
+            ArcadeTheme.disc(context, centerX - half / 2, centerY - half / 4, 1, 0xFF22334A);
+            ArcadeTheme.disc(context, centerX - half / 2, centerY + half / 4, 1, 0xFF22334A);
+            ArcadeTheme.disc(context, centerX + half / 2, centerY, 1, 0xFF22334A);
+        } else if (name.contains("paciência") || name.contains("paciencia") || name.contains("klondike")) {
+            ArcadeTheme.playingCard(context, textRenderer, centerX - half, centerY - half,
+                    half + 2, half * 2, "A", 0, false);
+            ArcadeTheme.playingCard(context, textRenderer, centerX - half / 2, centerY - half + 4,
+                    half + 2, half * 2, "K", 3, false);
+        } else if (name.contains("sinuca") || name.contains("bilhar")) {
+            ArcadeTheme.disc(context, centerX, centerY + half / 4, half - 2, 0xFF17734A);
+            ArcadeTheme.disc(context, centerX - half / 3, centerY + half / 3, 1, 0x66FFFFFF);
+            for (int step = 0; step < half; step += 3) {
+                context.fill(centerX + 2 + step, centerY - half - 2 + step, centerX + 4 + step,
+                        centerY - half + step, 0xFFE5B984);
+            }
+        } else if (name.contains("duelo de heróis") || name.contains("heroi")) {
+            context.fill(centerX - 4, centerY - half, centerX - 2, centerY + half, 0xFFD9E6F5);
+            context.fill(centerX - half / 2, centerY - 2, centerX + half / 4, centerY, ArcadeTheme.GOLD);
+            ArcadeTheme.disc(context, centerX, centerY + 2, 2, ArcadeTheme.GOLD);
+            ArcadeTheme.rounded(context, centerX + 1, centerY - half / 2, centerX + half,
+                    centerY + half / 2, 3, 0xFF3E6FA3);
+            context.fill(centerX + half / 3, centerY - half / 4, centerX + half / 3 + 1,
+                    centerY + half / 4, 0xFFD9E6F5);
+        } else if (name.contains("mini plataforma") || name.contains("plataforma")) {
+            context.fill(centerX - half, centerY + half / 2, centerX + half, centerY + half, 0xFF6E4E2C);
+            context.fill(centerX - half, centerY + half / 2, centerX + half, centerY + half / 2 + 2,
+                    0xFF4FA34A);
+            ArcadeTheme.disc(context, centerX, centerY - half / 2, 4, ArcadeTheme.GOLD);
+            ArcadeTheme.ring(context, centerX, centerY - half / 2, 4, 1, 0xFFFFF3C4);
+        } else if (name.contains("come-come") || name.contains("pac-man")) {
             ArcadeTheme.disc(context, centerX, centerY, half, ArcadeTheme.GOLD);
             int[] mouthX = {centerX, centerX + half + 2, centerX + half + 2};
             int[] mouthY = {centerY, centerY - half / 2, centerY + half / 2};

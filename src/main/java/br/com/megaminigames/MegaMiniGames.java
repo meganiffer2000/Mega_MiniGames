@@ -14,15 +14,15 @@ import org.slf4j.LoggerFactory;
 public final class MegaMiniGames implements ModInitializer {
     public static final String MOD_ID = "mega_minigames";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static final Item GAME_BOY = Registry.register(
+    public static final Item RETRO_CONSOLE = Registry.register(
             Registries.ITEM,
-            new Identifier(MOD_ID, "game_boy"),
+            new Identifier(MOD_ID, "retro_console"),
             new Item(new Item.Settings().maxCount(1))
     );
 
     @Override
     public void onInitialize() {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> entries.add(GAME_BOY));
-        LOGGER.info("Mega MiniGames carregado. Use o Game Boy do mod para abrir o hub.");
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> entries.add(RETRO_CONSOLE));
+        LOGGER.info("Mega MiniGames carregado. Use o Console Retrô do mod para abrir o hub.");
     }
 }

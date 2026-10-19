@@ -113,18 +113,9 @@ public final class LightsOutScreen extends Screen {
         }
 
         if (solved) {
-            int panelWidth = Math.min(width - 40, 260);
-            int panelHeight = 46;
-            int cx = width / 2;
-            int cy = top + SIDE * cell / 2;
-            ArcadeTheme.rounded(context, cx - panelWidth / 2, cy - panelHeight / 2, cx + panelWidth / 2,
-                    cy + panelHeight / 2, 12, 0xEE0A1422);
-            ArcadeTheme.rounded(context, cx - panelWidth / 2, cy - panelHeight / 2, cx + panelWidth / 2,
-                    cy - panelHeight / 2 + 2, 12, ArcadeTheme.GOLD);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("TODAS AS LUZES APAGADAS"),
-                    cx, cy - 11, ArcadeTheme.GOLD);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("em " + moves + " cliques"), cx, cy + 3,
-                    ArcadeTheme.TEXT);
+            ArcadeTheme.banner(context, textRenderer, "LUZES APAGADAS",
+                    "em " + moves + " cliques  •  R para outro",
+                    width / 2, top + SIDE * cell / 2, Math.min(width - 24, 260), ArcadeTheme.GOLD);
         }
         super.render(context, mouseX, mouseY, delta);
     }

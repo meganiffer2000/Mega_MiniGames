@@ -4,7 +4,7 @@
 
 ![Logo Mega MiniGames](assets/modrinth-icon.png)
 
-Mod de minijogos para **Minecraft 1.20.1**, usando **Fabric** e **Java 17**. O catálogo tem **140 minijogos** navegáveis em um hub com cartuchos ilustrados, filtros por categoria e interface arcade neon.
+Mod de minijogos para **Minecraft 1.20.1**, usando **Fabric** e **Java 17**. O catálogo tem **166 minijogos** navegáveis em um hub com cartuchos ilustrados, filtros por categoria e interface arcade neon.
 
 - **Versão atual:** `0.0.3-beta`
 - **Dependências:** Fabric API 0.92.2
@@ -17,7 +17,17 @@ Segure o item **Console Retrô** e use-o com o botão direito. Ele aparece na ab
 
 No hub, use as **setas ←/→** ou a **roda do mouse** para trocar de página, **R** para abrir um jogo aleatório e **ESC** para fechar.
 
-## Jogos novos da versão 0.0.3
+## Central de gestão (26 novos negócios)
+
+Os 26 negócios usam três motores de jogo diferentes — e cada um tem metas, clientes e decisões próprias.
+
+**Atendimento (fila e preparo por teclas 1–3):** Pizzaria Expressa, Padaria da Esquina, Sorveteria Gelada, Mercado do Bairro, Cinema Pipoca, Lanchonete Turbo, Floricultura Bella, Farmácia 24h, Sushi Rápido e Loja de Brinquedos.
+
+**Produção e mercado (comprar insumo, produzir e vender no preço alto):** Fábrica de Robôs, Porto Container, Fazenda Solar, Estufa Hidropônica, Apiário Doce Mel, Mineradora Profunda, Ferrovia Central, Fábrica de Sucos, Gráfica Expressa e Cerâmica Vila.
+
+**Incidentes (escolher a resposta certa antes do tempo):** Hospital Central, Banco Seguro, Redação do Jornal, Aeroporto Internacional, Hotel Estrela e Zoológico Urbano.
+
+Os jogos anteriores continuam na lista logo abaixo:
 
 - **Pinball Neon:** mesa com três amortecedores, alvos luminosos, slingshots e flippers (A/D).
 - **Batalha de Tanques:** labirinto com tijolos quebráveis, inimigos, vidas e três níveis.
@@ -49,6 +59,10 @@ No hub, use as **setas ←/→** ou a **roda do mouse** para trocar de página, 
 | Português (Brasil) | Console Retrô | ✔ | ✔ |
 | English (US) | Retro Console | ✔ | ✔ |
 | Español | Consola Retro | ✔ | ✔ |
+
+## Gestão mais clara nos jogos antigos
+
+- **Fazenda Próspera, Café da Praça, Central de Trânsito, Aquário Vivo, Colônia Espacial, Livraria em Dia, Estação de Recursos e Abrigo Animal** ganharam barra de meta, avaliação em estrelas, contador de dias e recorde de sessão.
 
 ## Novidades visuais
 
@@ -82,7 +96,7 @@ O nome da versão é definido **manualmente** em `gradle.properties` (`mod_versi
 
 ![Logo Mega MiniGames](assets/modrinth-icon.png)
 
-A minigame mod for **Minecraft 1.20.1**, built using **Fabric** and **Java 17**. The catalog offers **140 minigames** in a hub with illustrated cartridges, category filters and a neon arcade interface.
+A minigame mod for **Minecraft 1.20.1**, built using **Fabric** and **Java 17**. The catalog offers **166 minigames** in a hub with illustrated cartridges, category filters and a neon arcade interface.
 
 - **Current version:** `0.0.3-beta`
 - **Dependencies:** Fabric API 0.92.2
@@ -95,7 +109,17 @@ Hold the **Retro Console** item and right-click. It can be found in the **Tools*
 
 In the hub, use **←/→** or the **mouse wheel** to change pages, **R** to open a random game and **ESC** to close.
 
-## New games in 0.0.3
+## Management center (26 new businesses)
+
+The 26 businesses run on three different play engines — each with its own goals, customers and decisions.
+
+**Service rush (queue and prep with keys 1–3):** Pizzeria, Bakery, Ice Cream Shop, Corner Market, Popcorn Cinema, Turbo Diner, Flower Shop, 24h Pharmacy, Sushi Bar and Toy Store.
+
+**Production and market (buy input, produce, sell at the right price):** Robot Factory, Container Port, Solar Farm, Hydroponic Greenhouse, Honey Apiary, Deep Mine, Central Railway, Juice Factory, Print Shop and Ceramics Studio.
+
+**Incidents (pick the right response before time runs out):** Central Hospital, Safe Bank, Newsroom, International Airport, Star Hotel and City Zoo.
+
+The previous additions are still in the catalog:
 
 - **Pinball Neon:** table with three bumpers, lit targets, slingshots and flippers (A/D).
 - **Tank Battle:** maze with breakable bricks, enemy tanks, lives and three stages.
@@ -127,6 +151,10 @@ In the hub, use **←/→** or the **mouse wheel** to change pages, **R** to ope
 | Portuguese (Brazil) | Console Retrô | ✔ | ✔ |
 | English (US) | Retro Console | ✔ | ✔ |
 | Spanish | Consola Retro | ✔ | ✔ |
+
+## Clearer management in the older games
+
+- **Farm, Café, Traffic Control, Aquarium, Space Colony, Bookshop, Resource Station and Animal Shelter** gained a goal bar, star rating, day counter and session record.
 
 ## Visual changes
 

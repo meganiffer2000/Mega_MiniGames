@@ -37,6 +37,7 @@ public final class VarietyArcadeScreen extends Screen {
     private int score, round, ticks, timer, phase, misses, x, y, lane;
     private int fuel, ammo, target, resource, oxygen, altitude, wind, progress, keyCount;
     private int selectedX, selectedY, targetX, targetY, bridgeIndex;
+    private static int bestManagement;
     private boolean gameOver, won, initialized, jumping;
 
     public VarietyArcadeScreen(Game game) {
@@ -237,6 +238,12 @@ ArcadeTheme.background(c, width, height);
         ArcadeTheme.header(c, textRenderer, title, width / 2, 12, accent);
         ArcadeTheme.status(c, textRenderer, Text.literal(message), width / 2, 31,
                 gameOver ? ArcadeTheme.GOLD : ArcadeTheme.TEXT);
+        if (managementMode()) {
+            int goal = managementGoal();
+            float goalValue = Math.min(1.0F, score / (float) goal);
+            ArcadeTheme.progress(c, 16, 41, width - 32, 3, goalValue,
+                    goalValue >= 1.0F ? ArcadeTheme.SUCCESS : accent);
+        }
         switch (game) {
             case BOOKSHOP -> renderBookshop(c);
             case STATION -> renderStation(c);
@@ -254,15 +261,35 @@ ArcadeTheme.background(c, width, height);
             case PIPES -> renderPipes(c);
             case WORD_BRIDGE -> renderWordBridge(c);
         }
-        if (gameOver) ArcadeTheme.banner(c, textRenderer, won ? "VOCÊ VENCEU!" : "FIM DE JOGO",
-                "R para jogar novamente", width / 2, 62 + (height - 102) / 2, Math.min(width - 20, 280),
-                won ? ArcadeTheme.SUCCESS : ArcadeTheme.GOLD);
+        if (gameOver) {
+            bestManagement = Math.max(bestManagement, score);
+            ArcadeTheme.banner(c, textRenderer, won ? "VOCÊ VENCEU!" : "FIM DE JOGO",
+                    managementMode()
+                            ? "Meta " + Math.min(score, managementGoal()) + "/" + managementGoal()
+                                    + "  •  " + managementStars() + " estrelas  •  R tenta de novo"
+                            : "R para jogar novamente",
+                    width / 2, 62 + (height - 102) / 2, Math.min(width - 20, 300),
+                    won ? ArcadeTheme.SUCCESS : ArcadeTheme.GOLD);
+        }
         if (width >= 460) {
             ArcadeTheme.pill(c, textRenderer, "PONTOS  " + score, 16, height - 22, accent);
-            ArcadeTheme.pillRight(c, textRenderer, "RODADA  " + round, width - 16, height - 22,
-                    ArcadeTheme.GOLD);
+            ArcadeTheme.pillRight(c, textRenderer,
+                    managementMode() ? "RECORDE  " + bestManagement : "RODADA  " + round,
+                    width - 16, height - 22, ArcadeTheme.GOLD);
         }
         super.render(c, mouseX, mouseY, delta);
+    }
+
+    private boolean managementMode() {
+        return game == Game.BOOKSHOP || game == Game.STATION || game == Game.SHELTER;
+    }
+
+    private int managementGoal() {
+        return 12;
+    }
+
+    private int managementStars() {
+        return Math.max(1, Math.min(5, 1 + score / 3));
     }
 
     private void renderBookshop(DrawContext c) {

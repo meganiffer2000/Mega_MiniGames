@@ -12,6 +12,32 @@ import net.minecraft.text.Text;
 /** Hub em grade de capas clicáveis, com filtros por categoria e visual neon arcade. */
 public final class GamesHubScreen extends Screen {
     private static final List<Game> GAMES = List.of(
+            new Game("Pizzaria Expressa", () -> TycoonScreen.of(TycoonScreen.Kind.PIZZARIA), Category.MANAGEMENT),
+            new Game("Padaria da Esquina", () -> TycoonScreen.of(TycoonScreen.Kind.PADARIA), Category.MANAGEMENT),
+            new Game("Sorveteria Gelada", () -> TycoonScreen.of(TycoonScreen.Kind.SORVETERIA), Category.MANAGEMENT),
+            new Game("Mercado do Bairro", () -> TycoonScreen.of(TycoonScreen.Kind.MERCADO), Category.MANAGEMENT),
+            new Game("Cinema Pipoca", () -> TycoonScreen.of(TycoonScreen.Kind.CINEMA), Category.MANAGEMENT),
+            new Game("Lanchonete Turbo", () -> TycoonScreen.of(TycoonScreen.Kind.LANCHONETE), Category.MANAGEMENT),
+            new Game("Floricultura Bella", () -> TycoonScreen.of(TycoonScreen.Kind.FLORICULTURA), Category.MANAGEMENT),
+            new Game("Farmácia 24h", () -> TycoonScreen.of(TycoonScreen.Kind.FARMACIA), Category.MANAGEMENT),
+            new Game("Sushi Rápido", () -> TycoonScreen.of(TycoonScreen.Kind.SUSHI), Category.MANAGEMENT),
+            new Game("Loja de Brinquedos", () -> TycoonScreen.of(TycoonScreen.Kind.BRINQUEDOS), Category.MANAGEMENT),
+            new Game("Fábrica de Robôs", () -> TycoonScreen.of(TycoonScreen.Kind.FABRICA), Category.MANAGEMENT),
+            new Game("Porto Container", () -> TycoonScreen.of(TycoonScreen.Kind.PORTO), Category.MANAGEMENT),
+            new Game("Fazenda Solar", () -> TycoonScreen.of(TycoonScreen.Kind.SOLAR), Category.MANAGEMENT),
+            new Game("Estufa Hidropônica", () -> TycoonScreen.of(TycoonScreen.Kind.ESTUFA), Category.MANAGEMENT),
+            new Game("Apiário Doce Mel", () -> TycoonScreen.of(TycoonScreen.Kind.APIARIO), Category.MANAGEMENT),
+            new Game("Mineradora Profunda", () -> TycoonScreen.of(TycoonScreen.Kind.MINERADORA), Category.MANAGEMENT),
+            new Game("Ferrovia Central", () -> TycoonScreen.of(TycoonScreen.Kind.FERROVIA), Category.MANAGEMENT),
+            new Game("Fábrica de Sucos", () -> TycoonScreen.of(TycoonScreen.Kind.SUCOS), Category.MANAGEMENT),
+            new Game("Gráfica Expressa", () -> TycoonScreen.of(TycoonScreen.Kind.GRAFICA), Category.MANAGEMENT),
+            new Game("Cerâmica Vila", () -> TycoonScreen.of(TycoonScreen.Kind.CERAMICA), Category.MANAGEMENT),
+            new Game("Hospital Central", () -> TycoonScreen.of(TycoonScreen.Kind.HOSPITAL), Category.MANAGEMENT),
+            new Game("Banco Seguro", () -> TycoonScreen.of(TycoonScreen.Kind.BANCO), Category.MANAGEMENT),
+            new Game("Redação do Jornal", () -> TycoonScreen.of(TycoonScreen.Kind.JORNAL), Category.MANAGEMENT),
+            new Game("Aeroporto Internacional", () -> TycoonScreen.of(TycoonScreen.Kind.AEROPORTO), Category.MANAGEMENT),
+            new Game("Hotel Estrela", () -> TycoonScreen.of(TycoonScreen.Kind.HOTEL), Category.MANAGEMENT),
+            new Game("Zoológico Urbano", () -> TycoonScreen.of(TycoonScreen.Kind.ZOOLOGICO), Category.MANAGEMENT),
             new Game("Pinball Neon", PinballScreen::new, Category.ACTION),
             new Game("Batalha de Tanques", TankScreen::new, Category.ACTION),
             new Game("Nonograma", NonogramScreen::new, Category.PUZZLE),
@@ -448,6 +474,9 @@ public final class GamesHubScreen extends Screen {
         int half = Math.max(4, size / 2);
         int dark = ArcadeTheme.darken(color, 70);
         int light = ArcadeTheme.lighten(color, 55);
+        if (drawTycoonArt(context, name, centerX, centerY, half, color, light)) {
+            return;
+        }
         if (name.contains("pinball") || name.contains("fliperama")) {
             ArcadeTheme.rounded(context, centerX - half + 2, centerY - half, centerX + half - 2,
                     centerY + half, 3, 0xFF2B1B52);
@@ -791,6 +820,166 @@ public final class GamesHubScreen extends Screen {
         } else {
             drawCategoryGlyph(context, categoryFor(rawName), centerX, centerY, size, color);
         }
+    }
+
+    /** Ícones compactos para os 26 negócios da central de gestão. */
+    private boolean drawTycoonArt(DrawContext context, String name, int centerX, int centerY, int half,
+                                  int color, int light) {
+        if (name.contains("pizzaria")) {
+            ArcadeTheme.polygon(context, new int[] {centerX - half, centerX + half, centerX},
+                    new int[] {centerY - half, centerY + half / 2, centerY + half}, ArcadeTheme.GOLD);
+            context.fill(centerX - half + 2, centerY + 2, centerX + half - 2, centerY + 4, 0xFFD9653F);
+            ArcadeTheme.disc(context, centerX - half / 3, centerY, 1, 0xFFB33A2B);
+            ArcadeTheme.disc(context, centerX + half / 3, centerY - 2, 1, 0xFFB33A2B);
+        } else if (name.contains("padaria")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + half,
+                    centerY + half / 2, 4, 0xFFD9A15C);
+            context.fill(centerX - half + 3, centerY - half / 4, centerX + half - 3, centerY, 0xFFF2C98A);
+            context.fill(centerX - 1, centerY - half / 2, centerX + 1, centerY + half / 2, 0xFFB47A3C);
+        } else if (name.contains("sorveteria")) {
+            ArcadeTheme.polygon(context, new int[] {centerX - half / 2, centerX + half / 2, centerX},
+                    new int[] {centerY - 2, centerY - 2, centerY + half}, 0xFFD9A15C);
+            ArcadeTheme.disc(context, centerX, centerY - half / 2, half / 2 + 1, 0xFFFFC1D9);
+            ArcadeTheme.disc(context, centerX - 2, centerY - half, 1, 0xFFFFFFFF);
+        } else if (name.contains("mercado")) {
+            ArcadeTheme.rounded(context, centerX - half / 2, centerY - half / 2, centerX + half / 2,
+                    centerY + half, 3, ArcadeTheme.LIME);
+            context.fill(centerX - 2, centerY - half / 2 - 3, centerX + 2, centerY - half / 2, light);
+            ArcadeTheme.ring(context, centerX, centerY, half / 2, 1, 0xFF0A1422);
+        } else if (name.contains("cinema")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + half,
+                    centerY + half / 2, 2, 0xFF2A3345);
+            for (int i = 0; i < 4; i++) {
+                ArcadeTheme.rounded(context, centerX - half + i * (half / 2), centerY - half / 2,
+                        centerX - half + i * (half / 2) + half / 4, centerY - half / 2 + 3, 1, light);
+            }
+            ArcadeTheme.polygon(context, new int[] {centerX - 2, centerX + 4, centerX - 2},
+                    new int[] {centerY - 1, centerY + 2, centerY + 5}, ArcadeTheme.GOLD);
+        } else if (name.contains("lanchonete")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - 1, centerX + half, centerY + half / 2, 4,
+                    0xFFD9A15C);
+            context.fill(centerX - half, centerY - 3, centerX + half, centerY - 1, ArcadeTheme.LIME);
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + half, centerY - 4, 3,
+                    ArcadeTheme.CORAL);
+        } else if (name.contains("floricultura")) {
+            for (int i = 0; i < 4; i++) {
+                int dx = i == 0 ? -3 : i == 1 ? 3 : 0;
+                int dy = i == 2 ? -3 : i == 3 ? 3 : 0;
+                ArcadeTheme.disc(context, centerX + dx, centerY + dy, 2, ArcadeTheme.MAGENTA);
+            }
+            ArcadeTheme.disc(context, centerX, centerY, 2, ArcadeTheme.GOLD);
+            context.fill(centerX, centerY + 2, centerX + 1, centerY + half, ArcadeTheme.LIME);
+        } else if (name.contains("farmácia") || name.contains("farmacia") || name.contains("hospital")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half, centerX + half,
+                    centerY + half, 3, 0xFFF2F7FF);
+            context.fill(centerX - 2, centerY - half + 3, centerX + 2, centerY + half - 3, ArcadeTheme.DANGER);
+            context.fill(centerX - half + 3, centerY - 2, centerX + half - 3, centerY + 2, ArcadeTheme.DANGER);
+        } else if (name.contains("sushi")) {
+            ArcadeTheme.rounded(context, centerX - half + 1, centerY + 1, centerX + half - 1,
+                    centerY + half, 3, 0xFFF2F7FF);
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + half, centerY + 3, 3,
+                    ArcadeTheme.CORAL);
+            context.fill(centerX - half + 2, centerY - half / 2 + 2, centerX + half - 2, centerY - half / 2 + 3,
+                    0x66FFFFFF);
+        } else if (name.contains("brinquedos")) {
+            ArcadeTheme.disc(context, centerX, centerY, half - 1, ArcadeTheme.GOLD);
+            context.fill(centerX - half + 1, centerY, centerX + half - 1, centerY + 1, 0xFFB33A2B);
+            ArcadeTheme.disc(context, centerX, centerY, 2, 0xFFF2F7FF);
+        } else if (name.contains("sucos")) {
+            ArcadeTheme.rounded(context, centerX - 3, centerY - 1, centerX + 3, centerY + half, 2,
+                    ArcadeTheme.LIME);
+            context.fill(centerX - 3, centerY - 3, centerX + 3, centerY - 1, ArcadeTheme.GOLD);
+            context.fill(centerX + 1, centerY - half, centerX + 2, centerY - 2, ArcadeTheme.CORAL);
+        } else if (name.contains("fábrica") || name.contains("fabrica")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - 1, centerX + half, centerY + half, 2,
+                    ArcadeTheme.SKY);
+            context.fill(centerX - half + 2, centerY - half, centerX - half + 4, centerY - 1, light);
+            context.fill(centerX - 2, centerY - half + 2, centerX, centerY - 1, light);
+            ArcadeTheme.ring(context, centerX + half / 3, centerY + half / 3, 3, 1, 0xFF0A1422);
+        } else if (name.contains("porto")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY, centerX, centerY + half / 2, 1, ArcadeTheme.CORAL);
+            ArcadeTheme.rounded(context, centerX, centerY, centerX + half, centerY + half / 2, 1, ArcadeTheme.SKY);
+            ArcadeTheme.rounded(context, centerX - half / 2, centerY - half / 2, centerX + half / 2, centerY - 2,
+                    1, ArcadeTheme.GOLD);
+            context.fill(centerX - half, centerY + half / 2 + 1, centerX + half, centerY + half / 2 + 3,
+                    ArcadeTheme.SKY);
+        } else if (name.contains("solar")) {
+            ArcadeTheme.disc(context, centerX, centerY - half / 3, half / 3, ArcadeTheme.GOLD);
+            ArcadeTheme.rounded(context, centerX - half, centerY + 1, centerX + half, centerY + half, 1,
+                    ArcadeTheme.SKY);
+            for (int i = 1; i < 3; i++) {
+                context.fill(centerX - half + i * (half * 2 / 3), centerY + 2, centerX - half + i * (half * 2 / 3) + 1,
+                        centerY + half, 0x88000000);
+            }
+        } else if (name.contains("estufa")) {
+            ArcadeTheme.polygon(context, new int[] {centerX - half, centerX + half, centerX},
+                    new int[] {centerY, centerY, centerY - half}, 0xAA9BE8C4);
+            context.fill(centerX - half + 1, centerY, centerX + half - 1, centerY + half, 0x889BE8C4);
+            context.fill(centerX - 1, centerY, centerX + 1, centerY + half, ArcadeTheme.LIME);
+        } else if (name.contains("apiário") || name.contains("apiario")) {
+            ArcadeTheme.rounded(context, centerX - half / 2, centerY - half / 2, centerX + half / 2,
+                    centerY + half / 2, 2, 0xFFE5B984);
+            for (int i = -1; i <= 1; i++) {
+                context.fill(centerX - half / 2, centerY + i * 3, centerX + half / 2, centerY + i * 3 + 1,
+                        0xFF8A5A2E);
+            }
+            ArcadeTheme.disc(context, centerX + half / 2 + 2, centerY - half / 2, 1, ArcadeTheme.GOLD);
+        } else if (name.contains("mineradora")) {
+            context.fill(centerX - half, centerY - 2, centerX + half, centerY + 1, 0xFF9AAFC7);
+            context.fill(centerX - 1, centerY - half, centerX + 2, centerY + half, 0xFFB98A5A);
+            ArcadeTheme.star(context, centerX, centerY, 3, ArcadeTheme.GOLD);
+        } else if (name.contains("ferrovia")) {
+            context.fill(centerX - half, centerY - 3, centerX + half, centerY - 2, 0xFF9AAFC7);
+            context.fill(centerX - half, centerY + 2, centerX + half, centerY + 3, 0xFF9AAFC7);
+            for (int i = 0; i < 4; i++) {
+                context.fill(centerX - half + i * (half / 2), centerY - 4, centerX - half + i * (half / 2) + 1,
+                        centerY + 4, 0xFF6E4E2C);
+            }
+        } else if (name.contains("gráfica") || name.contains("grafica") || name.contains("jornal")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half / 2, centerX + half,
+                    centerY + half / 2, 1, 0xFFF2F7FF);
+            for (int i = 0; i < 3; i++) {
+                context.fill(centerX - half + 2, centerY - half / 4 + i * 2, centerX + half - 2,
+                        centerY - half / 4 + i * 2 + 1, 0xFF4A5769);
+            }
+            context.fill(centerX - half + 2, centerY - half / 2 + 2, centerX - 1, centerY - half / 4 + 1,
+                    ArcadeTheme.CORAL);
+        } else if (name.contains("cerâmica") || name.contains("ceramica")) {
+            ArcadeTheme.rounded(context, centerX - half / 2, centerY, centerX + half / 2, centerY + half, 3,
+                    0xFFD98C5F);
+            ArcadeTheme.rounded(context, centerX - 2, centerY - half / 2, centerX + 2, centerY + 1, 2,
+                    0xFFD98C5F);
+            context.fill(centerX - half / 2 + 1, centerY + 3, centerX + half / 2 - 1, centerY + 4,
+                    0xFFA8623C);
+        } else if (name.contains("banco")) {
+            ArcadeTheme.polygon(context, new int[] {centerX - half, centerX + half, centerX},
+                    new int[] {centerY - half / 2, centerY - half / 2, centerY - half}, 0xFFF2F7FF);
+            context.fill(centerX - half, centerY - half / 2, centerX + half, centerY - half / 2 + 2, 0xFFF2F7FF);
+            for (int i = 0; i < 3; i++) {
+                context.fill(centerX - half + 2 + i * (half / 2), centerY - half / 2 + 3,
+                        centerX - half + 3 + i * (half / 2), centerY + half / 2, 0xFFD9C07A);
+            }
+            context.fill(centerX - half, centerY + half / 2, centerX + half, centerY + half / 2 + 2,
+                    0xFFF2F7FF);
+        } else if (name.contains("aeroporto") || name.contains("avião")) {
+            context.fill(centerX - half, centerY - 1, centerX + half, centerY + 1, 0xFFF2F7FF);
+            context.fill(centerX - 2, centerY - half, centerX, centerY + half, 0xFFF2F7FF);
+            ArcadeTheme.disc(context, centerX, centerY, 2, ArcadeTheme.SKY);
+        } else if (name.contains("hotel")) {
+            context.fill(centerX - half, centerY, centerX + half, centerY + 3, 0xFFF2F7FF);
+            context.fill(centerX - half, centerY - half / 2, centerX - half + 2, centerY + 3, 0xFFF2F7FF);
+            ArcadeTheme.rounded(context, centerX - half + 2, centerY - 2, centerX + half, centerY, 2,
+                    ArcadeTheme.SKY);
+            ArcadeTheme.disc(context, centerX, centerY - half / 2, 3, ArcadeTheme.GOLD);
+        } else if (name.contains("zoológico") || name.contains("zoologico")) {
+            ArcadeTheme.disc(context, centerX, centerY + 2, half - 2, ArcadeTheme.CORAL);
+            ArcadeTheme.disc(context, centerX - half + 2, centerY - 2, 2, ArcadeTheme.CORAL);
+            ArcadeTheme.disc(context, centerX + half - 2, centerY - 2, 2, ArcadeTheme.CORAL);
+            ArcadeTheme.disc(context, centerX, centerY - half + 1, 2, ArcadeTheme.CORAL);
+        } else {
+            return false;
+        }
+        return true;
     }
 
     private void drawCategoryGlyph(DrawContext context, Category category, int centerX, int centerY, int size, int color) {

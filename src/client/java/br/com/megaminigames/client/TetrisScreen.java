@@ -1,9 +1,9 @@
 package br.com.megaminigames.client;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -11,10 +11,8 @@ import org.lwjgl.glfw.GLFW;
 public final class TetrisScreen extends Screen {
     private static final int COLUMNS = 10;
     private static final int ROWS = 20;
-    private static final int MAX_CELL_SIZE = 20;
-    private int cellSize;
-    private int boardLeft;
-    private int boardTop;
+    private static final int MIN_CELL_SIZE = 6;
+    private static final int MAX_CELL_SIZE = 22;
     private static final int[][][] SHAPES = {
             {{0, 1}, {1, 1}, {2, 1}, {3, 1}},
             {{1, 0}, {2, 0}, {1, 1}, {2, 1}},
@@ -30,12 +28,20 @@ public final class TetrisScreen extends Screen {
     };
 
     private final int[][] board = new int[ROWS][COLUMNS];
+    private int cellSize;
+    private int boardLeft;
+    private int boardTop;
+    private int panelLeft;
+    private int panelWidth;
     private int piece;
+    private int nextPiece;
     private int rotation;
     private int pieceX;
     private int pieceY;
     private int fallTicks;
     private int score;
+    private int lines;
+    private int flashTicks;
     private boolean gameOver;
     private boolean initialized;
 
@@ -45,18 +51,24 @@ public final class TetrisScreen extends Screen {
 
     @Override
     protected void init() {
-        int availableHeight = Math.max(ROWS * 6, height - 74);
-        int heightLimitedCell = availableHeight / ROWS;
-        int widthLimitedCell = Math.max(6, (width - 40) / COLUMNS);
-        cellSize = Math.max(6, Math.min(MAX_CELL_SIZE, Math.min(heightLimitedCell, widthLimitedCell)));
-        boardLeft = (width - COLUMNS * cellSize) / 2;
-        boardTop = Math.max(38, (height - ROWS * cellSize - 46) / 2);
+        int reserved = width > 340 ? 104 : 44;
+        int heightLimited = Math.max(MIN_CELL_SIZE, (height - 132) / ROWS);
+        int widthLimited = Math.max(MIN_CELL_SIZE, (width - reserved) / COLUMNS);
+        cellSize = Math.max(MIN_CELL_SIZE, Math.min(MAX_CELL_SIZE, Math.min(heightLimited, widthLimited)));
+        int boardWidth = COLUMNS * cellSize;
+        boolean sidePanel = width - boardWidth - 24 >= 62;
+        int blockWidth = boardWidth + (sidePanel ? 70 : 0);
+        boardLeft = (width - blockWidth) / 2;
+        boardTop = 56 + Math.max(0, (height - 30 - ROWS * cellSize - 56) / 2);
+        panelLeft = boardLeft + boardWidth + 10;
+        panelWidth = Math.min(60, width - panelLeft - 10);
+
         int buttonY = height - 22;
-        addDrawableChild(ButtonWidget.builder(Text.literal("Reiniciar (R)"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        int buttonWidth = Math.min(112, Math.max(78, (width - 46) / 2));
+        addDrawableChild(ArcadeTheme.button(width / 2 - buttonWidth - 4, buttonY, buttonWidth, 20,
+                Text.literal("Reiniciar (R)"), this::newGame));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, buttonWidth, 20,
+                Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
         if (!initialized) {
             newGame();
         }
@@ -64,16 +76,21 @@ public final class TetrisScreen extends Screen {
 
     private void newGame() {
         for (int[] row : board) {
-            java.util.Arrays.fill(row, 0);
+            Arrays.fill(row, 0);
         }
         score = 0;
+        lines = 0;
+        fallTicks = 0;
+        flashTicks = 0;
         gameOver = false;
         initialized = true;
+        nextPiece = ThreadLocalRandom.current().nextInt(SHAPES.length);
         spawnPiece();
     }
 
     private void spawnPiece() {
-        piece = ThreadLocalRandom.current().nextInt(SHAPES.length);
+        piece = nextPiece;
+        nextPiece = ThreadLocalRandom.current().nextInt(SHAPES.length);
         rotation = 0;
         pieceX = 3;
         pieceY = 0;
@@ -161,9 +178,13 @@ public final class TetrisScreen extends Screen {
                 for (int moveRow = row; moveRow > 0; moveRow--) {
                     System.arraycopy(board[moveRow - 1], 0, board[moveRow], 0, COLUMNS);
                 }
-                java.util.Arrays.fill(board[0], 0);
+                Arrays.fill(board[0], 0);
                 row++;
             }
+        }
+        if (cleared > 0) {
+            flashTicks = 8;
+            lines += cleared;
         }
         score += switch (cleared) {
             case 1 -> 100;
@@ -176,6 +197,9 @@ public final class TetrisScreen extends Screen {
 
     @Override
     public void tick() {
+        if (flashTicks > 0) {
+            flashTicks--;
+        }
         if (gameOver) {
             return;
         }
@@ -187,46 +211,123 @@ public final class TetrisScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.fill(0, 0, width, height, 0xFF101720);
-        context.drawCenteredTextWithShadow(textRenderer,
-                Text.literal("Tetris  |  Pontos: " + score + "  |  ← → mover, ↓ acelerar, ↑ girar"),
-                width / 2, 12, 0xFFFFFFFF);
+        ArcadeTheme.background(context, width, height);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, ArcadeTheme.PURPLE);
+        ArcadeTheme.status(context, textRenderer,
+                Text.literal(gameOver ? "Fim de jogo — pressione R" : "← → mover  •  ↑ girar  •  ↓ descer"),
+                width / 2, 32, gameOver ? ArcadeTheme.GOLD : ArcadeTheme.MUTED);
 
-        int left = boardLeft;
-        int top = boardTop;
-        context.fill(left - 3, top - 3, left + COLUMNS * cellSize + 3,
-                top + ROWS * cellSize + 3, 0xFF667782);
-        context.fill(left, top, left + COLUMNS * cellSize, top + ROWS * cellSize, 0xFF111820);
+        int right = boardLeft + COLUMNS * cellSize;
+        int bottom = boardTop + ROWS * cellSize;
+        ArcadeTheme.pill(context, textRenderer, "PONTOS  " + score, boardLeft, boardTop - 22, ArcadeTheme.PURPLE);
+        ArcadeTheme.pillRight(context, textRenderer, "LINHAS  " + lines, right, boardTop - 22, ArcadeTheme.LIME);
+
+        ArcadeTheme.rounded(context, boardLeft - 5, boardTop - 5, right + 5, bottom + 5, 8,
+                ArcadeTheme.alpha(ArcadeTheme.PURPLE, 110));
+        ArcadeTheme.rounded(context, boardLeft - 4, boardTop - 4, right + 4, bottom + 4, 7, ArcadeTheme.PANEL_DEEP);
+        context.fill(boardLeft, boardTop, right, bottom, 0xFF070B14);
+
         for (int y = 0; y < ROWS; y++) {
             for (int x = 0; x < COLUMNS; x++) {
+                if (cellSize >= 9) {
+                    int color = (x + y) % 2 == 0 ? 0x08FFFFFF : 0x04FFFFFF;
+                    context.fill(boardLeft + x * cellSize, boardTop + y * cellSize,
+                            boardLeft + (x + 1) * cellSize, boardTop + (y + 1) * cellSize, color);
+                }
                 if (board[y][x] != 0) {
-                    drawBlock(context, left, top, x, y, COLORS[board[y][x] - 1]);
+                    drawBlock(context, boardLeft, boardTop, x, y, COLORS[board[y][x] - 1], 255);
                 }
             }
         }
+
         if (!gameOver) {
+            int ghostY = pieceY;
+            while (!collides(pieceX, ghostY + 1, rotation)) {
+                ghostY++;
+            }
+            for (int[] block : SHAPES[piece]) {
+                int x = pieceX + rotatedX(block[0], block[1], rotation);
+                int y = ghostY + rotatedY(block[0], block[1], rotation);
+                if (y >= 0 && ghostY > pieceY) {
+                    int blockX = boardLeft + x * cellSize;
+                    int blockY = boardTop + y * cellSize;
+                    drawBlock(context, boardLeft, boardTop, x, y, COLORS[piece], 60);
+                    if (cellSize >= 10) {
+                        ArcadeTheme.rounded(context, blockX + 1, blockY + 1, blockX + cellSize - 1,
+                                blockY + cellSize - 1, 2, 0x22FFFFFF);
+                    }
+                }
+            }
             for (int[] block : SHAPES[piece]) {
                 int x = pieceX + rotatedX(block[0], block[1], rotation);
                 int y = pieceY + rotatedY(block[0], block[1], rotation);
                 if (y >= 0) {
-                    drawBlock(context, left, top, x, y, COLORS[piece]);
+                    drawBlock(context, boardLeft, boardTop, x, y, COLORS[piece], 255);
                 }
             }
-        } else {
-            int centerY = top + ROWS * cellSize / 2;
-            context.fill(left, centerY - 20, left + COLUMNS * cellSize, centerY + 20, 0xAA000000);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Fim de jogo! Pressione R"),
-                    width / 2, centerY - 4, 0xFFFFFFFF);
+        }
+
+        if (flashTicks > 0) {
+            context.fill(boardLeft, boardTop, right, bottom, ArcadeTheme.alpha(ArcadeTheme.LIME, 10 + flashTicks * 4));
+        }
+
+        if (panelWidth >= 40) {
+            ArcadeTheme.panelAccent(context, panelLeft, boardTop - 5, panelLeft + panelWidth,
+                    boardTop + 78, ArcadeTheme.PURPLE, 7);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("PRÓXIMA"),
+                    panelLeft + panelWidth / 2, boardTop + 4, ArcadeTheme.MUTED);
+            int previewCell = Math.max(6, Math.min(12, (panelWidth - 16) / 4));
+            int previewLeft = panelLeft + (panelWidth - 4 * previewCell) / 2;
+            int previewTop = boardTop + 20;
+            for (int[] block : SHAPES[nextPiece]) {
+                int blockX = previewLeft + block[0] * previewCell;
+                int blockY = previewTop + block[1] * previewCell;
+                ArcadeTheme.rounded(context, blockX, blockY, blockX + previewCell - 1, blockY + previewCell - 1, 2,
+                        COLORS[nextPiece]);
+                if (previewCell >= 9) {
+                    context.fill(blockX + 1, blockY + 1, blockX + previewCell - 2, blockY + 2, 0x55FFFFFF);
+                }
+            }
+            ArcadeTheme.panel(context, panelLeft, boardTop + 88, panelLeft + panelWidth, bottom);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("NÍVEL"),
+                    panelLeft + panelWidth / 2, boardTop + 96, ArcadeTheme.MUTED);
+            context.drawCenteredTextWithShadow(textRenderer,
+                    Text.literal(Integer.toString(Math.min(99, 1 + score / 1000))),
+                    panelLeft + panelWidth / 2, boardTop + 110, ArcadeTheme.GOLD);
+            int hintY = boardTop + 132;
+            if (hintY + 30 < bottom) {
+                context.drawCenteredTextWithShadow(textRenderer, Text.literal("R"),
+                        panelLeft + panelWidth / 2, hintY, ArcadeTheme.DIM);
+                context.drawCenteredTextWithShadow(textRenderer, Text.literal("recomeçar"),
+                        panelLeft + panelWidth / 2, hintY + 12, ArcadeTheme.DIM);
+            }
+        }
+
+        if (gameOver) {
+            int centerY = boardTop + ROWS * cellSize / 2;
+            int bannerWidth = Math.min(COLUMNS * cellSize + 40, width - 20);
+            ArcadeTheme.rounded(context, width / 2 - bannerWidth / 2, centerY - 28,
+                    width / 2 + bannerWidth / 2, centerY + 28, 10, 0xF00A1422);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("FIM DE JOGO"),
+                    width / 2, centerY - 16, ArcadeTheme.DANGER);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Pontos: " + score),
+                    width / 2, centerY - 1, ArcadeTheme.TEXT);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("R para jogar de novo"),
+                    width / 2, centerY + 13, ArcadeTheme.MUTED);
         }
         super.render(context, mouseX, mouseY, delta);
     }
 
-    private void drawBlock(DrawContext context, int left, int top, int x, int y, int color) {
+    private void drawBlock(DrawContext context, int left, int top, int x, int y, int color, int alpha) {
         int blockX = left + x * cellSize;
         int blockY = top + y * cellSize;
-        context.fill(blockX + 1, blockY + 1, blockX + cellSize - 1, blockY + cellSize - 1, color);
-        if (cellSize >= 10) {
-            context.fill(blockX + 2, blockY + 2, blockX + cellSize / 2, blockY + 4, 0x55FFFFFF);
+        int base = alpha >= 255 ? color : ArcadeTheme.alpha(color, alpha);
+        ArcadeTheme.rounded(context, blockX, blockY, blockX + cellSize, blockY + cellSize, 2, base);
+        if (cellSize >= 10 && alpha >= 255) {
+            ArcadeTheme.rounded(context, blockX + 1, blockY + 1, blockX + cellSize - 1, blockY + cellSize - 1, 2,
+                    ArcadeTheme.lighten(color, 40));
+            context.fill(blockX + 2, blockY + 2, blockX + cellSize - 3, blockY + 4, 0x55FFFFFF);
+            context.fill(blockX + 2, blockY + cellSize - 4, blockX + cellSize - 3, blockY + cellSize - 2, 0x33000000);
         }
     }
 
@@ -244,7 +345,9 @@ public final class TetrisScreen extends Screen {
             case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D -> move(1, 0);
             case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> move(0, 1);
             case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_SPACE -> rotate();
-            default -> { return super.keyPressed(keyCode, scanCode, modifiers); }
+            default -> {
+                return super.keyPressed(keyCode, scanCode, modifiers);
+            }
         }
         return true;
     }

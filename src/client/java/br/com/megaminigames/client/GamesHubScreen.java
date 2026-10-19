@@ -1,19 +1,15 @@
 package br.com.megaminigames.client;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 
-/** Hub visual em grade de capas clicáveis, adaptável ao tamanho da janela. */
+/** Hub em grade de capas clicáveis, com filtros por categoria e visual neon arcade. */
 public final class GamesHubScreen extends Screen {
-    private static final int[] COVER_COLORS = {
-            0xFF257E8A, 0xFF7447B7, 0xFFDB7139, 0xFF287A5C, 0xFFBB4269,
-            0xFF3C65A5, 0xFF9A7130, 0xFF397A9B, 0xFF8A4F56, 0xFF526B3B,
-            0xFFB34F35, 0xFF5353A1
-    };
     private static final List<Game> GAMES = List.of(
             new Game("Flappy Bird", FlappyBirdScreen::new),
             new Game("Campo Minado", MinesweeperScreen::new),
@@ -138,18 +134,31 @@ public final class GamesHubScreen extends Screen {
     );
 
     private enum Category {
-        ALL("Todos"), MANAGEMENT("Gerenciamento"), SIMULATION("Simulação"), ACTION("Ação"), ADVENTURE("Aventura"), PUZZLE("Quebra-cabeça");
+        ALL("Todos", ArcadeTheme.GOLD),
+        MANAGEMENT("Gerenciamento", ArcadeTheme.LIME),
+        SIMULATION("Simulação", ArcadeTheme.SKY),
+        ACTION("Ação", ArcadeTheme.MAGENTA),
+        ADVENTURE("Aventura", ArcadeTheme.CORAL),
+        PUZZLE("Quebra-cabeça", ArcadeTheme.PURPLE);
+
         private final String label;
-        Category(String label) { this.label = label; }
+        private final int color;
+
+        Category(String label, int color) {
+            this.label = label;
+            this.color = color;
+        }
     }
 
     private final Category category;
+    private final int[] chipX = new int[Category.values().length];
     private int page;
     private int columns;
     private int chipColumns;
     private int chipRows;
     private int chipWidth;
     private int chipTop;
+    private int chipHeight;
     private int rows;
     private int pageSize;
     private int pageCount;
@@ -157,6 +166,11 @@ public final class GamesHubScreen extends Screen {
     private int cardHeight;
     private int cardGap;
     private int gridTop;
+    private int sidePadding;
+    private int heroX1;
+    private int heroY1;
+    private int heroX2;
+    private int heroY2;
 
     public GamesHubScreen() {
         this(Category.ALL, 0);
@@ -189,56 +203,66 @@ public final class GamesHubScreen extends Screen {
 
     @Override
     protected void init() {
-        columns = width >= 780 ? 5 : width >= 620 ? 4 : width >= 420 ? 3 : 2;
-        chipColumns = width >= 600 ? Category.values().length : 3;
+        sidePadding = width >= 480 ? 14 : 8;
+        heroX1 = sidePadding;
+        heroX2 = width - sidePadding;
+        heroY1 = Math.max(6, height / 60);
+        heroY2 = Math.min(64, Math.max(46, height / 5));
+        columns = width >= 860 ? 5 : width >= 660 ? 4 : width >= 430 ? 3 : 2;
+        chipColumns = width >= 700 ? 6 : width >= 340 ? 3 : 2;
         chipRows = (Category.values().length + chipColumns - 1) / chipColumns;
-        chipTop = 45;
-        chipWidth = (width - 32 - 6 * (chipColumns - 1)) / chipColumns;
-        gridTop = chipTop + chipRows * 19 + 8;
+        chipTop = heroY2 + 8;
+        chipHeight = 18;
+        int chipGap = 6;
+        chipWidth = Math.max(58, (width - sidePadding * 2 - chipGap * (chipColumns - 1)) / chipColumns);
+        for (int i = 0; i < Category.values().length; i++) {
+            chipX[i] = sidePadding + (i % chipColumns) * (chipWidth + chipGap);
+        }
+        gridTop = chipTop + chipRows * (chipHeight + 4) + 4;
         cardGap = width >= 620 ? 8 : 6;
-        int sidePadding = width >= 420 ? 16 : 8;
-        cardWidth = Math.max(72, (width - sidePadding * 2 - cardGap * (columns - 1)) / columns);
-        int availableHeight = height - gridTop - 52;
-        rows = Math.max(1, Math.min(3, (availableHeight + cardGap) / (72 + cardGap)));
-        cardHeight = Math.max(52, Math.min(102, (availableHeight - cardGap * (rows - 1)) / rows));
+        cardWidth = Math.max(64, (width - sidePadding * 2 - cardGap * (columns - 1)) / columns);
+        int footerTop = height - 44;
+        int availableHeight = Math.max(52, footerTop - gridTop);
+        rows = Math.max(1, Math.min(4, (availableHeight + cardGap) / (72 + cardGap)));
+        cardHeight = Math.max(50, Math.min(96, (availableHeight - cardGap * (rows - 1)) / rows));
         pageSize = columns * rows;
         List<Game> visible = visibleGames();
         pageCount = Math.max(1, (visible.size() + pageSize - 1) / pageSize);
         page = Math.min(page, pageCount - 1);
 
-        int controlsY = height - 25;
-        int buttonWidth = Math.min(90, Math.max(62, (width - 28) / 3));
-        ButtonWidget previous = ButtonWidget.builder(Text.literal("‹ Voltar"), button ->
-                        client.setScreen(new GamesHubScreen(category, Math.max(0, page - 1))))
-                .dimensions(10, controlsY, buttonWidth, 20).build();
+        int controlsY = height - 26;
+        int buttonWidth = Math.min(94, Math.max(58, (width - sidePadding * 2 - 24) / 3));
+        ButtonWidget previous = ArcadeTheme.button(sidePadding, controlsY, buttonWidth, 20,
+                Text.literal("‹ Anterior"), () -> client.setScreen(new GamesHubScreen(category, Math.max(0, page - 1))));
         previous.active = page > 0;
         addDrawableChild(previous);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Fechar"), button -> client.setScreen(null))
-                .dimensions((width - buttonWidth) / 2, controlsY, buttonWidth, 20).build());
-        ButtonWidget next = ButtonWidget.builder(Text.literal("Avançar ›"), button ->
-                        client.setScreen(new GamesHubScreen(category, Math.min(pageCount - 1, page + 1))))
-                .dimensions(width - buttonWidth - 10, controlsY, buttonWidth, 20).build();
+        addDrawableChild(ArcadeTheme.button((width - buttonWidth) / 2, controlsY, buttonWidth, 20,
+                Text.literal("Fechar"), () -> client.setScreen(null)));
+        ButtonWidget next = ArcadeTheme.button(width - sidePadding - buttonWidth, controlsY, buttonWidth, 20,
+                Text.literal("Próxima ›"), () -> client.setScreen(new GamesHubScreen(category, Math.min(pageCount - 1, page + 1))));
         next.active = page < pageCount - 1;
         addDrawableChild(next);
+
+        if (width >= 600) {
+            addDrawableChild(ArcadeTheme.button(heroX2 - 104, heroY2 - 26, 96, 18,
+                    Text.literal("ALEATÓRIO"), this::openRandomGame));
+        }
+    }
+
+    private void openRandomGame() {
+        List<Game> visible = visibleGames();
+        if (visible.isEmpty()) return;
+        Game game = visible.get(ThreadLocalRandom.current().nextInt(visible.size()));
+        client.setScreen(game.screenFactory.get());
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.fill(0, 0, width, height, 0xC9081020);
-        for (int y = 0; y < height; y += 4) {
-            int tint = (y / 4 % 2 == 0) ? 0x080A3044 : 0x080B1A36;
-            context.fill(0, y, width, Math.min(height, y + 4), tint);
-        }
-
-        context.drawTextWithShadow(textRenderer, Text.literal("MEGA ARCADE"), 16, 13, 0xFFFFFFFF);
-        List<Game> visible = visibleGames();
-        context.drawTextWithShadow(textRenderer, Text.literal(visible.size() + " jogos • escolha uma categoria"), 17, 30, 0xFF9FB7D5);
-        String pageLabel = "PÁGINA " + (page + 1) + " / " + pageCount;
-        context.drawTextWithShadow(textRenderer, Text.literal(pageLabel),
-                width - textRenderer.getWidth(pageLabel) - 17, 17, 0xFFFFD76C);
+        ArcadeTheme.background(context, width, height);
+        drawHero(context, mouseX, mouseY);
         drawCategoryChips(context, mouseX, mouseY);
 
+        List<Game> visible = visibleGames();
         int first = page * pageSize;
         int end = Math.min(first + pageSize, visible.size());
         for (int index = first; index < end; index++) {
@@ -249,130 +273,192 @@ public final class GamesHubScreen extends Screen {
             int y = gridTop + row * (cardHeight + cardGap);
             drawCard(context, visible.get(index), index, x, y, mouseX, mouseY);
         }
+        drawPager(context);
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    private void drawHero(DrawContext context, int mouseX, int mouseY) {
+        int accent = category.color;
+        ArcadeTheme.rounded(context, heroX1 + 2, heroY1 + 3, heroX2 + 2, heroY2 + 3, 10, 0x55000000);
+        ArcadeTheme.rounded(context, heroX1, heroY1, heroX2, heroY2, 10, ArcadeTheme.alpha(ArcadeTheme.mix(ArcadeTheme.TEAL, accent, 0.5F), 0x66));
+        ArcadeTheme.rounded(context, heroX1 + 1, heroY1 + 1, heroX2 - 1, heroY2 - 1, 9, 0xF00D1A2C);
+        ArcadeTheme.rounded(context, heroX1 + 2, heroY1 + 2, heroX2 - 2, heroY1 + (heroY2 - heroY1) / 2, 8, 0x10FFFFFF);
+        ArcadeTheme.glow(context, heroX1 + 32, heroY1 + (heroY2 - heroY1) / 2, 30, ArcadeTheme.TEAL);
+
+        int logoSize = Math.min(44, heroY2 - heroY1 - 10);
+        drawArcadeLogo(context, heroX1 + 8, heroY1 + (heroY2 - heroY1 - logoSize) / 2, logoSize);
+
+        int textX = heroX1 + 60;
+        int textRight = heroX2 - (width >= 600 ? 112 : 10);
+        context.drawTextWithShadow(textRenderer, Text.literal("MEGA MINIGAMES"), textX, heroY1 + 10, 0xFFFFE9A8);
+        String subtitle = "ARCADE  •  " + visibleGames().size() + " jogos";
+        context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(subtitle, Math.max(30, textRight - textX))),
+                textX, heroY1 + 23, ArcadeTheme.MUTED);
+        if (heroY2 - heroY1 >= 52) {
+            String hint = "Escolha um cartucho e divirta-se";
+            context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(hint, Math.max(30, textRight - textX))),
+                    textX, heroY1 + 35, 0xFF7FA6C9);
+        }
+
+        if (width >= 520) {
+            String pageLabel = "PÁGINA " + (page + 1) + "/" + pageCount;
+            int pillWidth = textRenderer.getWidth(pageLabel) + 16;
+            ArcadeTheme.rounded(context, heroX2 - pillWidth - 8, heroY1 + 6, heroX2 - 8, heroY1 + 22, 7, 0xD90B1626);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(pageLabel), heroX2 - pillWidth / 2 - 8, heroY1 + 9, ArcadeTheme.GOLD);
+        }
+    }
+
+    private void drawArcadeLogo(DrawContext context, int x, int y, int size) {
+        int u = Math.max(1, size / 16);
+        int width = 14 * u;
+        int left = x + (size - width) / 2;
+        int top = y + Math.max(0, (size - 15 * u) / 2);
+        context.fill(left + 2 * u, top + 15 * u, left + 12 * u, top + 16 * u, 0x66000000);
+        ArcadeTheme.rounded(context, left + 4 * u, top + 2 * u, left + 12 * u, top + 14 * u, 2 * u, 0xFF28B3A6);
+        context.fill(left + 5 * u, top + 13 * u, left + 6 * u, top + 15 * u, 0xFF1E857C);
+        context.fill(left + 10 * u, top + 13 * u, left + 11 * u, top + 15 * u, 0xFF1E857C);
+        ArcadeTheme.rounded(context, left + 5 * u, top + 3 * u, left + 11 * u, top + 5 * u, u, ArcadeTheme.LIME);
+        context.fill(left + 5 * u, top + 5 * u, left + 11 * u, top + 9 * u, 0xFF08111F);
+        ArcadeTheme.star(context, left + 8 * u, top + 7 * u, Math.max(1, u), ArcadeTheme.GOLD);
+        context.fill(left + 4 * u, top + 9 * u, left + 12 * u, top + 11 * u, 0xFF1E857C);
+        context.fill(left + 8 * u, top + 9 * u, left + 9 * u, top + 10 * u, ArcadeTheme.MAGENTA);
+        context.fill(left + 10 * u, top + 9 * u, left + 11 * u, top + 10 * u, ArcadeTheme.GOLD);
+        context.fillGradient(left + 5 * u, top + 2 * u, left + 11 * u, top + 4 * u, 0x33B9F26B, 0x00B9F26B);
     }
 
     private void drawCategoryChips(DrawContext context, int mouseX, int mouseY) {
         Category[] categories = Category.values();
         for (int i = 0; i < categories.length; i++) {
-            int col = i % chipColumns, row = i / chipColumns;
-            int x = 16 + col * (chipWidth + 6), y = chipTop + row * 19;
+            int x = chipX[i];
+            int y = chipTop + (i / chipColumns) * (chipHeight + 4);
             boolean selected = categories[i] == category;
-            boolean hovered = mouseX >= x && mouseX < x + chipWidth && mouseY >= y && mouseY < y + 17;
-            context.fill(x, y, x + chipWidth, y + 17, selected ? 0xFF3E9C9C : hovered ? 0xFF35556D : 0xFF24374A);
-            context.fill(x, y + 15, x + chipWidth, y + 17, selected ? 0xFFFFD76C : 0xFF152535);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal(categories[i].label), x + chipWidth / 2, y + 4, selected ? 0xFFFFFFFF : 0xFFD3E2EF);
+            boolean hovered = mouseX >= x && mouseX < x + chipWidth && mouseY >= y && mouseY < y + chipHeight;
+            int accent = categories[i].color;
+            if (selected) {
+                ArcadeTheme.rounded(context, x, y, x + chipWidth, y + chipHeight, 9, accent);
+                ArcadeTheme.rounded(context, x + 1, y + 1, x + chipWidth - 1, y + 7, 8, 0x33FFFFFF);
+                context.fill(x + 6, y + 7, x + 9, y + 11, 0xFF0A1422);
+                context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(categories[i].label, chipWidth - 20)),
+                        x + 13, y + 5, 0xFF08121F);
+            } else {
+                ArcadeTheme.rounded(context, x, y, x + chipWidth, y + chipHeight, 9,
+                        hovered ? 0xCC22344E : 0xCC111E30);
+                ArcadeTheme.rounded(context, x + 1, y + 1, x + chipWidth - 1, y + chipHeight - 1, 8, 0x10FFFFFF);
+                context.fill(x + 6, y + 7, x + 9, y + 11, accent);
+                context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(categories[i].label, chipWidth - 20)),
+                        x + 13, y + 5, hovered ? ArcadeTheme.TEXT : ArcadeTheme.MUTED);
+            }
         }
     }
 
     private void drawCard(DrawContext context, Game game, int index, int x, int y, int mouseX, int mouseY) {
         boolean hovered = mouseX >= x && mouseX < x + cardWidth && mouseY >= y && mouseY < y + cardHeight;
-        int color = COVER_COLORS[index % COVER_COLORS.length];
-        int artWidth = Math.min(54, Math.max(32, cardWidth / 3));
-        int artLeft = x + cardWidth - artWidth - 6;
-
-        context.fill(x + 2, y + 3, x + cardWidth + 2, y + cardHeight + 3, 0xAA050A14);
-        context.fill(x, y, x + cardWidth, y + cardHeight, hovered ? 0xFFFFD76C : 0xFF071320);
-        context.fill(x + 2, y + 2, x + cardWidth - 2, y + cardHeight - 2, color);
-        context.fill(x + 3, y + 3, x + cardWidth - 3, y + cardHeight / 3, lighten(color));
-        context.fill(x + 3, y + cardHeight / 3, artLeft, y + cardHeight - 3, darken(color));
-
-        for (int i = 0; i < 3; i++) {
-            int dotX = x + 8 + i * 7;
-            context.fill(dotX, y + 7, dotX + 3, y + 10, 0x66FFFFFF);
-        }
-        drawCoverArt(context, game.name, index, artLeft, y + 8, artWidth, cardHeight - 16, color);
-
-        int textX = x + 9;
-        int maxTitleWidth = Math.max(28, artLeft - textX - 5);
-        String gameName = textRenderer.trimToWidth(game.name, maxTitleWidth);
-        int titleY = y + Math.max(20, cardHeight / 2 - 6);
-        context.drawTextWithShadow(textRenderer, Text.literal(gameName), textX, titleY, 0xFFFFFFFF);
-        if (cardHeight >= 72) context.drawTextWithShadow(textRenderer, Text.literal(game.category.label.toUpperCase(java.util.Locale.ROOT)), textX, y + cardHeight - 29, 0xFFFFD56A);
-        String action = hovered ? "ABRIR AGORA  ›" : "JOGAR  ›";
-        context.drawTextWithShadow(textRenderer, Text.literal(action), textX, y + cardHeight - 15,
-                hovered ? 0xFFFFE68A : 0xFFB9D7E8);
+        int accent = ArcadeTheme.mix(game.category.color, ArcadeTheme.accentFor(game.name), 0.4F);
+        int top = hovered ? y - 1 : y;
+        int radius = 8;
+        ArcadeTheme.rounded(context, x + 2, top + 4, x + cardWidth + 2, top + cardHeight + 4, radius, 0x55000000);
         if (hovered) {
-            context.fill(x + 3, y + cardHeight - 3, x + cardWidth - 3, y + cardHeight - 1, 0xFFFFD76C);
+            ArcadeTheme.rounded(context, x - 1, top - 1, x + cardWidth + 1, top + cardHeight + 1, radius + 1, accent);
+        }
+        ArcadeTheme.rounded(context, x, top, x + cardWidth, top + cardHeight, radius,
+                hovered ? ArcadeTheme.alpha(accent, 0xEE) : 0xCC26384F);
+        ArcadeTheme.rounded(context, x + 1, top + 1, x + cardWidth - 1, top + cardHeight - 1, radius - 1, 0xF00C1727);
+
+        int coverHeight = Math.max(26, cardHeight - 26);
+        ArcadeTheme.rounded(context, x + 2, top + 2, x + cardWidth - 2, top + coverHeight, radius - 2,
+                ArcadeTheme.mix(accent, 0xFF0A1422, 0.62F));
+        ArcadeTheme.rounded(context, x + 2, top + 2, x + cardWidth - 2, top + coverHeight / 2 + 2, radius - 2,
+                ArcadeTheme.alpha(ArcadeTheme.lighten(accent, 34), 0x5A));
+        for (int line = top + 4; line < top + coverHeight - 1; line += 3) {
+            context.fill(x + 3, line, x + cardWidth - 3, line + 1, 0x12000000);
+        }
+        int iconSize = Math.max(6, Math.min(22, coverHeight / 2 - 3));
+        drawCategoryGlyph(context, game.category, x + cardWidth / 2, top + 2 + (coverHeight - 2) / 2, iconSize,
+                ArcadeTheme.lighten(accent, 60));
+        context.drawTextWithShadow(textRenderer, Text.literal(String.format("%02d", index + 1)), x + 6, top + 5, 0x88FFFFFF);
+
+        context.fill(x + 2, top + coverHeight, x + cardWidth - 2, top + cardHeight - 2, 0xF0091220);
+        int textX = x + 7;
+        int maxWidth = cardWidth - 14;
+        String name = textRenderer.trimToWidth(game.name, maxWidth);
+        context.drawTextWithShadow(textRenderer, Text.literal(name), textX, top + coverHeight + 4,
+                hovered ? 0xFFFFFFFF : ArcadeTheme.TEXT);
+        if (cardHeight >= 68) {
+            String tag = hovered ? "ABRIR  ›" : game.category.label.toUpperCase(java.util.Locale.ROOT);
+            context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(tag, maxWidth)), textX,
+                    top + cardHeight - 15, hovered ? ArcadeTheme.GOLD : ArcadeTheme.alpha(accent, 0xFF));
+        }
+        context.fill(x + 7, top + coverHeight + 2, x + Math.min(cardWidth - 7, 27), top + coverHeight + 3,
+                hovered ? ArcadeTheme.GOLD : accent);
+    }
+
+    private void drawCategoryGlyph(DrawContext context, Category category, int centerX, int centerY, int size, int color) {
+        int half = Math.max(3, size / 2);
+        switch (category) {
+            case MANAGEMENT -> {
+                ArcadeTheme.disc(context, centerX, centerY, half, color);
+                ArcadeTheme.disc(context, centerX, centerY, Math.max(1, half / 3), 0xFF0C1727);
+                for (int i = 0; i < 4; i++) {
+                    int dx = i < 2 ? -1 : 1;
+                    int dy = i % 2 == 0 ? -1 : 1;
+                    context.fill(centerX + dx * half - 1, centerY + dy * half - 1,
+                            centerX + dx * half + 2, centerY + dy * half + 2, color);
+                }
+            }
+            case SIMULATION -> {
+                ArcadeTheme.ring(context, centerX, centerY, half, 1, color);
+                ArcadeTheme.disc(context, centerX, centerY, Math.max(2, half / 2), color);
+                context.fill(centerX - half, centerY - 1, centerX - half + 2, centerY + 1, color);
+                context.fill(centerX + half - 1, centerY - half, centerX + half + 1, centerY - half + 2, color);
+            }
+            case ACTION -> {
+                for (int i = 0; i < size; i++) {
+                    int x = centerX + (i - size / 2) / 2;
+                    int width = Math.max(1, size / 4);
+                    context.fill(x - width, centerY - size / 2 + i, x + width, centerY - size / 2 + i + 1, color);
+                }
+            }
+            case ADVENTURE -> {
+                for (int i = 0; i <= half; i++) {
+                    int spread = i;
+                    context.fill(centerX - half - 2 + spread / 2, centerY + half - i,
+                            centerX + 2, centerY + half - i + 1, color);
+                    context.fill(centerX - 2, centerY + half - i,
+                            centerX + half + 2 - spread / 2, centerY + half - i + 1, color);
+                }
+                context.fill(centerX - 1, centerY - half, centerX + 2, centerY + half, color);
+            }
+            case PUZZLE -> {
+                int tile = Math.max(2, half - 1);
+                context.fill(centerX - tile - 1, centerY - tile - 1, centerX - 1, centerY - 1, color);
+                context.fill(centerX + 1, centerY - tile - 1, centerX + tile + 1, centerY - 1, color);
+                context.fill(centerX - tile - 1, centerY + 1, centerX - 1, centerY + tile + 1, color);
+                context.fill(centerX + 2, centerY + 2, centerX + tile + 2, centerY + tile + 2, 0xFF0C1727);
+            }
+            default -> ArcadeTheme.star(context, centerX, centerY, half, color);
         }
     }
 
-    private void drawCoverArt(DrawContext c, String name, int seed, int x, int y, int w, int h, int base) {
-        int cx = x + w / 2;
-        int cy = y + h / 2;
-        c.fill(x, y, x + w, y + h, 0x66202B47);
-        String low = name.toLowerCase(java.util.Locale.ROOT);
-        if (low.contains("campo") || low.contains("minado") || low.contains("tetris") || low.contains("sudoku")
-                || low.contains("luzes") || low.contains("2048") || low.contains("15") || low.contains("gomoku")
-                || low.contains("velha") || low.contains("ligue") || low.contains("blocos") || low.contains("torre")) {
-            int size = Math.max(5, Math.min(12, w / 4));
-            for (int r = 0; r < 3; r++) for (int col = 0; col < 3; col++) {
-                int bx = cx - size - 2 + col * (size + 2);
-                int by = cy - size - 2 + r * (size + 2);
-                int shade = (r * 3 + col + seed) % 3 == 0 ? 0xFFFFD45F : (r + col) % 2 == 0 ? 0xFF79D8C1 : 0xFFE8F0FF;
-                c.fill(bx, by, bx + size, by + size, shade);
-                if (size > 8 && (r + col + seed) % 2 == 0) {
-                    c.drawCenteredTextWithShadow(textRenderer, Text.literal("" + ((r * 3 + col + seed) % 9 + 1)), bx + size / 2, by + size / 2 - 3, 0xFF26354B);
+    private void drawPager(DrawContext context) {
+        if (pageCount <= 1) return;
+        int y = height - 38;
+        if (pageCount <= 12) {
+            int spacing = 11;
+            int total = (pageCount - 1) * spacing;
+            for (int i = 0; i < pageCount; i++) {
+                int cx = width / 2 - total / 2 + i * spacing;
+                if (i == page) {
+                    ArcadeTheme.rounded(context, cx - 5, y - 2, cx + 5, y + 2, 2, ArcadeTheme.GOLD);
+                } else {
+                    ArcadeTheme.disc(context, cx, y, 2, 0xFF34485F);
                 }
             }
-        } else if (low.contains("carta") || low.contains("blackjack") || low.contains("dados") || low.contains("guerra")) {
-            c.fill(cx - 14, cy - 15, cx + 9, cy + 16, 0xFFEAF2F8);
-            c.fill(cx - 6, cy - 17, cx + 17, cy + 14, 0xFFFFDF83);
-            c.drawCenteredTextWithShadow(textRenderer, Text.literal(seed % 2 == 0 ? "A" : "7"), cx + 5, cy - 5, 0xFF26354B);
-            c.fill(cx - 9, cy + 3, cx - 2, cy + 10, 0xFFDB5364);
-        } else if (low.contains("alvo") || low.contains("reflex") || low.contains("laser") || low.contains("toupeira") || low.contains("bolha")) {
-            int radius = Math.max(8, Math.min(17, w / 3));
-            for (int r = radius; r > 0; r -= Math.max(3, radius / 3)) {
-                int ring = (r / 3) % 2 == 0 ? 0xFFE8F4FF : 0xFFE75D67;
-                for (int dy = -r; dy <= r; dy++) {
-                    int dx = (int) Math.sqrt(r * r - dy * dy);
-                    c.fill(cx - dx, cy + dy, cx + dx + 1, cy + dy + 1, ring);
-                }
-            }
-            c.fill(cx - 1, cy - radius - 4, cx + 1, cy + radius + 5, 0xCCFFFFFF);
-            c.fill(cx - radius - 4, cy - 1, cx + radius + 5, cy + 1, 0xCCFFFFFF);
-        } else if (low.contains("palavra") || low.contains("termo") || low.contains("anagrama") || low.contains("forca") || low.contains("digita")) {
-            String[] letters = {"M", "A", "G"};
-            int tile = Math.max(8, Math.min(15, w / 3));
-            for (int i = 0; i < 3; i++) {
-                int bx = cx - tile - 2 + i * (tile + 2);
-                int by = cy - tile / 2 + (i == 1 ? -4 : 3);
-                c.fill(bx, by, bx + tile, by + tile, i == 1 ? 0xFF8DCB70 : 0xFFEAF1F8);
-                c.drawCenteredTextWithShadow(textRenderer, Text.literal(letters[(i + seed) % 3]), bx + tile / 2, by + tile / 2 - 3, 0xFF26354B);
-            }
-        } else if (low.contains("snake") || low.contains("sapo") || low.contains("fruta") || low.contains("pesca") || low.contains("estrela")) {
-            int unit = Math.max(5, Math.min(10, w / 5));
-            for (int i = 0; i < 4; i++) {
-                int bx = cx - unit * 2 + i * unit;
-                int by = cy + ((i + seed) % 2 == 0 ? -unit : unit / 2);
-                c.fill(bx, by, bx + unit - 1, by + unit - 1, i == 3 ? 0xFFFFE46A : 0xFF8EE6A0);
-            }
-            c.fill(cx + unit, cy - unit - 2, cx + unit + 2, cy - unit, 0xFF182435);
         } else {
-            int radius = Math.max(8, Math.min(17, w / 3));
-            for (int dy = -radius; dy <= radius; dy++) {
-                int dx = (int) Math.sqrt(radius * radius - dy * dy);
-                c.fill(cx - dx, cy + dy, cx + dx + 1, cy + dy + 1, (dy + seed) % 3 == 0 ? 0xFFFFE58A : 0xFFFBF5D7);
-            }
-            c.fill(cx - 2, cy - 2, cx + 3, cy + 3, base);
-            c.fill(cx + radius / 2, cy - radius / 2, cx + radius / 2 + 3, cy - radius / 2 + 3, 0xFFFFFFFF);
+            String label = "PÁGINA " + (page + 1) + " / " + pageCount;
+            int pillWidth = textRenderer.getWidth(label) + 16;
+            ArcadeTheme.rounded(context, width / 2 - pillWidth / 2, y - 7, width / 2 + pillWidth / 2, y + 7, 7, 0xCC0B1626);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(label), width / 2, y - 4, ArcadeTheme.MUTED);
         }
-        String mark = name.contains("15") ? "15" : name.contains("2048") ? "2K" : name.substring(0, Math.min(2, name.length())).toUpperCase(java.util.Locale.ROOT);
-        c.drawTextWithShadow(textRenderer, Text.literal(mark), x + 3, y + 2, 0xFFFFF5DA);
-    }
-
-    private int lighten(int color) {
-        int r = Math.min(255, ((color >> 16) & 255) + 24);
-        int g = Math.min(255, ((color >> 8) & 255) + 24);
-        int b = Math.min(255, (color & 255) + 24);
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
-    }
-
-    private int darken(int color) {
-        int r = ((color >> 16) & 255) * 3 / 5;
-        int g = ((color >> 8) & 255) * 3 / 5;
-        int b = (color & 255) * 3 / 5;
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     @Override
@@ -381,11 +467,23 @@ public final class GamesHubScreen extends Screen {
         if (button != 0) return false;
         Category[] categories = Category.values();
         for (int i = 0; i < categories.length; i++) {
-            int col = i % chipColumns, row = i / chipColumns;
-            int x = 16 + col * (chipWidth + 6), y = chipTop + row * 19;
-            if (mouseX >= x && mouseX < x + chipWidth && mouseY >= y && mouseY < y + 17) {
+            int x = chipX[i];
+            int y = chipTop + (i / chipColumns) * (chipHeight + 4);
+            if (mouseX >= x && mouseX < x + chipWidth && mouseY >= y && mouseY < y + chipHeight) {
                 client.setScreen(new GamesHubScreen(categories[i], 0));
                 return true;
+            }
+        }
+        if (pageCount > 1 && pageCount <= 12) {
+            int spacing = 11;
+            int total = (pageCount - 1) * spacing;
+            int y = height - 38;
+            for (int i = 0; i < pageCount; i++) {
+                int cx = width / 2 - total / 2 + i * spacing;
+                if (mouseX >= cx - 5 && mouseX < cx + 5 && mouseY >= y - 4 && mouseY < y + 4) {
+                    if (i != page) client.setScreen(new GamesHubScreen(category, i));
+                    return true;
+                }
             }
         }
         List<Game> visible = visibleGames();
@@ -397,7 +495,7 @@ public final class GamesHubScreen extends Screen {
             int row = slot / columns;
             int x = (width - columns * cardWidth - (columns - 1) * cardGap) / 2 + col * (cardWidth + cardGap);
             int y = gridTop + row * (cardHeight + cardGap);
-            if (mouseX >= x && mouseX < x + cardWidth && mouseY >= y && mouseY < y + cardHeight) {
+            if (mouseX >= x && mouseX < x + cardWidth && mouseY >= y - 1 && mouseY < y + cardHeight + 1) {
                 client.setScreen(visible.get(index).screenFactory.get());
                 return true;
             }
@@ -413,6 +511,10 @@ public final class GamesHubScreen extends Screen {
         }
         if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT && page > 0) {
             client.setScreen(new GamesHubScreen(category, page - 1));
+            return true;
+        }
+        if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_R) {
+            openRandomGame();
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

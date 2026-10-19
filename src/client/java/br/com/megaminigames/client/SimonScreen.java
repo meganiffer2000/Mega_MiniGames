@@ -41,11 +41,8 @@ public final class SimonScreen extends Screen {
         boardLeft = (width - boardSize) / 2;
         boardTop = Math.max(56, (height - boardSize - 70) / 2);
         int buttonY = Math.min(height - 24, boardTop + boardSize + 18);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Reiniciar (R)"), button -> newGame())
-                .dimensions(width / 2 - 116, buttonY, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, buttonY, 112, 20).build());
+        addDrawableChild(ArcadeTheme.button(width / 2 - 116, buttonY, 112, 20, Text.literal("Reiniciar (R)"), () -> newGame()));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, buttonY, 112, 20, Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
         if (sequence.isEmpty()) {
             newGame();
         }
@@ -101,31 +98,53 @@ public final class SimonScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 12, 0xFFFFFFFF);
+        ArcadeTheme.background(context, width, height);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, ArcadeTheme.GOLD);
         String instructions = switch (mode) {
             case SHOWING -> "Observe a sequência...";
             case INPUT -> "Sua vez! Clique nas cores ou pressione 1, 2, 3 e 4";
             default -> "Sequência errada! Pressione R para tentar novamente";
         };
-        context.drawCenteredTextWithShadow(textRenderer,
-                Text.literal("Rodada " + sequence.size() + "  |  " + instructions),
-                width / 2, 31, mode == LOST ? 0xFFFF7777 : 0xFFFFFFFF);
+        ArcadeTheme.status(context, textRenderer,
+                Text.literal("Rodada " + sequence.size() + "  •  " + instructions),
+                width / 2, 31, mode == LOST ? ArcadeTheme.DANGER : ArcadeTheme.MUTED);
 
         int gap = Math.max(4, boardSize * PAD_GAP / (PAD_SIZE * 2 + PAD_GAP));
         int cellSize = (boardSize - gap) / 2;
         int lit = litPad();
+        ArcadeTheme.rounded(context, boardLeft - 8, boardTop - 8, boardLeft + boardSize + 8,
+                boardTop + boardSize + 8, 18, 0x55000000);
+        ArcadeTheme.rounded(context, boardLeft - 8, boardTop - 8, boardLeft + boardSize + 8,
+                boardTop + boardSize + 8, 18, 0x66FFFFFF);
+        ArcadeTheme.rounded(context, boardLeft - 7, boardTop - 7, boardLeft + boardSize + 7,
+                boardTop + boardSize + 7, 17, 0xF00A1422);
         for (int pad = 0; pad < 4; pad++) {
             int row = pad / 2;
             int column = pad % 2;
             int x = boardLeft + column * (cellSize + gap);
             int y = boardTop + row * (cellSize + gap);
-            int color = pad == lit ? brighten(PAD_COLORS[pad]) : PAD_COLORS[pad];
-            context.fill(x, y, x + cellSize, y + cellSize, color);
-            context.fill(x + 4, y + 4, x + cellSize - 4, y + cellSize - 4, color);
+            int base = PAD_COLORS[pad];
+            boolean hovered = mode == INPUT && mouseX >= x && mouseX < x + cellSize && mouseY >= y && mouseY < y + cellSize;
+            if (pad == lit) {
+                ArcadeTheme.glow(context, x + cellSize / 2, y + cellSize / 2, cellSize / 2, base);
+            }
+            ArcadeTheme.rounded(context, x, y, x + cellSize, y + cellSize, 14, ArcadeTheme.darken(base, 60));
+            ArcadeTheme.rounded(context, x + 2, y + 2, x + cellSize - 2, y + cellSize - 2, 12,
+                    pad == lit ? brighten(base) : hovered ? ArcadeTheme.lighten(base, 18) : base);
+            ArcadeTheme.rounded(context, x + 4, y + 4, x + cellSize - 4, y + cellSize / 2, 10, 0x22FFFFFF);
+            if (pad == lit) {
+                ArcadeTheme.ring(context, x + cellSize / 2, y + cellSize / 2, cellSize / 2 - 8, 3, 0xAAFFFFFF);
+            }
             context.drawCenteredTextWithShadow(textRenderer, Text.literal(PAD_NAMES[pad]),
                     x + cellSize / 2, y + cellSize / 2 - 4, 0xFFFFFFFF);
         }
+        int hubRadius = Math.max(18, cellSize / 5);
+        int hubX = boardLeft + cellSize + gap / 2;
+        int hubY = boardTop + cellSize + gap / 2;
+        ArcadeTheme.disc(context, hubX, hubY, hubRadius, 0xF00A1422);
+        ArcadeTheme.ring(context, hubX, hubY, hubRadius, 3, 0xFF35C8B9);
+        context.drawCenteredTextWithShadow(textRenderer, Text.literal("SIMON"), hubX, hubY - 8, ArcadeTheme.GOLD);
+        context.drawCenteredTextWithShadow(textRenderer, Text.literal("R" + sequence.size()), hubX, hubY + 3, ArcadeTheme.TEXT);
         super.render(context, mouseX, mouseY, delta);
     }
 

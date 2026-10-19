@@ -57,11 +57,8 @@ public final class ExtraArcadeScreen extends Screen {
         areaTop = 52;
         areaWidth = Math.max(100, width - 36);
         areaHeight = Math.max(80, height - 100);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Reiniciar (R)"), button -> resetGame())
-                .dimensions(width / 2 - 116, height - 25, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao menu"), button ->
-                        client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, height - 25, 112, 20).build());
+        addDrawableChild(ArcadeTheme.button(width / 2 - 116, height - 25, 112, 20, Text.literal("Reiniciar (R)"), () -> resetGame()));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, height - 25, 112, 20, Text.literal("Voltar ao menu"), () -> client.setScreen(new GamesHubScreen())));
         if (!initialized) {
             resetGame();
             initialized = true;
@@ -403,10 +400,17 @@ public final class ExtraArcadeScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context);
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 12, 0xFFFFFFFF);
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal(message), width / 2, 31,
-                gameOver && won ? 0xFF70EB89 : 0xFFE6EDF4);
+ArcadeTheme.background(context, width, height);
+        int accent = ArcadeTheme.accentFor(title);
+        context.fillGradient(0, 0, width, 64, ArcadeTheme.alpha(accent, 30), 0x00000000);
+        ArcadeTheme.rounded(context, 8, 3, width - 8, height - 25, 14, ArcadeTheme.alpha(accent, 110));
+        ArcadeTheme.rounded(context, 9, 4, width - 9, height - 26, 13, 0xFF07101C);
+        ArcadeTheme.rounded(context, 11, 6, width - 11, height - 28, 11, 0xFF0E1B2C);
+        ArcadeTheme.rounded(context, 12, 7, width - 12, height - 29, 10, 0xFF122134);
+        context.fillGradient(15, 44, width - 15, 116, ArcadeTheme.alpha(accent, 16), 0x00000000);
+        ArcadeTheme.header(context, textRenderer, title, width / 2, 12, accent);
+        ArcadeTheme.status(context, textRenderer, Text.literal(message), width / 2, 31,
+                gameOver ? ArcadeTheme.GOLD : ArcadeTheme.TEXT);
         switch (game) {
             case SLIDING_15 -> renderSliding(context);
             case GOMOKU -> renderGomoku(context);
@@ -429,6 +433,8 @@ public final class ExtraArcadeScreen extends Screen {
             case TRUE_FALSE -> renderTrueFalse(context);
             case CARD_WAR -> renderCardWar(context);
         }
+        if (gameOver) ArcadeTheme.status(context, textRenderer, Text.literal("R para jogar novamente"),
+                width / 2, height - 45, ArcadeTheme.GOLD);
         super.render(context, mouseX, mouseY, delta);
     }
 

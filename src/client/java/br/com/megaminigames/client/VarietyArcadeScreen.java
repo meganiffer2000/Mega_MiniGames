@@ -46,10 +46,8 @@ public final class VarietyArcadeScreen extends Screen {
 
     @Override
     protected void init() {
-        addDrawableChild(ButtonWidget.builder(Text.literal("Reiniciar (R)"), button -> resetGame())
-                .dimensions(width / 2 - 116, height - 25, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Voltar ao hub"), button -> client.setScreen(new GamesHubScreen()))
-                .dimensions(width / 2 + 4, height - 25, 112, 20).build());
+        addDrawableChild(ArcadeTheme.button(width / 2 - 116, height - 25, 112, 20, Text.literal("Reiniciar (R)"), () -> resetGame()));
+        addDrawableChild(ArcadeTheme.button(width / 2 + 4, height - 25, 112, 20, Text.literal("Voltar ao hub"), () -> client.setScreen(new GamesHubScreen())));
         if (!initialized) { resetGame(); initialized = true; }
     }
 
@@ -228,9 +226,17 @@ public final class VarietyArcadeScreen extends Screen {
 
     @Override
     public void render(DrawContext c, int mouseX, int mouseY, float delta) {
-        renderBackground(c); c.fill(0, 0, width, height, 0xD00A1321); c.fill(12, 8, width - 12, height - 34, 0xAA1B2C3E);
-        c.drawCenteredTextWithShadow(textRenderer, title, width / 2, 13, 0xFFFFFFFF);
-        c.drawCenteredTextWithShadow(textRenderer, message, width / 2, 32, gameOver ? 0xFFFFD76A : 0xFFD6E7F5);
+ArcadeTheme.background(c, width, height);
+        int accent = ArcadeTheme.accentFor(title);
+        c.fillGradient(0, 0, width, 64, ArcadeTheme.alpha(accent, 30), 0x00000000);
+        ArcadeTheme.rounded(c, 8, 3, width - 8, height - 25, 14, ArcadeTheme.alpha(accent, 110));
+        ArcadeTheme.rounded(c, 9, 4, width - 9, height - 26, 13, 0xFF07101C);
+        ArcadeTheme.rounded(c, 11, 6, width - 11, height - 28, 11, 0xFF0E1B2C);
+        ArcadeTheme.rounded(c, 12, 7, width - 12, height - 29, 10, 0xFF122134);
+        c.fillGradient(15, 44, width - 15, 116, ArcadeTheme.alpha(accent, 16), 0x00000000);
+        ArcadeTheme.header(c, textRenderer, title, width / 2, 12, accent);
+        ArcadeTheme.status(c, textRenderer, Text.literal(message), width / 2, 31,
+                gameOver ? ArcadeTheme.GOLD : ArcadeTheme.TEXT);
         switch (game) {
             case BOOKSHOP -> renderBookshop(c);
             case STATION -> renderStation(c);
@@ -248,7 +254,7 @@ public final class VarietyArcadeScreen extends Screen {
             case PIPES -> renderPipes(c);
             case WORD_BRIDGE -> renderWordBridge(c);
         }
-        if (gameOver) c.drawCenteredTextWithShadow(textRenderer, Text.literal("R para jogar novamente"), width / 2, height - 43, 0xFFFFD76A);
+        if (gameOver) ArcadeTheme.status(c, textRenderer, Text.literal("R para jogar novamente"), width / 2, height - 45, ArcadeTheme.GOLD);
         super.render(c, mouseX, mouseY, delta);
     }
 

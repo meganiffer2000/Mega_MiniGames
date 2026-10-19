@@ -40,7 +40,7 @@ public final class CategoryArcadeScreen extends Screen {
     private int score, round, ticks, timer, phase, misses, x, y, altitude, speed;
     private int resourceA, resourceB, resourceC, lane, targetLane, ammo, fuel, keyCount;
     private int selectedAction, weather, temperature, population, predatorCount, preyCount;
-    private boolean gameOver, won, initialized;
+    private boolean gameOver, won, initialized, jumping;
 
     public CategoryArcadeScreen(Game game) {
         super(Text.literal(game.title));
@@ -65,7 +65,7 @@ public final class CategoryArcadeScreen extends Screen {
         targets.clear();
         score = round = ticks = phase = misses = keyCount = resourceA = resourceB = resourceC = 0;
         timer = 0; x = y = 0; altitude = 4; speed = 4; lane = 1; targetLane = 1;
-        fuel = 100; ammo = 10; selectedAction = 0; gameOver = won = false;
+        fuel = 100; ammo = 10; selectedAction = 0; gameOver = won = jumping = false;
         population = 5; predatorCount = 2; preyCount = 8; weather = 2; temperature = 2;
         switch (game) {
             case FARM -> { timer = 1200; resourceA = 12; message = "Plante, espere crescer e colha antes do fim da estação."; }

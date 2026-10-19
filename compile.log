@@ -13,21 +13,111 @@ For more details see https://docs.gradle.org/8.6/release-notes.html
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.6/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 
+> Configure project :
+Fabric Loom: 1.6.12
+:remapping 54 mods from modImplementation (java-api)
+
+> Task :compileJava
+> Task :processResources
+> Task :classes
+
+> Task :compileClientJava
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:203: error: incompatible types: bad return type in lambda expression
+            super(x, y, width, height, label, button -> action.run(), supplier -> label);
+                                                                                  ^
+    Text cannot be converted to MutableText
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:219: error: x has private access in ClickableWidget
+            rounded(context, this.x, this.y + 2, this.x + this.width, this.y + this.height + 2, 6, 0x55000000);
+                                 ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:219: error: y has private access in ClickableWidget
+            rounded(context, this.x, this.y + 2, this.x + this.width, this.y + this.height + 2, 6, 0x55000000);
+                                         ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:219: error: x has private access in ClickableWidget
+            rounded(context, this.x, this.y + 2, this.x + this.width, this.y + this.height + 2, 6, 0x55000000);
+                                                     ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:219: error: y has private access in ClickableWidget
+            rounded(context, this.x, this.y + 2, this.x + this.width, this.y + this.height + 2, 6, 0x55000000);
+                                                                          ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:220: error: x has private access in ClickableWidget
+            rounded(context, this.x, this.y, this.x + this.width, this.y + this.height, 6,
+                                 ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:220: error: y has private access in ClickableWidget
+            rounded(context, this.x, this.y, this.x + this.width, this.y + this.height, 6,
+                                         ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:220: error: x has private access in ClickableWidget
+            rounded(context, this.x, this.y, this.x + this.width, this.y + this.height, 6,
+                                                 ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:220: error: y has private access in ClickableWidget
+            rounded(context, this.x, this.y, this.x + this.width, this.y + this.height, 6,
+                                                                      ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:222: error: x has private access in ClickableWidget
+            rounded(context, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, 5,
+                                 ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:222: error: y has private access in ClickableWidget
+            rounded(context, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, 5,
+                                             ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:222: error: x has private access in ClickableWidget
+            rounded(context, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, 5,
+                                                         ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:222: error: y has private access in ClickableWidget
+            rounded(context, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, 5,
+                                                                                  ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:224: error: x has private access in ClickableWidget
+            context.fillGradient(this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 2, top,
+                                     ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:224: error: y has private access in ClickableWidget
+            context.fillGradient(this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 2, top,
+                                                 ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:224: error: x has private access in ClickableWidget
+            context.fillGradient(this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 2, top,
+                                                             ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:224: error: y has private access in ClickableWidget
+            context.fillGradient(this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 2, top,
+                                                                                      ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:226: error: x has private access in ClickableWidget
+            context.fill(this.x + 3, this.y + 2, this.x + this.width - 3, this.y + 3,
+                             ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:226: error: y has private access in ClickableWidget
+            context.fill(this.x + 3, this.y + 2, this.x + this.width - 3, this.y + 3,
+                                         ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:226: error: x has private access in ClickableWidget
+            context.fill(this.x + 3, this.y + 2, this.x + this.width - 3, this.y + 3,
+                                                     ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:226: error: y has private access in ClickableWidget
+            context.fill(this.x + 3, this.y + 2, this.x + this.width - 3, this.y + 3,
+                                                                              ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:229: error: x has private access in ClickableWidget
+                context.fill(this.x + 3, this.y + this.height - 3, this.x + this.width - 3,
+                                 ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:229: error: y has private access in ClickableWidget
+                context.fill(this.x + 3, this.y + this.height - 3, this.x + this.width - 3,
+                                             ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:229: error: x has private access in ClickableWidget
+                context.fill(this.x + 3, this.y + this.height - 3, this.x + this.width - 3,
+                                                                       ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:230: error: y has private access in ClickableWidget
+                        this.y + this.height - 2, 0x88FFFFFF);
+                            ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:234: error: x has private access in ClickableWidget
+                    this.x + this.width / 2, this.y + (this.height - 8) / 2, textColor);
+                        ^
+/home/runner/work/Mega_MiniGames/Mega_MiniGames/src/client/java/br/com/megaminigames/client/ArcadeTheme.java:234: error: y has private access in ClickableWidget
+                    this.x + this.width / 2, this.y + (this.height - 8) / 2, textColor);
+                                                 ^
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+27 errors
+
+> Task :compileClientJava FAILED
+
 FAILURE: Build failed with an exception.
 
-* Where:
-Build file '/home/runner/work/Mega_MiniGames/Mega_MiniGames/build.gradle' line: 2
-
 * What went wrong:
-An exception occurred applying plugin request [id: 'fabric-loom', version: '1.6.12']
-> Failed to apply plugin 'fabric-loom'.
-   > You are using an outdated version of Java (11). Java 17 or higher is required.
-     The JAVA_HOME environment variable is currently set to (/usr/lib/jvm/temurin-11-jdk-amd64).
+Execution failed for task ':compileClientJava'.
+> Compilation failed; see the compiler error output for details.
 
 * Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
+> Run with --info option to get more log output.
 > Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
 
-BUILD FAILED in 21s
+BUILD FAILED in 1m 4s
+3 actionable tasks: 3 executed

@@ -42,7 +42,27 @@ public final class GamesHubScreen extends Screen {
             new Game("Digitação Rápida", TypingSprintScreen::new),
             new Game("Batalha Naval", MiniBattleshipScreen::new),
             new Game("Pular Corda", JumpRopeScreen::new),
-            new Game("Pescaria", FishingScreen::new)
+            new Game("Pescaria", FishingScreen::new),
+            new Game("Jogo dos 15", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.SLIDING_15)),
+            new Game("Gomoku", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.GOMOKU)),
+            new Game("Anagrama", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.ANAGRAM)),
+            new Game("Maior ou Menor", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.HIGH_LOW)),
+            new Game("Duelo de Dados", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.DICE_DUEL)),
+            new Game("Pênaltis", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.PENALTIES)),
+            new Game("Caçador de Alvos", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.AIM_TRAINER)),
+            new Game("Sapo na Estrada", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.FROGGER)),
+            new Game("Mini Golfe", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.MINI_GOLF)),
+            new Game("Memória Numérica", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.NUMBER_MEMORY)),
+            new Game("Combinação de Cores", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.COLOR_MATCH)),
+            new Game("Pegue as Estrelas", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.STAR_CATCH)),
+            new Game("Pare a Barra", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.STOP_BAR)),
+            new Game("Caça ao Tesouro", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.TREASURE_HUNT)),
+            new Game("Corrida de Faixas", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.LANE_RACER)),
+            new Game("Arremesso ao Cesto", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.BASKET_SHOT)),
+            new Game("Salto de Obstáculos", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.JUMP_HURDLE)),
+            new Game("Sequência de Setas", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.ARROW_SEQUENCE)),
+            new Game("Verdadeiro ou Falso", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.TRUE_FALSE)),
+            new Game("Guerra de Cartas", () -> new ExtraArcadeScreen(ExtraArcadeScreen.Game.CARD_WAR))
     );
 
     private final int page;

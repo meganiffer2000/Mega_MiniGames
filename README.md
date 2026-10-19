@@ -34,7 +34,7 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **30 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **50 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
 
 Nesta atualização foram adicionados dez jogos:
 
@@ -49,4 +49,27 @@ Nesta atualização foram adicionados dez jogos:
 - **Pular Corda**: pressione Espaço no momento certo.
 - **Pescaria**: lance a linha e recolha quando o peixe morder.
 
-Também foram ajustados os tamanhos dos tabuleiros e controles de **Tetris**, **Campo Minado**, **Jogo da Memória** e **Acerte a Toupeira** para telas menores; a toupeira aparece desde o início e não some entre acertos. Outros dez jogos adicionados anteriormente são **Invasores Espaciais**, **Damas**, **Termo**, **Desafio de Matemática**, **Teste de Reflexo**, **Tetris**, **Quebra-Blocos**, **2048**, **Jogo da Velha** e **Ligue 4**. O hub usa páginas para organizar os jogos e o workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.
+Esta atualização também adiciona vinte jogos:
+
+- **Jogo dos 15**: ordene as peças deslizando-as para o espaço vazio.
+- **Gomoku**: faça cinco em linha contra a IA.
+- **Anagrama**: reorganize letras para descobrir palavras.
+- **Maior ou Menor**: adivinhe se a próxima carta será maior ou menor.
+- **Duelo de Dados**: dispute rodadas de dados contra o computador.
+- **Pênaltis**: escolha a direção do chute e tente marcar.
+- **Caçador de Alvos**: acerte alvos clicáveis antes de o tempo acabar.
+- **Sapo na Estrada**: atravesse as pistas desviando dos carros.
+- **Mini Golfe**: ajuste direção e força para colocar a bola no buraco.
+- **Memória Numérica**: memorize e repita sequências de números.
+- **Combinação de Cores**: diga se o nome da cor combina com a tinta.
+- **Pegue as Estrelas**: mova a cesta para coletar estrelas.
+- **Pare a Barra**: pare o marcador dentro da faixa de precisão.
+- **Caça ao Tesouro**: encontre o tesouro escondido com dicas de proximidade.
+- **Corrida de Faixas**: troque de faixa para escapar dos obstáculos.
+- **Arremesso ao Cesto**: acerte o tempo do arremesso.
+- **Salto de Obstáculos**: pressione Espaço no momento certo.
+- **Sequência de Setas**: memorize e repita a sequência indicada.
+- **Verdadeiro ou Falso**: responda a dez contas rápidas.
+- **Guerra de Cartas**: vire cartas e vença a IA com a maior.
+
+Também foram ajustados os tamanhos dos tabuleiros e controles de **Tetris**, **Campo Minado**, **Jogo da Memória** e **Acerte a Toupeira** para telas menores; a toupeira aparece desde o início e não some entre acertos. O hub usa páginas para organizar os jogos e o workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.

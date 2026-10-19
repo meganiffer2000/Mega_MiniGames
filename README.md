@@ -34,7 +34,7 @@ O arquivo compilado será criado em `build/libs/`. Para iniciar uma instância d
 
 ## Comando e primeiro jogo
 
-Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **50 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
+Dentro de um mundo, use `/mmg games_hub` para abrir o menu paginado, que agora oferece **60 minijogos**. O comando é registrado também no cliente para funcionar mesmo em servidores que não tenham o mod instalado; o mod deve estar instalado no seu cliente.
 
 Nesta atualização foram adicionados dez jogos:
 
@@ -72,4 +72,17 @@ Esta atualização também adiciona vinte jogos:
 - **Verdadeiro ou Falso**: responda a dez contas rápidas.
 - **Guerra de Cartas**: vire cartas e vença a IA com a maior.
 
-Também foram ajustados os tamanhos dos tabuleiros e controles de **Tetris**, **Campo Minado**, **Jogo da Memória** e **Acerte a Toupeira** para telas menores; a toupeira aparece desde o início e não some entre acertos. O hub usa páginas para organizar os jogos e o workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.
+Esta atualização adiciona mais dez jogos:
+
+- **Caça-Palavras**: encontre a palavra escondida na grade de letras.
+- **Desafio Relâmpago**: resolva contas de adição contra o cronômetro.
+- **Teste de Reação**: clique somente quando o sinal ficar verde.
+- **Copos Mágicos**: memorize a estrela e acompanhe os copos embaralhados.
+- **Desvie dos Lasers**: troque de faixa para sobreviver aos lasers.
+- **Frutas Coloridas**: pegue apenas as frutas da cor indicada.
+- **Quiz de Bandeiras**: associe bandeiras a países.
+- **Toque Rápido**: faça o máximo de cliques em dez segundos.
+- **Torre Perfeita**: pare os blocos no momento certo para empilhá-los.
+- **Estoure as Bolhas**: clique nas bolhas antes que mudem de lugar.
+
+Também foram ajustados os tamanhos dos tabuleiros e controles de **Tetris**, **Campo Minado**, **Jogo da Memória** e **Acerte a Toupeira** para telas menores; a toupeira aparece desde o início e não some entre acertos. O hub agora usa capas ilustradas e clicáveis em uma grade responsiva, com paginação adaptada ao tamanho da janela. O workflow do GitHub Actions compila o mod e publica o `.jar` como artefato da execução.

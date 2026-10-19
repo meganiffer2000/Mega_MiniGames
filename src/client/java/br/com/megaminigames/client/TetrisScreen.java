@@ -35,6 +35,8 @@ public final class TetrisScreen extends Screen {
     private int panelWidth;
     private int piece;
     private int nextPiece;
+    private int holdPiece = -1;
+    private boolean holdUsed;
     private int rotation;
     private int pieceX;
     private int pieceY;
@@ -85,10 +87,44 @@ public final class TetrisScreen extends Screen {
         gameOver = false;
         initialized = true;
         nextPiece = ThreadLocalRandom.current().nextInt(SHAPES.length);
+        holdPiece = -1;
+        holdUsed = false;
         spawnPiece();
     }
 
+    private void holdPiece() {
+        if (holdUsed || gameOver) return;
+        holdUsed = true;
+        if (holdPiece < 0) {
+            holdPiece = piece;
+            piece = nextPiece;
+            nextPiece = ThreadLocalRandom.current().nextInt(SHAPES.length);
+        } else {
+            int swap = holdPiece;
+            holdPiece = piece;
+            piece = swap;
+        }
+        rotation = 0;
+        pieceX = 3;
+        pieceY = 0;
+        if (collides(pieceX, pieceY, rotation)) {
+            gameOver = true;
+        }
+    }
+
+    private void hardDrop() {
+        int dropped = 0;
+        while (!collides(pieceX, pieceY + 1, rotation)) {
+            pieceY++;
+            dropped++;
+        }
+        score += dropped * 2;
+        lockPiece();
+        fallTicks = 0;
+    }
+
     private void spawnPiece() {
+        holdUsed = false;
         piece = nextPiece;
         nextPiece = ThreadLocalRandom.current().nextInt(SHAPES.length);
         rotation = 0;
@@ -214,7 +250,8 @@ public final class TetrisScreen extends Screen {
         ArcadeTheme.background(context, width, height);
         ArcadeTheme.header(context, textRenderer, title, width / 2, 12, ArcadeTheme.PURPLE);
         ArcadeTheme.status(context, textRenderer,
-                Text.literal(gameOver ? "Fim de jogo — pressione R" : "← → mover  •  ↑ girar  •  ↓ descer"),
+                Text.literal(gameOver ? "Fim de jogo — pressione R"
+                        : "← → mover  •  ↑ girar  •  Espaço desce  •  C guarda"),
                 width / 2, 32, gameOver ? ArcadeTheme.GOLD : ArcadeTheme.MUTED);
 
         int right = boardLeft + COLUMNS * cellSize;
@@ -288,18 +325,33 @@ public final class TetrisScreen extends Screen {
                     context.fill(blockX + 1, blockY + 1, blockX + previewCell - 2, blockY + 2, 0x55FFFFFF);
                 }
             }
-            ArcadeTheme.panel(context, panelLeft, boardTop + 88, panelLeft + panelWidth, bottom);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("NÍVEL"),
-                    panelLeft + panelWidth / 2, boardTop + 96, ArcadeTheme.MUTED);
-            context.drawCenteredTextWithShadow(textRenderer,
-                    Text.literal(Integer.toString(Math.min(99, 1 + score / 1000))),
-                    panelLeft + panelWidth / 2, boardTop + 110, ArcadeTheme.GOLD);
-            int hintY = boardTop + 132;
-            if (hintY + 30 < bottom) {
-                context.drawCenteredTextWithShadow(textRenderer, Text.literal("R"),
-                        panelLeft + panelWidth / 2, hintY, ArcadeTheme.DIM);
-                context.drawCenteredTextWithShadow(textRenderer, Text.literal("recomeçar"),
-                        panelLeft + panelWidth / 2, hintY + 12, ArcadeTheme.DIM);
+            int holdTop = boardTop + 84;
+            ArcadeTheme.panelAccent(context, panelLeft, holdTop, panelLeft + panelWidth, holdTop + 62,
+                    ArcadeTheme.LIME, 7);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("GUARDA"),
+                    panelLeft + panelWidth / 2, holdTop + 5, ArcadeTheme.MUTED);
+            int holdCell = Math.max(6, Math.min(12, (panelWidth - 16) / 4));
+            int holdLeft = panelLeft + (panelWidth - 4 * holdCell) / 2;
+            int holdY = holdTop + 20;
+            if (holdPiece >= 0) {
+                for (int[] block : SHAPES[holdPiece]) {
+                    int blockX = holdLeft + block[0] * holdCell;
+                    int blockY = holdY + block[1] * holdCell;
+                    ArcadeTheme.rounded(context, blockX, blockY, blockX + holdCell - 1,
+                            blockY + holdCell - 1, 2, holdUsed ? 0xFF4B5568 : COLORS[holdPiece]);
+                }
+            } else {
+                context.drawCenteredTextWithShadow(textRenderer, Text.literal("C"),
+                        panelLeft + panelWidth / 2, holdY + holdCell, ArcadeTheme.DIM);
+            }
+            int levelTop = holdTop + 68;
+            ArcadeTheme.panel(context, panelLeft, levelTop, panelLeft + panelWidth, bottom);
+            if (bottom - levelTop >= 34) {
+                context.drawCenteredTextWithShadow(textRenderer, Text.literal("NÍVEL"),
+                        panelLeft + panelWidth / 2, levelTop + 6, ArcadeTheme.MUTED);
+                context.drawCenteredTextWithShadow(textRenderer,
+                        Text.literal(Integer.toString(Math.min(99, 1 + score / 1000))),
+                        panelLeft + panelWidth / 2, levelTop + 20, ArcadeTheme.GOLD);
             }
         }
 
@@ -344,7 +396,9 @@ public final class TetrisScreen extends Screen {
             case GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_A -> move(-1, 0);
             case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D -> move(1, 0);
             case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> move(0, 1);
-            case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_SPACE -> rotate();
+            case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> rotate();
+            case GLFW.GLFW_KEY_SPACE -> hardDrop();
+            case GLFW.GLFW_KEY_C -> holdPiece();
             default -> {
                 return super.keyPressed(keyCode, scanCode, modifiers);
             }

@@ -6,11 +6,17 @@ import java.util.function.Supplier;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 
 /** Hub em grade de capas clicáveis, com filtros por categoria e visual neon arcade. */
 public final class GamesHubScreen extends Screen {
     private static final List<Game> GAMES = List.of(
+            new Game("Pinball Neon", PinballScreen::new, Category.ACTION),
+            new Game("Batalha de Tanques", TankScreen::new, Category.ACTION),
+            new Game("Nonograma", NonogramScreen::new, Category.PUZZLE),
+            new Game("Hóquei de Ar", AirHockeyScreen::new, Category.SIMULATION),
+            new Game("Trânsito Travado", RushHourScreen::new, Category.PUZZLE),
             new Game("Empurra-Caixas", SokobanScreen::new, Category.PUZZLE),
             new Game("Senha Secreta", MastermindScreen::new, Category.PUZZLE),
             new Game("Bomba!", BombermanScreen::new, Category.ACTION),
@@ -149,19 +155,25 @@ public final class GamesHubScreen extends Screen {
     );
 
     private enum Category {
-        ALL("Todos", ArcadeTheme.GOLD),
-        MANAGEMENT("Gerenciamento", ArcadeTheme.LIME),
-        SIMULATION("Simulação", ArcadeTheme.SKY),
-        ACTION("Ação", ArcadeTheme.MAGENTA),
-        ADVENTURE("Aventura", ArcadeTheme.CORAL),
-        PUZZLE("Quebra-cabeça", ArcadeTheme.PURPLE);
+        ALL("mega_minigames.category.all", "Todos", ArcadeTheme.GOLD),
+        MANAGEMENT("mega_minigames.category.management", "Gerenciamento", ArcadeTheme.LIME),
+        SIMULATION("mega_minigames.category.simulation", "Simulação", ArcadeTheme.SKY),
+        ACTION("mega_minigames.category.action", "Ação", ArcadeTheme.MAGENTA),
+        ADVENTURE("mega_minigames.category.adventure", "Aventura", ArcadeTheme.CORAL),
+        PUZZLE("mega_minigames.category.puzzle", "Quebra-cabeça", ArcadeTheme.PURPLE);
 
+        private final String key;
         private final String label;
         private final int color;
 
-        Category(String label, int color) {
+        Category(String key, String label, int color) {
+            this.key = key;
             this.label = label;
             this.color = color;
+        }
+
+        private String label() {
+            return I18n.translate(key);
         }
     }
 
@@ -248,20 +260,25 @@ public final class GamesHubScreen extends Screen {
         int controlsY = height - 26;
         int buttonWidth = Math.min(94, Math.max(58, (width - sidePadding * 2 - 24) / 3));
         ButtonWidget previous = ArcadeTheme.button(sidePadding, controlsY, buttonWidth, 20,
-                Text.literal("‹ Anterior"), () -> client.setScreen(new GamesHubScreen(category, Math.max(0, page - 1))));
+                Text.translatable("mega_minigames.hub.previous"), () -> client.setScreen(new GamesHubScreen(category, Math.max(0, page - 1))));
         previous.active = page > 0;
         addDrawableChild(previous);
         addDrawableChild(ArcadeTheme.button((width - buttonWidth) / 2, controlsY, buttonWidth, 20,
-                Text.literal("Fechar"), () -> client.setScreen(null)));
+                Text.translatable("mega_minigames.hub.close"), () -> client.setScreen(null)));
         ButtonWidget next = ArcadeTheme.button(width - sidePadding - buttonWidth, controlsY, buttonWidth, 20,
-                Text.literal("Próxima ›"), () -> client.setScreen(new GamesHubScreen(category, Math.min(pageCount - 1, page + 1))));
+                Text.translatable("mega_minigames.hub.next"), () -> client.setScreen(new GamesHubScreen(category, Math.min(pageCount - 1, page + 1))));
         next.active = page < pageCount - 1;
         addDrawableChild(next);
 
         if (width >= 600) {
             addDrawableChild(ArcadeTheme.button(heroX2 - 104, heroY2 - 26, 96, 18,
-                    Text.literal("ALEATÓRIO"), this::openRandomGame));
+                    Text.translatable("mega_minigames.hub.random"), this::openRandomGame));
         }
+    }
+
+    /** Sorteia um jogo do catálogo completo (usado pelo Console Retrô ao agachar). */
+    public static Screen randomGame() {
+        return GAMES.get(ThreadLocalRandom.current().nextInt(GAMES.size())).screenFactory.get();
     }
 
     private void openRandomGame() {
@@ -306,17 +323,17 @@ public final class GamesHubScreen extends Screen {
         int textX = heroX1 + 60;
         int textRight = heroX2 - (width >= 600 ? 112 : 10);
         context.drawTextWithShadow(textRenderer, Text.literal("MEGA MINIGAMES"), textX, heroY1 + 10, 0xFFFFE9A8);
-        String subtitle = "ARCADE  •  " + visibleGames().size() + " jogos  •  R surpreende";
+        String subtitle = I18n.translate("mega_minigames.hub.subtitle", visibleGames().size());
         context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(subtitle, Math.max(30, textRight - textX))),
                 textX, heroY1 + 23, ArcadeTheme.MUTED);
         if (heroY2 - heroY1 >= 52) {
-            String hint = "Setas viram página  •  R sorteia  •  ESC fecha";
+            String hint = I18n.translate("mega_minigames.hub.hint");
             context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(hint, Math.max(30, textRight - textX))),
                     textX, heroY1 + 35, 0xFF7FA6C9);
         }
 
         if (width >= 520) {
-            String pageLabel = "PÁGINA " + (page + 1) + "/" + pageCount;
+            String pageLabel = I18n.translate("mega_minigames.hub.page", page + 1, pageCount);
             int pillWidth = textRenderer.getWidth(pageLabel) + 16;
             ArcadeTheme.rounded(context, heroX2 - pillWidth - 8, heroY1 + 6, heroX2 - 8, heroY1 + 22, 7, 0xD90B1626);
             context.drawCenteredTextWithShadow(textRenderer, Text.literal(pageLabel), heroX2 - pillWidth / 2 - 8, heroY1 + 9, ArcadeTheme.GOLD);
@@ -353,14 +370,14 @@ public final class GamesHubScreen extends Screen {
                 ArcadeTheme.rounded(context, x, y, x + chipWidth, y + chipHeight, 9, accent);
                 ArcadeTheme.rounded(context, x + 1, y + 1, x + chipWidth - 1, y + 7, 8, 0x33FFFFFF);
                 context.fill(x + 6, y + 7, x + 9, y + 11, 0xFF0A1422);
-                context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(categories[i].label, chipWidth - 20)),
+                context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(categories[i].label(), chipWidth - 20)),
                         x + 13, y + 5, 0xFF08121F);
             } else {
                 ArcadeTheme.rounded(context, x, y, x + chipWidth, y + chipHeight, 9,
                         hovered ? 0xCC22344E : 0xCC111E30);
                 ArcadeTheme.rounded(context, x + 1, y + 1, x + chipWidth - 1, y + chipHeight - 1, 8, 0x10FFFFFF);
                 context.fill(x + 6, y + 7, x + 9, y + 11, accent);
-                context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(categories[i].label, chipWidth - 20)),
+                context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(categories[i].label(), chipWidth - 20)),
                         x + 13, y + 5, hovered ? ArcadeTheme.TEXT : ArcadeTheme.MUTED);
             }
         }
@@ -391,6 +408,14 @@ public final class GamesHubScreen extends Screen {
         drawGameArt(context, game.name, x + cardWidth / 2, top + 2 + (coverHeight - 2) / 2, iconSize,
                 ArcadeTheme.lighten(accent, 60));
         context.drawTextWithShadow(textRenderer, Text.literal(String.format("%02d", index + 1)), x + 6, top + 5, 0x88FFFFFF);
+        if (index < 5) {
+            String badge = I18n.translate("mega_minigames.hub.new");
+            int badgeWidth = textRenderer.getWidth(badge) + 8;
+            int badgeX = x + cardWidth - badgeWidth - 4;
+            ArcadeTheme.rounded(context, badgeX, top + 4, badgeX + badgeWidth, top + 14, 5, 0xEEFFD66B);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(badge), badgeX + badgeWidth / 2,
+                    top + 6, 0xFF231703);
+        }
         if (hovered) {
             int badgeX = x + cardWidth - 12;
             int badgeY = top + 11;
@@ -407,7 +432,8 @@ public final class GamesHubScreen extends Screen {
         context.drawTextWithShadow(textRenderer, Text.literal(name), textX, top + coverHeight + 4,
                 hovered ? 0xFFFFFFFF : ArcadeTheme.TEXT);
         if (cardHeight >= 68) {
-            String tag = hovered ? "ABRIR  ›" : game.category.label.toUpperCase(java.util.Locale.ROOT);
+            String tag = hovered ? I18n.translate("mega_minigames.hub.open")
+                    : game.category.label().toUpperCase(java.util.Locale.ROOT);
             context.drawTextWithShadow(textRenderer, Text.literal(textRenderer.trimToWidth(tag, maxWidth)), textX,
                     top + cardHeight - 15, hovered ? ArcadeTheme.GOLD : ArcadeTheme.alpha(accent, 0xFF));
         }
@@ -422,7 +448,54 @@ public final class GamesHubScreen extends Screen {
         int half = Math.max(4, size / 2);
         int dark = ArcadeTheme.darken(color, 70);
         int light = ArcadeTheme.lighten(color, 55);
-        if (name.contains("empurra-caixas") || name.contains("sokoban")) {
+        if (name.contains("pinball") || name.contains("fliperama")) {
+            ArcadeTheme.rounded(context, centerX - half + 2, centerY - half, centerX + half - 2,
+                    centerY + half, 3, 0xFF2B1B52);
+            ArcadeTheme.ring(context, centerX - half / 3, centerY - half / 3, 4, 1, ArcadeTheme.MAGENTA);
+            ArcadeTheme.ring(context, centerX + half / 3, centerY - half / 3, 4, 1, ArcadeTheme.LIME);
+            ArcadeTheme.disc(context, centerX, centerY, 5, 0xFFFFE9A8);
+            context.fill(centerX - half / 2, centerY + half / 2, centerX - 2, centerY + half / 2 + 2,
+                    ArcadeTheme.GOLD);
+            context.fill(centerX + 2, centerY + half / 2, centerX + half / 2, centerY + half / 2 + 2,
+                    ArcadeTheme.GOLD);
+        } else if (name.contains("tanques") || name.contains("tanque")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY, centerX + half, centerY + half, 3,
+                    0xFF5C6B80);
+            ArcadeTheme.rounded(context, centerX - half + 2, centerY + 2, centerX + half - 2, centerY + half - 2,
+                    2, 0xFF8B4A35);
+            ArcadeTheme.rounded(context, centerX - half / 2, centerY - 2, centerX + half / 2, centerY + 12, 3,
+                    ArcadeTheme.LIME);
+            context.fill(centerX - 2, centerY - half, centerX + 2, centerY + 2,
+                    ArcadeTheme.lighten(ArcadeTheme.LIME, 30));
+            ArcadeTheme.disc(context, centerX, centerY + 5, 3, ArcadeTheme.darken(ArcadeTheme.LIME, 40));
+        } else if (name.contains("nonograma")) {
+            int block = Math.max(4, half / 2);
+            for (int row = 0; row < 4; row++) {
+                for (int column = 0; column < 4; column++) {
+                    int x = centerX - half + column * block;
+                    int y = centerY - half + row * block;
+                    context.fill(x, y, x + block - 1, y + block - 1,
+                            (row + column) % 3 == 0 ? ArcadeTheme.PURPLE : 0xFF1A2438);
+                }
+            }
+        } else if (name.contains("hóquei") || name.contains("hoquei") || name.contains("air hockey")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - half, centerX + half, centerY + half, 4,
+                    0xFF153C55);
+            context.fill(centerX - half, centerY, centerX + half, centerY + 1, 0x66FFFFFF);
+            ArcadeTheme.ring(context, centerX, centerY, half / 2, 1, 0x44FFFFFF);
+            ArcadeTheme.disc(context, centerX, centerY + half / 3, 3, ArcadeTheme.SKY);
+            ArcadeTheme.disc(context, centerX - 2, centerY - half / 3, 3, ArcadeTheme.CORAL);
+            ArcadeTheme.disc(context, centerX + 4, centerY - 2, 2, ArcadeTheme.GOLD);
+        } else if (name.contains("trânsito") || name.contains("transito") || name.contains("rush hour")) {
+            ArcadeTheme.rounded(context, centerX - half, centerY - 2, centerX + half - 4, centerY + 7, 2,
+                    0xFFE05263);
+            ArcadeTheme.rounded(context, centerX - 2, centerY - half, centerX + 6, centerY - 4, 2,
+                    0xFF4FB3D9);
+            ArcadeTheme.rounded(context, centerX - half + 2, centerY + half - 6, centerX - 4, centerY + half, 2,
+                    0xFF9AAFC7);
+            context.fill(centerX + half - 2, centerY - 1, centerX + half, centerY + 6, ArcadeTheme.LIME);
+            ArcadeTheme.ring(context, centerX - half / 3, centerY + 2, 3, 1, 0x88FFFFFF);
+        } else if (name.contains("empurra-caixas") || name.contains("sokoban")) {
             ArcadeTheme.rounded(context, centerX - half + 2, centerY - half + 2, centerX + half - 2,
                     centerY + half - 2, 2, 0xFFC58B4E);
             ArcadeTheme.rounded(context, centerX - half + 3, centerY - half + 3, centerX + half - 3,
@@ -782,7 +855,7 @@ public final class GamesHubScreen extends Screen {
                 }
             }
         } else {
-            String label = "PÁGINA " + (page + 1) + " / " + pageCount;
+            String label = I18n.translate("mega_minigames.hub.page", page + 1, pageCount);
             int pillWidth = textRenderer.getWidth(label) + 16;
             ArcadeTheme.rounded(context, width / 2 - pillWidth / 2, y - 7, width / 2 + pillWidth / 2, y + 7, 7, 0xCC0B1626);
             context.drawCenteredTextWithShadow(textRenderer, Text.literal(label), width / 2, y - 4, ArcadeTheme.MUTED);

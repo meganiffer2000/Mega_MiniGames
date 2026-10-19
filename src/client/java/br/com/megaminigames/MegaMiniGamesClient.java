@@ -13,7 +13,11 @@ public final class MegaMiniGamesClient implements ClientModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) -> {
             var stack = player.getStackInHand(hand);
             if (!stack.isOf(MegaMiniGames.RETRO_CONSOLE)) return TypedActionResult.pass(stack);
-            if (world.isClient) MinecraftClient.getInstance().setScreen(new GamesHubScreen());
+            if (world.isClient) {
+                MinecraftClient.getInstance().setScreen(player.isSneaking()
+                        ? GamesHubScreen.randomGame()
+                        : new GamesHubScreen());
+            }
             return TypedActionResult.success(stack);
         });
     }

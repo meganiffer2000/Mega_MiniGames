@@ -17,7 +17,7 @@ public final class MegaMiniGames implements ModInitializer {
     public static final Item RETRO_CONSOLE = Registry.register(
             Registries.ITEM,
             new Identifier(MOD_ID, "retro_console"),
-            new Item(new Item.Settings().maxCount(1))
+            new RetroConsoleItem(new Item.Settings().maxCount(1).fireproof())
     );
 
     @Override

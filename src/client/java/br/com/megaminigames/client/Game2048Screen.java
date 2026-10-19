@@ -23,6 +23,8 @@ public final class Game2048Screen extends Screen {
     private int spawnRow = -1;
     private int spawnColumn = -1;
     private int spawnTicks;
+    private int[][] undoBoard;
+    private int undoScore;
 
     public Game2048Screen() {
         super(Text.literal("2048"));
@@ -53,6 +55,7 @@ public final class Game2048Screen extends Screen {
         reached2048 = false;
         spawnRow = -1;
         spawnTicks = 0;
+        undoBoard = null;
         initialized = true;
         spawnTile();
         spawnTile();
@@ -80,6 +83,11 @@ public final class Game2048Screen extends Screen {
         if (gameOver) {
             return;
         }
+        int[][] snapshot = new int[SIDE][SIDE];
+        for (int row = 0; row < SIDE; row++) {
+            System.arraycopy(board[row], 0, snapshot[row], 0, SIDE);
+        }
+        int previousScore = score;
         boolean changed = false;
         for (int line = 0; line < SIDE; line++) {
             int[] values = new int[SIDE];
@@ -112,10 +120,24 @@ public final class Game2048Screen extends Screen {
             }
         }
         if (changed) {
+            undoBoard = snapshot;
+            undoScore = previousScore;
             bestScore = Math.max(bestScore, score);
             spawnTile();
             gameOver = !hasMoves();
         }
+    }
+
+    private void undo() {
+        if (undoBoard == null || gameOver) return;
+        for (int row = 0; row < SIDE; row++) {
+            System.arraycopy(undoBoard[row], 0, board[row], 0, SIDE);
+        }
+        score = undoScore;
+        undoBoard = null;
+        gameOver = false;
+        spawnRow = -1;
+        spawnTicks = 0;
     }
 
     private int getCell(int line, int position, int direction) {
@@ -172,7 +194,8 @@ public final class Game2048Screen extends Screen {
         ArcadeTheme.pill(context, textRenderer, bestLabel, left + SIDE * cell - textRenderer.getWidth(bestLabel) - 18,
                 34, ArcadeTheme.TEAL);
         context.drawCenteredTextWithShadow(textRenderer,
-                Text.literal(reached2048 ? "2048 alcançado! Continue ou reinicie." : "Setas ou WASD para deslizar"),
+                Text.literal(reached2048 ? "2048 alcançado! Continue ou reinicie."
+                        : "Setas ou WASD deslizam  •  Z desfaz a última jogada"),
                 width / 2, 55, reached2048 ? ArcadeTheme.SUCCESS : ArcadeTheme.MUTED);
 
         int pad = 8;
@@ -248,6 +271,7 @@ public final class Game2048Screen extends Screen {
             case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D -> move(1);
             case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> move(2);
             case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> move(3);
+            case GLFW.GLFW_KEY_Z -> undo();
             default -> {
                 return super.keyPressed(keyCode, scanCode, modifiers);
             }

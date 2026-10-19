@@ -1,3 +1,24 @@
 {
-  "item.mega_minigames.retro_console": "Console Retrô"
+  "item.mega_minigames.retro_console": "Console Retrô",
+  "item.mega_minigames.retro_console.tip1": "Clique com o botão direito para abrir o hub arcade",
+  "item.mega_minigames.retro_console.tip2": "140 minijogos de ação, quebra-cabeça e aventura",
+  "item.mega_minigames.retro_console.tip3": "Agachado + clique abre um jogo aleatório",
+  "mega_minigames.category.all": "Todos",
+  "mega_minigames.category.management": "Gerenciamento",
+  "mega_minigames.category.simulation": "Simulação",
+  "mega_minigames.category.action": "Ação",
+  "mega_minigames.category.adventure": "Aventura",
+  "mega_minigames.category.puzzle": "Quebra-cabeça",
+  "mega_minigames.hub.previous": "‹ Anterior",
+  "mega_minigames.hub.next": "Próxima ›",
+  "mega_minigames.hub.close": "Fechar",
+  "mega_minigames.hub.random": "ALEATÓRIO",
+  "mega_minigames.hub.open": "ABRIR  ›",
+  "mega_minigames.hub.subtitle": "ARCADE  •  %s jogos  •  R surpreende",
+  "mega_minigames.hub.hint": "Setas viram página  •  R sorteia  •  ESC fecha",
+  "mega_minigames.hub.page": "PÁGINA %s/%s",
+  "item.mega_minigames.retro_console.tip4": "Também aparece na aba Ferramentas do Criativo",
+  "advancements.mega_minigames.retro_console.title": "Console Retrô",
+  "advancements.mega_minigames.retro_console.description": "Obtenha o Console Retrô e abra o hub de minijogos.",
+  "mega_minigames.hub.new": "NOVO"
 }

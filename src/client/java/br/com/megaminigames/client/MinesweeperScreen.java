@@ -184,7 +184,7 @@ public final class MinesweeperScreen extends Screen {
             status = "Você encontrou uma mina! Tente novamente.";
             statusColor = ArcadeTheme.DANGER;
         } else {
-            status = "Esquerdo revela  •  Direito marca bandeira";
+            status = "Esquerdo revela  •  Direito marca  •  Meio abre vizinhos";
             statusColor = ArcadeTheme.MUTED;
         }
         ArcadeTheme.status(context, textRenderer, Text.literal(textRenderer.trimToWidth(status, width - 20)),
@@ -204,6 +204,32 @@ public final class MinesweeperScreen extends Screen {
             }
         }
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    /** Abre os vizinhos quando o número de bandeiras ao redor já bate com a pista. */
+    private void chord(int row, int column) {
+        if (gameOver || !revealed[row][column] || mines[row][column]) return;
+        int flags = 0;
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int neighborRow = row + dy;
+                int neighborColumn = column + dx;
+                if (isInside(neighborRow, neighborColumn) && flagged[neighborRow][neighborColumn]) {
+                    flags++;
+                }
+            }
+        }
+        if (flags != neighborCounts[row][column]) return;
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int neighborRow = row + dy;
+                int neighborColumn = column + dx;
+                if (isInside(neighborRow, neighborColumn) && !flagged[neighborRow][neighborColumn]) {
+                    reveal(neighborRow, neighborColumn);
+                    if (gameOver) return;
+                }
+            }
+        }
     }
 
     private int countFlags() {
@@ -297,6 +323,10 @@ public final class MinesweeperScreen extends Screen {
             }
             if (button == 1) {
                 toggleFlag(row, column);
+                return true;
+            }
+            if (button == 2) {
+                chord(row, column);
                 return true;
             }
         }

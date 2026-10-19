@@ -19,6 +19,8 @@ public final class SnakeScreen extends Screen {
     private int boardLeft;
     private int boardTop;
     private Cell food;
+    private boolean golden;
+    private int goldenTicks;
     private Direction direction = Direction.RIGHT;
     private Direction queuedDirection = Direction.RIGHT;
     private int ticksUntilMove;
@@ -63,12 +65,17 @@ public final class SnakeScreen extends Screen {
             food = new Cell(ThreadLocalRandom.current().nextInt(COLUMNS),
                     ThreadLocalRandom.current().nextInt(ROWS));
         } while (snake.contains(food));
+        golden = score > 0 && ThreadLocalRandom.current().nextInt(100) < 26;
+        goldenTicks = 120;
     }
 
     @Override
     public void tick() {
         if (gameOver) {
             return;
+        }
+        if (golden && --goldenTicks <= 0) {
+            golden = false;
         }
         if (++ticksUntilMove < Math.max(3, 7 - score / 4)) {
             return;
@@ -89,7 +96,8 @@ public final class SnakeScreen extends Screen {
 
         snake.addFirst(next);
         if (eating) {
-            score++;
+            score += golden ? 3 : 1;
+            golden = false;
             if (snake.size() == COLUMNS * ROWS) {
                 gameOver = true;
             } else {
@@ -108,7 +116,7 @@ public final class SnakeScreen extends Screen {
         String scoreLabel = "PONTOS " + score;
         ArcadeTheme.pill(context, textRenderer, scoreLabel, boardLeft, 32, ArcadeTheme.LIME);
         int level = Math.max(1, 7 - Math.max(3, 7 - score / 4));
-        String levelLabel = "VELOCIDADE " + level;
+        String levelLabel = golden ? "OURO x3  •  " + Math.max(0, goldenTicks / 20) + "s" : "VELOCIDADE " + level;
         ArcadeTheme.pillRight(context, textRenderer, levelLabel, boardRight, 32, ArcadeTheme.GOLD);
         context.drawCenteredTextWithShadow(textRenderer,
                 Text.literal("Setas ou WASD  •  R reinicia"), width / 2, 54, ArcadeTheme.MUTED);
@@ -168,6 +176,12 @@ public final class SnakeScreen extends Screen {
         int x = boardLeft + food.x * cellSize + cellSize / 2;
         int y = boardTop + food.y * cellSize + cellSize / 2;
         int radius = Math.max(3, cellSize / 2 - 3);
+        if (golden) {
+            ArcadeTheme.glow(context, x, y, radius + 6, 0xCCFFD66B);
+            ArcadeTheme.star(context, x, y, radius + 1, ArcadeTheme.GOLD);
+            ArcadeTheme.disc(context, x, y, Math.max(1, radius / 2), 0xFFFFF3C4);
+            return;
+        }
         ArcadeTheme.glow(context, x, y, radius + 3, ArcadeTheme.MAGENTA);
         ArcadeTheme.disc(context, x, y + 1, radius, 0xFFB3273F);
         ArcadeTheme.disc(context, x, y, radius, 0xFFFF4D6D);

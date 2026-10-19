@@ -1,6 +1,8 @@
 # Mega MiniGames
 
-Base inicial de um mod para **Minecraft 1.20.1**, usando **Fabric** e **Java 17**. A estrutura está pronta para receber os minijogos que serão definidos depois.
+![Logo Mega MiniGames](assets/modrinth-icon.png)
+
+Mod de minijogos para **Minecraft 1.20.1**, usando **Fabric** e **Java 17**. O catálogo cresce por atualizações e pode ser navegado no hub com capas clicáveis e filtros por categoria.
 
 ## Requisitos
 

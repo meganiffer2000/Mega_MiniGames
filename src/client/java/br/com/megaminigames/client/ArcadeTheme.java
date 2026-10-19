@@ -7,20 +7,23 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 
 /**
- * Tema visual compartilhado do Mega MiniGames.
+ * Linguagem visual compartilhada dos minigames: fundo neon, painéis de vidro,
+ * pílulas de HUD, botões e ícones desenhados com {@code fill}.
  *
- * <p>Uma única fonte de verdade para cores, fundos animados, painéis, títulos e botões.
- * Assim todos os jogos falam a mesma linguagem visual (neon arcade sobre azul-marinho),
- * inspirada no ícone oficial do mod.</p>
+ * <p>Tudo aqui é desenhado a partir de retângulos preenchidos, então funciona em
+ * qualquer versão 1.20.x sem depender de texturas adicionais.</p>
  */
 public final class ArcadeTheme {
-    public static final int INK = 0xFF060A14;
-    public static final int INK_SOFT = 0xFF0A1120;
-    public static final int PANEL = 0xF0122033;
-    public static final int PANEL_DEEP = 0xF00B1524;
-    public static final int PANEL_LIGHT = 0xF0182C45;
-    public static final int BORDER = 0x3DFFFFFF;
-    public static final int BORDER_SOFT = 0x1FFFFFFF;
+    /* ------------------------------------------------------------------ */
+    /* Paleta                                                             */
+    /* ------------------------------------------------------------------ */
+
+    /** Cor de texto principal (branco levemente azulado). */
+    public static final int TEXT = 0xFFF2F7FF;
+    /** Texto secundário, usado em instruções. */
+    public static final int MUTED = 0xFF9DB2CC;
+    /** Texto de rodapé/dicas discretas. */
+    public static final int DIM = 0xFF6A80A0;
 
     public static final int TEAL = 0xFF35C8B9;
     public static final int TEAL_DEEP = 0xFF1B7D78;
@@ -31,13 +34,20 @@ public final class ArcadeTheme {
     public static final int PURPLE = 0xFF9B7BF0;
     public static final int CORAL = 0xFFFF8A65;
 
-    public static final int TEXT = 0xFFF4F9FF;
-    public static final int MUTED = 0xFFA2B6CF;
-    public static final int DIM = 0xFF7086A0;
-    public static final int SUCCESS = 0xFF6FE58E;
-    public static final int DANGER = 0xFFFF7373;
+    public static final int SUCCESS = 0xFF6EE58C;
+    public static final int DANGER = 0xFFFF6E6E;
 
-    public static final int[] ACCENTS = {TEAL, LIME, GOLD, MAGENTA, SKY, PURPLE, CORAL};
+    /** Fundo mais escuro usado dentro de painéis. */
+    public static final int PANEL_DEEP = 0xFF0B1626;
+    /** Fundo padrão de um painel de vidro. */
+    public static final int PANEL = 0xF0132438;
+    /** Fundo de cartões e células. */
+    public static final int PANEL_LIGHT = 0xFF1B2E46;
+    /** Linhas e bordas suaves. */
+    public static final int BORDER = 0x33FFFFFF;
+    public static final int BORDER_SOFT = 0x1AFFFFFF;
+
+    private static final int[] ACCENTS = {TEAL, LIME, GOLD, MAGENTA, SKY, PURPLE, CORAL};
 
     private ArcadeTheme() {
     }
@@ -47,83 +57,92 @@ public final class ArcadeTheme {
     /* ------------------------------------------------------------------ */
 
     public static void background(DrawContext context, int width, int height) {
-        background(context, width, height, (System.currentTimeMillis() % 120000L) / 1000.0F);
+        background(context, width, height, (System.currentTimeMillis() % 200000L) / 1000.0F);
     }
 
     public static void background(DrawContext context, int width, int height, float time) {
-        context.fillGradient(0, 0, width, height, 0xFF132542, 0xFF060A13);
-        context.fillGradient(0, 0, width, Math.max(1, height * 2 / 3), 0x222FB9AE, 0x00000000);
-        context.fillGradient(0, height / 4, width, height, 0x1AF0509B, 0x00000000);
+        context.fill(0, 0, width, height, 0xFF060A13);
+        context.fillGradient(0, 0, width, height, 0xFF16233F, 0xFF050810);
 
-        // Grade tecnológica suave.
-        for (int x = 0; x < width; x += 32) {
-            context.fill(x, 0, x + 1, height, 0x08A9C7E6);
+        // Brilhos suaves nos cantos.
+        context.fillGradient(0, 0, width / 2, height / 2, 0x1F35C8B9, 0x00000000);
+        context.fillGradient(width / 2, height / 2, width, height, 0x1FF0509B, 0x00000000);
+        context.fillGradient(0, height / 2, width, height, 0x14000000, 0x66000000);
+        context.fillGradient(0, 0, width, height / 4, 0x33060A13, 0x00060A13);
+
+        // Grade técnica discreta.
+        for (int x = 12; x < width; x += 32) {
+            context.fill(x, 0, x + 1, height, 0x08FFFFFF);
         }
-        for (int y = 0; y < height; y += 32) {
-            context.fill(0, y, width, y + 1, 0x08A9C7E6);
+        for (int y = 10; y < height; y += 32) {
+            context.fill(0, y, width, y + 1, 0x08FFFFFF);
         }
 
-        // Estrelas com cintilação.
-        for (int i = 0; i < 52; i++) {
-            int hash = i * 374761393 + 668265263;
-            hash = (hash ^ (hash >> 13)) * 1274126177;
+        // Estrelas cintilantes.
+        for (int index = 0; index < 44; index++) {
+            int hash = index * 73856093 ^ (index + 11) * 19349663;
             int x = Math.floorMod(hash, Math.max(1, width));
             int y = Math.floorMod(hash >> 7, Math.max(1, height));
-            int wave = (int) ((Math.sin(time * 1.7 + i * 0.9) + 1.0) * 0.5 * 3.0);
-            int alpha = 0x1E + wave * 0x14;
-            int size = i % 11 == 0 ? 2 : 1;
-            context.fill(x, y, x + size, y + size, (alpha << 24) | 0xFFFFFF);
+            float twinkle = (float) (0.5 + 0.5 * Math.sin(time * 1.7F + index * 1.3F));
+            int alpha = 0x14 + (int) (twinkle * 0x38);
+            int size = index % 9 == 0 ? 2 : 1;
+            context.fill(x, y, x + size, y + size, (alpha << 24) | 0xBFE7FF);
         }
 
-        // Vinheta e linhas de varredura.
-        context.fillGradient(0, 0, width, Math.max(1, height / 6), 0x66040A14, 0x00040A14);
-        context.fillGradient(0, height - Math.max(1, height / 5), width, height, 0x00040A14, 0x99040A14);
-        for (int y = 0; y < height; y += 4) {
-            context.fill(0, y, width, y + 1, 0x07000000);
+        // Linhas horizontais lembrando um monitor CRT.
+        for (int y = 0; y < height; y += 3) {
+            context.fill(0, y, width, y + 1, 0x05000000);
         }
     }
 
     /* ------------------------------------------------------------------ */
-    /* Painéis, cabeçalhos e HUD                                          */
+    /* Painéis e cabeçalho                                                */
     /* ------------------------------------------------------------------ */
 
     public static void panel(DrawContext context, int x1, int y1, int x2, int y2) {
-        panelAccent(context, x1, y1, x2, y2, BORDER, 10);
+        panelAccent(context, x1, y1, x2, y2, BORDER, 8);
     }
 
-    public static void panelAccent(DrawContext context, int x1, int y1, int x2, int y2, int accent, int radius) {
-        rounded(context, x1 + 2, y1 + 3, x2 + 2, y2 + 3, radius, 0x55000000);
-        rounded(context, x1, y1, x2, y2, radius, accent);
+    public static void panelAccent(DrawContext context, int x1, int y1, int x2, int y2, int border, int radius) {
+        rounded(context, x1 + 2, y1 + 3, x2 + 2, y2 + 3, radius, 0x66000000);
+        rounded(context, x1, y1, x2, y2, radius, border);
         rounded(context, x1 + 1, y1 + 1, x2 - 1, y2 - 1, Math.max(0, radius - 1), PANEL);
-        rounded(context, x1 + 1, y1 + 1, x2 - 1, y1 + Math.max(2, (y2 - y1) / 2), Math.max(0, radius - 1), 0x0DFFFFFF);
-        context.fill(x1 + radius, y1 + 1, x2 - radius, y1 + 2, 0x30FFFFFF);
+        context.fillGradient(x1 + 1, y1 + 1, x2 - 1, Math.min(y2 - 1, y1 + 22), 0x14FFFFFF, 0x00000000);
     }
 
     public static void header(DrawContext context, TextRenderer font, Text title, int centerX, int y, int accent) {
-        int textWidth = font.getWidth(title);
-        int x1 = centerX - textWidth / 2 - 18;
-        int x2 = centerX + textWidth / 2 + 18;
-        rounded(context, x1 - 2, y - 2, x2 + 2, y + 17, 11, (accent & 0x00FFFFFF) | 0x29000000);
-        rounded(context, x1, y - 4, x2, y + 15, 9, (accent & 0x00FFFFFF) | 0x66000000);
-        rounded(context, x1 + 1, y - 3, x2 - 1, y + 14, 8, 0xF00C1828);
-        rounded(context, x1 + 2, y - 2, x2 - 2, y + 6, 6, 0x14FFFFFF);
-        rounded(context, x1 + 7, y + 1, x1 + 11, y + 10, 2, accent);
-        rounded(context, x2 - 11, y + 1, x2 - 7, y + 10, 2, accent);
+        String label = title.getString();
+        int textWidth = font.getWidth(label);
+        int left = centerX - textWidth / 2 - 16;
+        int right = centerX + textWidth / 2 + 16;
+
+        context.fillGradient(left - 6, y - 6, right + 6, y + 20, (accent & 0x00FFFFFF) | 0x33000000,
+                0x00000000);
+        rounded(context, left, y - 4, right, y + 16, 9, 0xD90B1626);
+        rounded(context, left, y - 4, right, y + 15, 9, (accent & 0x00FFFFFF) | 0x66000000);
+        rounded(context, left + 1, y - 3, right - 1, y + 14, 8, 0xF0101F33);
+        context.fillGradient(left + 2, y - 2, right - 2, y + 6, 0x1AFFFFFF, 0x00000000);
+        context.fill(left + 5, y + 3, left + 8, y + 9, accent);
+        context.fill(right - 8, y + 3, right - 5, y + 9, accent);
         context.drawCenteredTextWithShadow(font, title, centerX, y, TEXT);
-        context.fillGradient(x1 + 16, y + 14, x2 - 16, y + 16, accent, 0x00000000);
+        context.fillGradient(centerX - textWidth / 2, y + 15, centerX + textWidth / 2, y + 17, accent,
+                0x00000000);
     }
 
     public static void status(DrawContext context, TextRenderer font, Text text, int centerX, int y, int color) {
-        int width = font.getWidth(text) + 16;
-        rounded(context, centerX - width / 2, y - 2, centerX + width / 2, y + 11, 6, 0x8C081120);
         context.drawCenteredTextWithShadow(font, text, centerX, y, color);
     }
+
+    /* ------------------------------------------------------------------ */
+    /* HUD                                                                */
+    /* ------------------------------------------------------------------ */
 
     /** Pílula de HUD alinhada à esquerda; devolve a largura usada. */
     public static int pill(DrawContext context, TextRenderer font, String label, int x, int y, int accent) {
         int width = font.getWidth(label) + 18;
         rounded(context, x, y, x + width, y + 15, 7, 0xD90B1626);
-        rounded(context, x + 1, y + 1, x + width - 1, y + 14, 6, 0x12FFFFFF);
+        rounded(context, x, y, x + width, y + 15, 7, (accent & 0x00FFFFFF) | 0x55000000);
+        rounded(context, x + 1, y + 1, x + width - 1, y + 14, 6, 0xE8122236);
         context.fill(x + 5, y + 5, x + 8, y + 10, accent);
         context.drawTextWithShadow(font, Text.literal(label), x + 12, y + 4, TEXT);
         return width;
@@ -137,101 +156,153 @@ public final class ArcadeTheme {
     }
 
     public static void progress(DrawContext context, int x, int y, int width, int height, float value, int accent) {
-        rounded(context, x, y, x + width, y + height, height / 2, 0xFF101C2C);
+        rounded(context, x, y, x + width, y + height, height / 2, 0xCC0A1422);
         int filled = Math.round(width * Math.max(0.0F, Math.min(1.0F, value)));
         if (filled > 0) {
             rounded(context, x, y, x + Math.max(height, filled), y + height, height / 2, accent);
-            rounded(context, x + 1, y + 1, x + Math.max(height, filled) - 1, y + height / 2, Math.max(1, height / 2 - 1), 0x33FFFFFF);
+            context.fill(x + 1, y + 1, x + Math.max(1, filled - 1), y + Math.max(1, height / 2),
+                    (accent & 0x00FFFFFF) | 0x44000000);
         }
-        rounded(context, x, y, x + width, y + height, height / 2, BORDER);
+        rounded(context, x, y, x + width, y + height, height / 2, BORDER_SOFT);
+    }
+
+    /** Barra dupla usada como enfeite de rodapé. */
+    public static void divider(DrawContext context, int x1, int x2, int y) {
+        context.fillGradient(x1, y, x2, y + 1, 0x2235C8B9, 0x00F0509B);
+        context.fill(x1, y + 2, x2, y + 3, BORDER_SOFT);
     }
 
     /* ------------------------------------------------------------------ */
     /* Botões                                                             */
     /* ------------------------------------------------------------------ */
 
+    /** Cria um botão já estilizado com o tema. */
     public static ButtonWidget button(int x, int y, int width, int height, Text label, Runnable action) {
         return new ArcadeButton(x, y, width, height, label, action);
     }
 
+    /** Botão principal, com destaque na cor de acento do jogo. */
+    public static ButtonWidget primaryButton(int x, int y, int width, int height, Text label, int accent,
+                                             Runnable action) {
+        ArcadeButton button = new ArcadeButton(x, y, width, height, label, action);
+        button.accent = accent;
+        button.primary = true;
+        return button;
+    }
+
+    /**
+     * Botão desenhado manualmente: retângulo arredondado, brilho superior e
+     * variação de cor no hover. Estende {@link ButtonWidget} apenas para herdar
+     * o comportamento de clique e navegação.
+     */
     private static final class ArcadeButton extends ButtonWidget {
-        private ArcadeButton(int x, int y, int width, int height, Text message, Runnable action) {
-            super(x, y, width, height, message, button -> action.run(), supplier -> message);
+        private int accent = TEAL;
+        private boolean primary;
+
+        private ArcadeButton(int x, int y, int width, int height, Text label, Runnable action) {
+            super(x, y, width, height, label, button -> action.run(), supplier -> label);
         }
 
         @Override
         protected void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-            boolean hovered = this.active && mouseX >= this.x && mouseX < this.x + this.width
-                    && mouseY >= this.y && mouseY < this.y + this.height;
-            int accent = accentFor(getMessage());
-            int base = !this.active ? 0x66101A2A : hovered ? mix(TEAL_DEEP, accent, 0.45F) : 0xE0162B41;
-            int border = !this.active ? 0x22FFFFFF : hovered ? accent : 0x44FFFFFF;
-            rounded(context, this.x, this.y + 3, this.x + this.width, this.y + this.height + 3, 6, 0x55000000);
-            rounded(context, this.x, this.y, this.x + this.width, this.y + this.height, 6, border);
-            rounded(context, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, 5, base);
-            rounded(context, this.x + 2, this.y + 2, this.x + this.width - 2, this.y + this.height / 2 + 2, 4,
-                    this.active ? 0x1FFFFFFF : 0x0AFFFFFF);
-            context.fill(this.x + 8, this.y + this.height - 2, this.x + this.width - 8, this.y + this.height - 1,
-                    this.active ? (hovered ? accent : (accent & 0x00FFFFFF) | 0x99000000) : 0x22556680);
-            TextRenderer font = MinecraftClient.getInstance().textRenderer;
-            context.drawCenteredTextWithShadow(font, getMessage(), this.x + this.width / 2, this.y + this.height / 2 - 4,
-                    !this.active ? DIM : hovered ? 0xFFFFFFFF : 0xFFDCECF8);
+            boolean hovered = this.active && isMouseOver(mouseX, mouseY);
+            int top = hovered ? mix(PANEL_LIGHT, accent, 0.28F) : PANEL_LIGHT;
+            int bottom = hovered ? darken(accent, 70) : 0xFF122134;
+            if (this.primary) {
+                top = hovered ? lighten(accent, 30) : accent;
+                bottom = hovered ? darken(accent, 35) : darken(accent, 65);
+            }
+            if (!this.active) {
+                top = 0xFF17202D;
+                bottom = 0xFF101722;
+            }
+            rounded(context, this.x, this.y + 2, this.x + this.width, this.y + this.height + 2, 6, 0x55000000);
+            rounded(context, this.x, this.y, this.x + this.width, this.y + this.height, 6,
+                    this.active ? (hovered ? (this.primary ? lighten(accent, 60) : accent) : BORDER) : 0x22FFFFFF);
+            rounded(context, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, 5,
+                    this.active ? bottom : 0xFF1A2430);
+            context.fillGradient(this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 2, top,
+                    this.active ? bottom : 0xFF1A2430);
+            context.fill(this.x + 3, this.y + 2, this.x + this.width - 3, this.y + 3,
+                    this.active ? 0x33FFFFFF : 0x11FFFFFF);
+            if (hovered) {
+                context.fill(this.x + 3, this.y + this.height - 3, this.x + this.width - 3,
+                        this.y + this.height - 2, 0x88FFFFFF);
+            }
+            int textColor = !this.active ? 0xFF6C7E93 : this.primary ? 0xFF0A1A1C : TEXT;
+            context.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, getMessage(),
+                    this.x + this.width / 2, this.y + (this.height - 8) / 2, textColor);
         }
     }
 
     /* ------------------------------------------------------------------ */
-    /* Formas e ícones                                                    */
+    /* Formas                                                             */
     /* ------------------------------------------------------------------ */
 
     public static void rounded(DrawContext context, int x1, int y1, int x2, int y2, int radius, int color) {
         if (x2 <= x1 || y2 <= y1) {
             return;
         }
-        int r = Math.max(0, Math.min(radius, Math.min((x2 - x1) / 2, (y2 - y1) / 2)));
-        if (r == 0) {
+        int r = Math.min(radius, Math.min((x2 - x1) / 2, (y2 - y1) / 2));
+        if (r <= 0) {
             context.fill(x1, y1, x2, y2, color);
             return;
         }
         context.fill(x1, y1 + r, x2, y2 - r, color);
-        for (int i = 0; i < r; i++) {
-            double offset = r - i - 0.5;
-            int inset = r - (int) Math.round(Math.sqrt(Math.max(0.0, (double) r * r - offset * offset)));
-            context.fill(x1 + inset, y1 + i, x2 - inset, y1 + i + 1, color);
-            context.fill(x1 + inset, y2 - 1 - i, x2 - inset, y2 - i, color);
+        for (int row = 0; row < r; row++) {
+            double dy = r - row - 0.5;
+            int inset = r - (int) Math.round(Math.sqrt(Math.max(0.0, r * r - dy * dy)));
+            context.fill(x1 + inset, y1 + row, x2 - inset, y1 + row + 1, color);
+            context.fill(x1 + inset, y2 - row - 1, x2 - inset, y2 - row, color);
         }
     }
 
     public static void disc(DrawContext context, int centerX, int centerY, int radius, int color) {
-        int r = Math.max(0, radius);
-        for (int dy = -r; dy <= r; dy++) {
-            int half = (int) Math.sqrt((double) r * r - (double) dy * dy);
-            context.fill(centerX - half, centerY + dy, centerX + half + 1, centerY + dy + 1, color);
+        if (radius <= 0) {
+            context.fill(centerX, centerY, centerX + 1, centerY + 1, color);
+            return;
+        }
+        for (int row = -radius; row <= radius; row++) {
+            int half = (int) Math.sqrt(Math.max(0, radius * radius - row * row));
+            context.fill(centerX - half, centerY + row, centerX + half, centerY + row + 1, color);
         }
     }
 
     public static void ring(DrawContext context, int centerX, int centerY, int radius, int thickness, int color) {
-        for (int dy = -radius; dy <= radius; dy++) {
-            int half = (int) Math.sqrt((double) radius * radius - (double) dy * dy);
-            if (Math.abs(dy) >= radius - thickness) {
-                context.fill(centerX - half, centerY + dy, centerX + half + 1, centerY + dy + 1, color);
-            } else {
-                context.fill(centerX - half, centerY + dy, centerX - half + thickness, centerY + dy + 1, color);
-                context.fill(centerX + half - thickness + 1, centerY + dy, centerX + half + 1, centerY + dy + 1, color);
+        if (radius <= 0) {
+            return;
+        }
+        for (int row = -radius; row <= radius; row++) {
+            int outer = (int) Math.sqrt(Math.max(0, radius * radius - row * row));
+            int innerRadius = Math.max(0, radius - Math.max(1, thickness));
+            int inner = (int) Math.sqrt(Math.max(0, innerRadius * innerRadius - row * row));
+            if (outer - inner > 0) {
+                context.fill(centerX - outer, centerY + row, centerX - inner, centerY + row + 1, color);
+                context.fill(centerX + inner + 1, centerY + row, centerX + outer + 1, centerY + row + 1, color);
             }
         }
     }
 
+    /** Halo suave; camadas concêntricas de baixa opacidade. */
     public static void glow(DrawContext context, int centerX, int centerY, int radius, int color) {
+        int baseAlpha = (color >>> 24) & 0xFF;
         int rgb = color & 0x00FFFFFF;
-        for (int i = 4; i >= 1; i--) {
-            disc(context, centerX, centerY, Math.max(1, radius * i / 4), (0x10 << 24) | rgb);
+        int layers = 4;
+        for (int layer = layers; layer >= 1; layer--) {
+            int r = Math.max(1, radius * layer / layers);
+            int alpha = Math.max(2, baseAlpha / (layer * 2));
+            disc(context, centerX, centerY, r, (alpha << 24) | rgb);
         }
     }
 
     public static void drawX(DrawContext context, int centerX, int centerY, int size, int thickness, int color) {
-        for (int i = -size; i <= size; i++) {
-            context.fill(centerX + i, centerY + i, centerX + i + thickness, centerY + i + thickness, color);
-            context.fill(centerX + i, centerY - i, centerX + i + thickness, centerY - i + thickness, color);
+        for (int step = -size; step <= size; step++) {
+            for (int offset = 0; offset < Math.max(1, thickness); offset++) {
+                context.fill(centerX + step + offset, centerY + step, centerX + step + offset + 1,
+                        centerY + step + 1, color);
+                context.fill(centerX + step + offset, centerY - step, centerX + step + offset + 1,
+                        centerY - step + 1, color);
+            }
         }
     }
 
@@ -240,73 +311,73 @@ public final class ArcadeTheme {
     }
 
     public static void drawCheck(DrawContext context, int x, int y, int color) {
-        for (int i = 0; i < 4; i++) {
-            context.fill(x + i, y + 3 + i, x + i + 1, y + 4 + i, color);
-            context.fill(x + 7 - i, y + i, x + 8 - i, y + 1 + i, color);
+        for (int step = 0; step < 4; step++) {
+            context.fill(x + step, y + 2 + step / 2, x + step + 1, y + 4 + step / 2, color);
+        }
+        for (int step = 0; step < 6; step++) {
+            context.fill(x + 3 + step, y + 4 - step / 2, x + 4 + step, y + 5 - step / 2, color);
         }
     }
 
+    /** Estrela de cinco pontas simplificada, desenhada com linhas. */
     public static void star(DrawContext context, int centerX, int centerY, int size, int color) {
-        for (int i = 0; i < size; i++) {
-            int half = Math.max(0, size / 2 - i / 2);
-            context.fill(centerX - half, centerY - size + i, centerX + half + 1, centerY - size + i + 1, color);
-            context.fill(centerX - half, centerY + size - i, centerX + half + 1, centerY + size - i + 1, color);
+        for (int step = -size; step <= size; step++) {
+            int vertical = (int) (Math.abs(step) * 0.55F);
+            context.fill(centerX + step, centerY - vertical, centerX + step + 1, centerY + size / 2, color);
         }
-        context.fill(centerX - 1, centerY - size, centerX + 2, centerY + size + 1, color);
-        context.fill(centerX - size, centerY - 1, centerX + size + 1, centerY + 2, color);
+        context.fill(centerX - size / 2, centerY - size / 2, centerX + size / 2, centerY + size / 4, color);
+        context.fill(centerX - size / 3, centerY - size, centerX + size / 3, centerY - size + 2, color);
     }
 
     public static void heart(DrawContext context, int centerX, int centerY, int size, int color) {
-        disc(context, centerX - size / 2, centerY - size / 4, Math.max(1, size / 2), color);
-        disc(context, centerX + size / 2, centerY - size / 4, Math.max(1, size / 2), color);
-        for (int i = 0; i <= size; i++) {
-            int half = size - i;
-            context.fill(centerX - half, centerY - size / 4 + i, centerX + half + 1, centerY - size / 4 + i + 1, color);
+        int radius = Math.max(2, size / 2);
+        disc(context, centerX - radius / 2, centerY - radius / 3, radius / 2, color);
+        disc(context, centerX + radius / 2, centerY - radius / 3, radius / 2, color);
+        for (int row = 0; row < radius; row++) {
+            int half = (int) ((radius - row) * 0.9);
+            context.fill(centerX - half, centerY + row, centerX + half, centerY + row + 1, color);
         }
     }
 
-    public static void divider(DrawContext context, int x1, int x2, int y) {
-        context.fillGradient(x1, y, x2, y + 1, 0x00000000, 0x66FFFFFF);
-        context.fillGradient(x1, y, x2, y + 1, 0x44FFFFFF, 0x00000000);
-    }
-
     /* ------------------------------------------------------------------ */
-    /* Cores utilitárias                                                  */
+    /* Cores                                                              */
     /* ------------------------------------------------------------------ */
 
     public static int accentFor(Text text) {
-        return accentFor(text.asTruncatedString(64));
+        return accentFor(text == null ? "" : text.getString());
     }
 
     public static int accentFor(String name) {
-        int hash = name == null ? 0 : name.hashCode();
-        return ACCENTS[Math.floorMod(hash, ACCENTS.length)];
+        if (name == null || name.isEmpty()) {
+            return TEAL;
+        }
+        return ACCENTS[Math.floorMod(name.hashCode(), ACCENTS.length)];
     }
 
     public static int mix(int from, int to, float amount) {
         float a = Math.max(0.0F, Math.min(1.0F, amount));
-        int r = (int) (((from >> 16) & 255) * (1 - a) + ((to >> 16) & 255) * a);
-        int g = (int) (((from >> 8) & 255) * (1 - a) + ((to >> 8) & 255) * a);
-        int b = (int) ((from & 255) * (1 - a) + (to & 255) * a);
-        int alpha = (from >>> 24) == 0 ? (to >>> 24) : (from >>> 24);
-        return (alpha << 24) | (r << 16) | (g << 8) | b;
+        int r = (int) (((from >> 16) & 0xFF) * (1 - a) + ((to >> 16) & 0xFF) * a);
+        int g = (int) (((from >> 8) & 0xFF) * (1 - a) + ((to >> 8) & 0xFF) * a);
+        int b = (int) ((from & 0xFF) * (1 - a) + (to & 0xFF) * a);
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     public static int lighten(int color, int amount) {
-        int r = Math.min(255, ((color >> 16) & 255) + amount);
-        int g = Math.min(255, ((color >> 8) & 255) + amount);
-        int b = Math.min(255, (color & 255) + amount);
+        int r = Math.min(255, ((color >> 16) & 0xFF) + amount);
+        int g = Math.min(255, ((color >> 8) & 0xFF) + amount);
+        int b = Math.min(255, (color & 0xFF) + amount);
         return (color & 0xFF000000) | (r << 16) | (g << 8) | b;
     }
 
     public static int darken(int color, int amount) {
-        int r = Math.max(0, ((color >> 16) & 255) - amount);
-        int g = Math.max(0, ((color >> 8) & 255) - amount);
-        int b = Math.max(0, (color & 255) - amount);
+        int r = Math.max(0, ((color >> 16) & 0xFF) - amount);
+        int g = Math.max(0, ((color >> 8) & 0xFF) - amount);
+        int b = Math.max(0, (color & 0xFF) - amount);
         return (color & 0xFF000000) | (r << 16) | (g << 8) | b;
     }
 
     public static int alpha(int color, int alpha) {
-        return (Math.max(0, Math.min(255, alpha)) << 24) | (color & 0x00FFFFFF);
+        int a = Math.max(0, Math.min(255, alpha));
+        return (a << 24) | (color & 0x00FFFFFF);
     }
 }

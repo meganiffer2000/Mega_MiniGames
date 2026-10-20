@@ -62,9 +62,9 @@ jobs:
           VERSION=$(sed -n 's/^mod_version=//p' gradle.properties)
           JAR=$(ls build/libs/*.jar | grep -v sources | head -n 1)
           echo "Publicando $JAR na release v$VERSION"
-          gh release view "v$VERSION" >/dev/null 2>&1 \
-            || gh release create "v$VERSION" --target "$GITHUB_SHA" \
-                 --title "Mega MiniGames v$VERSION" --notes "Build automático do Mega MiniGames."
+          # As notas da tag são mantidas: o changelog é publicado nas releases.
+          if ! gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release create "v$VERSION" --target "$GITHUB_SHA" \
+              --title "Mega MiniGames v$VERSION" --notes "Changelog na descrição da tag v$VERSION."
+          fi
           gh release upload "v$VERSION" "$JAR" --clobber
-          gh release edit "v$VERSION" \
-            --notes "Última compilação: ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} (run ${GITHUB_RUN_NUMBER}). Baixe o jar em Assets."

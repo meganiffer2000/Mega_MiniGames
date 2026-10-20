@@ -159,9 +159,9 @@ Cada turno tem **14 incidentes** com três respostas possíveis. Aperte **1**, *
 | **Hóquei de Ar** | Disco com física elástica, rival que persegue e partida até 7 gols, com sequência de rally. | Mova o mouse na sua metade para rebater. |
 | **Sinuca** | Nove bolas em losango, seis caçapas, atrito e colisão elástica. | Mouse mira e segura para carregar, solta para tacar; **Espaço** também carrega. |
 | **Boliche** | Cinco rodadas com mira, barra de força e contagem de pinos. | Setas ajustam, **Espaço** lança. |
-| **Pouso de Precisão** | Avião em aproximação: altitude e velocidade precisam bater com a faixa verde. | **↑/↓** altitude, **←/→** velocidade. |
-| **Meu Bichinho** | Bichinho virtual com fome, humor e higiene. | Clique nos três cuidados. |
-| **Órbita Estável** | Mantenha a nave na altitude 3 para pontuar. | **↑/↓** ajustam a altitude. |
+| **Pouso de Precisão** | Módulo lunar com gravidade, vento e combustível: pouse devagar nas plataformas (x2, x3 e x4) em 5 fases, com 3 vidas. | **W/Espaço** acelera, **A/D** desloca, **R** reinicia. |
+| **Meu Bichinho** | Bichinho virtual em pixel art com fome, higiene, energia e alegria; moedas, níveis, melhorias e carinho. | **1–4** cuidam, clique no bichinho ou nas melhorias, **R** reinicia. |
+| **Órbita Estável** | Simulação orbital de verdade: gravidade, propulsão com combustível, faixa de órbita-alvo, destroços e células de energia. | **WASD/setas** propulsão, **R** reinicia. |
 | **Clima e Colheita** | Ajuste sol e chuva para a plantação sobreviver. | Clique nos controles de clima. |
 | **Equilíbrio Natural** | Presas e predadores num ecossistema frágil. | Clique para alimentar/proteger. |
 | **Rali de Montanha** | Carro em pista estreita com pedras. | **←/→** desviam. |

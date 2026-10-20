@@ -6,7 +6,7 @@
 
 Mod de minijogos para **Minecraft 1.20.1**, usando **Fabric** e **Java 17**. O catálogo tem **166 minijogos** navegáveis em um hub com cartuchos ilustrados, filtros por categoria e interface arcade neon.
 
-- **Versão atual:** `0.0.3-beta`
+- **Versão atual:** `0.0.4-beta`
 - **Dependências:** Fabric API 0.92.2
 - **Versão alvo:** Minecraft 1.20.1
 - **Loader:** Fabric
@@ -39,6 +39,14 @@ As duas lojas seguem o motor da Pizzaria (mesma câmera, mesma bancada 3×3 com 
 - **Sorveteria Gelada:** **12 ingredientes** e **10 sorvetes** (do baunilha à taça especial), com freezer de vidro, batedeira e piso xadrez. A cada ~75 s vem uma **onda de calor**: mais clientes, menos paciência e **+25% nos preços** por 30 segundos.
 - **Promoção do dia (as três lojas):** a cada 2 minutos um sabor conhecido passa a pagar **50% a mais** — ele ganha uma estrela no cardápio.
 
+## Simulação com física própria
+
+Três jogos de **Simulação** ganharam telas próprias, com física e progressão de verdade:
+
+- **Pouso de Precisão:** um módulo lunar desce sobre um mundo de 2.200 px com terreno gerado na hora, **três plataformas** (x2, x3 e x4) e **5 fases**. A gravidade aumenta a cada fase, o vento muda de direção e aparece no painel, o combustível é finito e o módulo explode se tocar o solo rápido demais. São **3 vidas**, sombra e linha de mira para ajudar, e a pontuação depende do combustível restante e do multiplicador da plataforma.
+- **Meu Bichinho:** quarto em pixel art com ciclo de dia e noite. O bichinho tem **fome, higiene, energia e alegria**, e cada cuidado rende moedas. Dá para fazer **carinho** clicando nele, comprar **3 melhorias** (cama, brinquedo e banheira, até o nível 3), jogar bola e colocar para dormir. O bichinho sobe de nível e rende mais moedas — e **não existe game over**.
+- **Órbita Estável:** gravidade 1/r², inércia, arrasto e propulsão com combustível. Mantenha o módulo na **faixa verde** de uma órbita-alvo que muda a cada fase, desvie de **destroços**, colete **células de combustível** e complete **5 fases** com 3 vidas. O HUD mostra combustível, raio da órbita, velocidade e estabilidade.
+
 ## Central de gestão (23 negócios)
 
 Os 23 negócios usam três motores de jogo diferentes — e cada um tem metas, clientes e decisões próprias.
@@ -67,13 +75,6 @@ Os jogos anteriores continuam na lista logo abaixo:
 - **Duelo de Heróis:** batalha por turnos com ataque, defesa, poção e golpe especial.
 - **Mini Plataforma:** três fases de plataforma com moedas, inimigos e bandeira.
 
-## Console Retrô melhorado
-
-- Textura 32×32 nova, com tela animada, D-pad, botões, LED e alto-falante.
-- **Clique direito** abre o hub; **agachado + clique direito** abre um jogo aleatório direto.
-- Dica (tooltip) em três idiomas e brilho de encantamento no inventário.
-- Avanço (advancement) próprio para quem fabrica o console.
-
 ## Traduções
 
 | Idioma | Item | Hub | Avanço |
@@ -82,23 +83,9 @@ Os jogos anteriores continuam na lista logo abaixo:
 | English (US) | Retro Console | ✔ | ✔ |
 | Español | Consola Retro | ✔ | ✔ |
 
-## Gestão mais clara nos jogos antigos
-
-- **Fazenda Próspera, Café da Praça, Central de Trânsito, Aquário Vivo, Colônia Espacial, Livraria em Dia, Estação de Recursos e Abrigo Animal** ganharam barra de meta, avaliação em estrelas, contador de dias e recorde de sessão.
-
-## Novidades visuais
-
-- Tema arcade neon compartilhado: fundo animado com estrelas, grade, vinheta e varredura CRT, painéis de vidro, pílulas de HUD, barras de progresso e botões com brilho.
-- Cartuchos com ilustrações próprias para cada jogo, selo de play no hover e navegação por teclado.
-- Banners de vitória, derrota e empate, placares de sessão e recordes em vários jogos.
-- Controles na tela: teclados virtuais no **Termo**, **Forca**, **Adivinhe o Número** e **Desafio de Matemática**; cartas desenhadas no **Blackjack** e na **Paciência**; tabuleiros ilustrados em **Damas**, **Ligue 4**, **Memória**, **Sudoku**, **Reversi** e **Dominó**.
-- **Tetris** agora tem peça guardada (**C**), queda instantânea (**Espaço**) e painel de nível replanejado.
-- **2048** ganhou desfazer (**Z**) e **Campo Minado** ganhou abertura em cadeia com o botão do meio.
-- **Snake** troca maçãs por estrelas douradas que valem 3 pontos por tempo limitado.
-
 ## Baixar ou compilar o jar
 
-Cada push compila o mod e publica o `.jar` em **Releases** (tag `v0.0.3-beta`), pronto para colocar na pasta `mods` junto com o **Fabric Loader** e a **Fabric API 0.92.2**.
+Cada push compila o mod e publica o `.jar` em **Releases** (tag `v0.0.4-beta`), pronto para colocar na pasta `mods` junto com o **Fabric Loader** e a **Fabric API 0.92.2**.
 
 Para compilar localmente, use **JDK 17** e execute:
 
@@ -106,7 +93,7 @@ Para compilar localmente, use **JDK 17** e execute:
 ./gradlew build
 ```
 
-O resultado fica em `build/libs/mega-minigames-0.0.3-beta.jar`.
+O resultado fica em `build/libs/mega-minigames-0.0.4-beta.jar`.
 
 ## Versionamento
 
@@ -120,7 +107,7 @@ O nome da versão é definido **manualmente** em `gradle.properties` (`mod_versi
 
 A minigame mod for **Minecraft 1.20.1**, built using **Fabric** and **Java 17**. The catalog offers **166 minigames** in a hub with illustrated cartridges, category filters and a neon arcade interface.
 
-- **Current version:** `0.0.3-beta`
+- **Current version:** `0.0.4-beta`
 - **Dependencies:** Fabric API 0.92.2
 - **Target version:** Minecraft 1.20.1
 - **Loader:** Fabric
@@ -153,6 +140,14 @@ Both shops run on the Pizzeria engine (same camera, same 3×3 workbench with sec
 - **Ice Cream Shop:** **12 ingredients** and **10 ice creams** (from vanilla to the special sundae), with a glass freezer, a mixer and a checkered floor. Every ~75 s a **heat wave** hits: more customers, less patience and **+25% on prices** for 30 seconds.
 - **Daily special (all three shops):** every 2 minutes one known flavour pays **50% more** — it gets a star on the menu.
 
+## Simulation with real physics
+
+Three **Simulation** games now have their own screens, with real physics and progression:
+
+- **Precision Landing:** a lunar module descends over a 2,200 px world with generated terrain, **three pads** (x2, x3 and x4) and **5 stages**. Gravity grows every stage, the wind shifts and is shown on the panel, fuel is limited and the module explodes if it hits the ground too fast. You get **3 lives**, a shadow and a guide line, and the score depends on the remaining fuel and the pad multiplier.
+- **My Little Pet:** a pixel-art room with a day/night cycle. The pet has **hunger, hygiene, energy and joy**, and every care action earns coins. You can **pet it** by clicking, buy **3 upgrades** (bed, toy and bathtub, up to level 3), play ball and let it sleep. The pet levels up and earns more coins — and there is **no game over**.
+- **Stable Orbit:** 1/r² gravity, inertia, drag and fuelled thrust. Keep the module inside the **green band** of a target orbit that changes every stage, dodge **debris**, collect **fuel cells** and clear **5 stages** with 3 lives. The HUD shows fuel, orbit radius, speed and stability.
+
 ## Management center (23 businesses)
 
 The 23 businesses run on three different play engines — each with its own goals, customers and decisions.
@@ -181,13 +176,6 @@ The previous additions are still in the catalog:
 - **Hero Duel:** turn-based battle with attack, defend, potion and special moves.
 - **Mini Platformer:** three platforming stages with coins, enemies and a flag.
 
-## Improved Retro Console
-
-- New 32×32 texture with an animated screen, D-pad, buttons, LED and speaker.
-- **Right-click** opens the hub; **sneak + right-click** starts a random game.
-- Tooltip in three languages and enchantment glint in the inventory.
-- Its own advancement for players who craft the console.
-
 ## Translations
 
 | Language | Item | Hub | Advancement |
@@ -196,23 +184,9 @@ The previous additions are still in the catalog:
 | English (US) | Retro Console | ✔ | ✔ |
 | Spanish | Consola Retro | ✔ | ✔ |
 
-## Clearer management in the older games
-
-- **Farm, Café, Traffic Control, Aquarium, Space Colony, Bookshop, Resource Station and Animal Shelter** gained a goal bar, star rating, day counter and session record.
-
-## Visual changes
-
-- Shared neon arcade theme: animated star/grid background with vignette and CRT sweep, glass panels, HUD pills, progress bars and glossy buttons.
-- Cartridges with unique artwork for each game, hover play badge and keyboard navigation.
-- Victory, defeat and draw banners, session scores and best records in many games.
-- On-screen controls: virtual keyboards in **Wordle**, **Hangman**, **Number Guess** and **Math Quiz**; drawn cards in **Blackjack** and **Solitaire**; illustrated boards in **Checkers**, **Connect Four**, **Memory**, **Sudoku**, **Reversi** and **Dominoes**.
-- **Tetris** now has a hold slot (**C**), instant drop (**Space**) and a redesigned level panel.
-- **2048** gained undo (**Z**) and **Minesweeper** gained middle-click chording.
-- **Snake** swaps apples for golden stars worth 3 points for a limited time.
-
 ## Downloading or building the jar
 
-Every push builds the mod and publishes the `.jar` under **Releases** (tag `v0.0.3-beta`), ready to drop into the `mods` folder with **Fabric Loader** and **Fabric API 0.92.2**.
+Every push builds the mod and publishes the `.jar` under **Releases** (tag `v0.0.4-beta`), ready to drop into the `mods` folder with **Fabric Loader** and **Fabric API 0.92.2**.
 
 To build locally with **JDK 17**:
 
@@ -220,7 +194,7 @@ To build locally with **JDK 17**:
 ./gradlew build
 ```
 
-The result is written to `build/libs/mega-minigames-0.0.3-beta.jar`.
+The result is written to `build/libs/mega-minigames-0.0.4-beta.jar`.
 
 ## Versioning
 

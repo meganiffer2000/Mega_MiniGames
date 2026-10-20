@@ -33,14 +33,28 @@ Jogo de gestão com **câmera lateral que segue o Steve**, mundo desenhado em pi
 - **Abas:** **Melhorias** (forno, pizzaria e Steve), **Coleção** (8 lembranças) e **Equipe** (3 garçons + 3 chefes, liberados por nível e com preço/ritmo diferentes).
 - **Nível:** cada nível libera melhorias e funcionários. A pizza de queijo já vem desbloqueada; as outras 9 precisam ser descobertas na bancada.
 
-## Negócios de atendimento — fila e preparo (9)
+## Padaria da Esquina — simulação em pixel art
+
+Mesmo motor da Pizzaria, com **12 ingredientes** de panificação e **10 receitas** escondidas (do pão francês ao bolo de chocolate). O forno de tijolos assa em paralelo e a bancada de madeira tem rolo, farinha e massa.
+
+- **Pão fresquinho:** cada fornada fica **quentinha por 75 s**. Vendida depois disso, o cliente paga **35% menos** — o slot cinza e a etiqueta "frio" avisam.
+- **Promoção do dia:** a cada 2 minutos um pão conhecido passa a pagar **50% a mais**.
+- **Controles:** os mesmos da Pizzaria (setas/A-D, **E**, **1 a 0**, clique, **Shift + clique** na loja).
+
+## Sorveteria Gelada — simulação em pixel art
+
+O freezer guarda os potes e a bancada tem batedeira e tigela. São **12 ingredientes** e **10 sorvetes** para descobrir (do simples baunilha à taça especial). Piso xadrez, casquinhas na parede e **onda de calor**.
+
+- **Onda de calor:** a cada ~75 s o sol aperta por 30 s — chegam **mais clientes**, com **menos paciência**, mas todos pagam **25% a mais**. Um aviso com contagem aparece no topo.
+- **Promoção do dia:** a cada 2 minutos um sabor conhecido paga **50% a mais**.
+- **Controles:** os mesmos da Pizzaria; o botão da bancada vira **CONGELAR**.
+
+## Negócios de atendimento — fila e preparo (7)
 
 Clientes chegam pedindo um dos três produtos da loja (mostrado no cartão). Aperte **1**, **2** ou **3** para preparar; o preparo leva alguns instantes e, se acertar o pedido, o cliente paga mais conforme o **combo**. Cliente sem paciência vai embora; **6 desistências** encerram o turno. Meta: **28 clientes** em 90 segundos. O **Espaço** não é usado aqui.
 
 | Jogo | O que é |
 | --- | --- |
-| **Padaria da Esquina** | Balcão de padaria: Pão, Croissant e Bolo — vencer a fila da manhã. |
-| **Sorveteria Gelada** | Sorveteria: Baunilha, Chocolate e Morango, com clientes impacientes no calor. |
 | **Mercado do Bairro** | Mercadinho de bairro: Frutas, Padaria e Limpeza no mesmo caixa. |
 | **Cinema Pipoca** | Bomboniere do cinema: Pipoca, Refri e Nachos antes da sessão começar. |
 | **Lanchonete Turbo** | Lanchonete de fast-food: Burger, Batata e Milk-shake em ritmo acelerado. |

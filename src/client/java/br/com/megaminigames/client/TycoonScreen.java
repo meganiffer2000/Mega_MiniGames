@@ -8,11 +8,11 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 
 /**
- * Central de gestão: 25 negócios com três motores de jogo diferentes.
+ * Central de gestão: 23 negócios com três motores de jogo diferentes.
  *
  * <ul>
- *   <li><b>RUSH</b> — fila de clientes com paciência e preparo por teclas 1–3 (a Pizzaria Expressa
- *       ganhou tela própria em {@link PizzeriaScreen}).</li>
+ *   <li><b>RUSH</b> — fila de clientes com paciência e preparo por teclas 1–3 (a Pizzaria,
+ *       a Padaria e a Sorveteria ganharam telas próprias em {@link ShopSimScreen}).</li>
  *   <li><b>CYCLE</b> — comprar insumo, produzir e vender no melhor preço de mercado.</li>
  *   <li><b>RESPONSE</b> — resolver incidentes escolhendo a resposta certa a tempo.</li>
  * </ul>
@@ -21,8 +21,6 @@ public final class TycoonScreen extends ArcadeScreen {
     private enum Engine { RUSH, CYCLE, RESPONSE }
 
     private enum Mode {
-        PADARIA("Padaria da Esquina", Engine.RUSH, ArcadeTheme.GOLD, "Pão", "Croissant", "Bolo"),
-        SORVETERIA("Sorveteria Gelada", Engine.RUSH, ArcadeTheme.SKY, "Baunilha", "Chocolate", "Morango"),
         MERCADO("Mercado do Bairro", Engine.RUSH, ArcadeTheme.LIME, "Frutas", "Padaria", "Limpeza"),
         CINEMA("Cinema Pipoca", Engine.RUSH, ArcadeTheme.MAGENTA, "Pipoca", "Refri", "Nachos"),
         LANCHONETE("Lanchonete Turbo", Engine.RUSH, ArcadeTheme.CORAL, "Burger", "Batata", "Milk-shake"),
@@ -152,7 +150,7 @@ public final class TycoonScreen extends ArcadeScreen {
     }
 
     public enum Kind {
-        PADARIA, SORVETERIA, MERCADO, CINEMA, LANCHONETE, FLORICULTURA, FARMACIA, SUSHI, BRINQUEDOS,
+        MERCADO, CINEMA, LANCHONETE, FLORICULTURA, FARMACIA, SUSHI, BRINQUEDOS,
         FABRICA, PORTO, SOLAR, ESTUFA, APIARIO, MINERADORA, FERROVIA, SUCOS, GRAFICA, CERAMICA,
         HOSPITAL, BANCO, JORNAL, AEROPORTO, HOTEL, ZOOLOGICO
     }

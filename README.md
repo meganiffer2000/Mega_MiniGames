@@ -31,11 +31,19 @@ A **Pizzaria Expressa** ganhou tela própria e virou uma simulação de verdade:
 - **3 abas no topo:** **Melhorias** (forno, pizzaria e Steve), **Coleção** (8 itens deixados por clientes) e **Equipe** (3 garçons e 3 chefes, cada um com nível mínimo, preço e velocidade próprios — os chefes fazem pizzas sozinhos).
 - **Controles:** setas ←/→ ou **A/D** para andar, **E** para interagir, **1 a 0** para servir pelo cardápio, clique para servir e comprar, **ESC** para sair.
 
-## Central de gestão (25 negócios)
+## Padaria da Esquina e Sorveteria Gelada
 
-Os 25 negócios usam três motores de jogo diferentes — e cada um tem metas, clientes e decisões próprias.
+As duas lojas seguem o motor da Pizzaria (mesma câmera, mesma bancada 3×3 com receitas secretas, mesmas abas), mas cada uma tem **mecânica própria**:
 
-**Atendimento (fila e preparo por teclas 1–3):** Padaria da Esquina, Sorveteria Gelada, Mercado do Bairro, Cinema Pipoca, Lanchonete Turbo, Floricultura Bella, Farmácia 24h, Sushi Rápido e Loja de Brinquedos.
+- **Padaria da Esquina:** **12 ingredientes** e **10 receitas** (pão francês, croissant, sonho, pão de queijo, torta de frango...). Cada fornada fica **quentinha por 75 segundos** — depois o cliente paga **35% menos**. O forno é de tijolos com cúpula e a parede tem prateleiras de pão.
+- **Sorveteria Gelada:** **12 ingredientes** e **10 sorvetes** (do baunilha à taça especial), com freezer de vidro, batedeira e piso xadrez. A cada ~75 s vem uma **onda de calor**: mais clientes, menos paciência e **+25% nos preços** por 30 segundos.
+- **Promoção do dia (as três lojas):** a cada 2 minutos um sabor conhecido passa a pagar **50% a mais** — ele ganha uma estrela no cardápio.
+
+## Central de gestão (23 negócios)
+
+Os 23 negócios usam três motores de jogo diferentes — e cada um tem metas, clientes e decisões próprias.
+
+**Atendimento (fila e preparo por teclas 1–3):** Mercado do Bairro, Cinema Pipoca, Lanchonete Turbo, Floricultura Bella, Farmácia 24h, Sushi Rápido e Loja de Brinquedos.
 
 **Produção e mercado (comprar insumo, produzir e vender no preço alto):** Fábrica de Robôs, Porto Container, Fazenda Solar, Estufa Hidropônica, Apiário Doce Mel, Mineradora Profunda, Ferrovia Central, Fábrica de Sucos, Gráfica Expressa e Cerâmica Vila.
 
@@ -137,11 +145,19 @@ In the hub, use **←/→** or the **mouse wheel** to change pages, **R** to ope
 - **3 tabs at the top:** **Upgrades** (oven, pizzeria and Steve), **Collection** (8 items left by customers) and **Team** (3 waiters and 3 chefs, each with their own level requirement, price and speed — chefs make pizzas on their own).
 - **Controls:** ←/→ or **A/D** to walk, **E** to interact, **1 to 0** to serve from the menu, click to serve and buy, **ESC** to leave.
 
-## Management center (25 businesses)
+## Corner Bakery and Ice Cream Shop
 
-The 25 businesses run on three different play engines — each with its own goals, customers and decisions.
+Both shops run on the Pizzeria engine (same camera, same 3×3 workbench with secret recipes, same tabs), but each one has its **own mechanic**:
 
-**Service rush (queue and prep with keys 1–3):** Bakery, Ice Cream Shop, Corner Market, Popcorn Cinema, Turbo Diner, Flower Shop, 24h Pharmacy, Sushi Bar and Toy Store.
+- **Corner Bakery:** **12 ingredients** and **10 recipes** (baguette, croissant, cream bun, cheese bread, chicken pie...). Every batch stays **warm for 75 seconds** — after that customers pay **35% less**. The brick oven has a dome and the wall is lined with bread shelves.
+- **Ice Cream Shop:** **12 ingredients** and **10 ice creams** (from vanilla to the special sundae), with a glass freezer, a mixer and a checkered floor. Every ~75 s a **heat wave** hits: more customers, less patience and **+25% on prices** for 30 seconds.
+- **Daily special (all three shops):** every 2 minutes one known flavour pays **50% more** — it gets a star on the menu.
+
+## Management center (23 businesses)
+
+The 23 businesses run on three different play engines — each with its own goals, customers and decisions.
+
+**Service rush (queue and prep with keys 1–3):** Corner Market, Popcorn Cinema, Turbo Diner, Flower Shop, 24h Pharmacy, Sushi Bar and Toy Store.
 
 **Production and market (buy input, produce, sell at the right price):** Robot Factory, Container Port, Solar Farm, Hydroponic Greenhouse, Honey Apiary, Deep Mine, Central Railway, Juice Factory, Print Shop and Ceramics Studio.
 

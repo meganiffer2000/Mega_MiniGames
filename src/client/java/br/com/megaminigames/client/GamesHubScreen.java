@@ -13,8 +13,8 @@ import net.minecraft.text.Text;
 public final class GamesHubScreen extends Screen {
     private static final List<Game> GAMES = List.of(
             new Game("Pizzaria Expressa", PizzeriaScreen::new, Category.MANAGEMENT),
-            new Game("Padaria da Esquina", () -> TycoonScreen.of(TycoonScreen.Kind.PADARIA), Category.MANAGEMENT),
-            new Game("Sorveteria Gelada", () -> TycoonScreen.of(TycoonScreen.Kind.SORVETERIA), Category.MANAGEMENT),
+            new Game("Padaria da Esquina", PadariaScreen::new, Category.MANAGEMENT),
+            new Game("Sorveteria Gelada", SorveteriaScreen::new, Category.MANAGEMENT),
             new Game("Mercado do Bairro", () -> TycoonScreen.of(TycoonScreen.Kind.MERCADO), Category.MANAGEMENT),
             new Game("Cinema Pipoca", () -> TycoonScreen.of(TycoonScreen.Kind.CINEMA), Category.MANAGEMENT),
             new Game("Lanchonete Turbo", () -> TycoonScreen.of(TycoonScreen.Kind.LANCHONETE), Category.MANAGEMENT),

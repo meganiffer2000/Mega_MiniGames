@@ -12,7 +12,7 @@ Mod de minijogos para **Minecraft 1.20.1**, usando **Fabric** e **Java 17**. O c
 
 ## Comando e primeiro jogo
 
-O mod oferece **120 minijogos** em um hub paginado. Para abrir, segure o item **Game Boy** e use-o com o botão direito. Ele aparece na aba **Ferramentas** do Criativo e também pode ser fabricado com 5 barras de ferro, 2 redstones, 1 painel de vidro e 1 botão de pedra.
+O mod oferece **120 minijogos** em um hub paginado. Para abrir, segure o item **Console** e use-o com o botão direito. Ele aparece na aba **Ferramentas** do Criativo e também pode ser fabricado com 5 barras de ferro, 2 redstones, 1 painel de vidro e 1 botão de pedra.
 
 # EN
 
@@ -26,4 +26,4 @@ A minigame mod for **Minecraft 1.20.1**, built using **Fabric** and **Java 17**.
 - **Target version:** Minecraft 1.20.1
 - **Loader:** Fabric
 
-## Command and first game The mod offers **120 minigames** within a paginated hub. To open it, hold the **Game Boy** item and right-click. It can be found in the **Tools** tab in Creative mode and can also be crafted using 5 iron ingots, 2 redstone dust, 1 glass pane, and 1 stone button.
+## Command and first game The mod offers **120 minigames** within a paginated hub. To open it, hold the **Console** item and right-click. It can be found in the **Tools** tab in Creative mode and can also be crafted using 5 iron ingots, 2 redstone dust, 1 glass pane, and 1 stone button.

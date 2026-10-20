@@ -17,6 +17,8 @@ Segure o item **Console Retrô** e use-o com o botão direito. Ele aparece na ab
 
 No hub, use as **setas ←/→** ou a **roda do mouse** para trocar de página, **R** para abrir um jogo aleatório e **ESC** para fechar.
 
+📖 A lista completa dos 166 jogos, com descrição e controles, está em **[CATALOGO.md](CATALOGO.md)**.
+
 ## Central de gestão (26 novos negócios)
 
 Os 26 negócios usam três motores de jogo diferentes — e cada um tem metas, clientes e decisões próprias.
@@ -108,6 +110,8 @@ A minigame mod for **Minecraft 1.20.1**, built using **Fabric** and **Java 17**.
 Hold the **Retro Console** item and right-click. It can be found in the **Tools** tab in Creative mode and can also be crafted using 5 iron ingots, 2 redstone dust, 1 glass pane, and 1 stone button.
 
 In the hub, use **←/→** or the **mouse wheel** to change pages, **R** to open a random game and **ESC** to close.
+
+📖 The full list of all 166 games, with descriptions and controls, is in **[CATALOGO.md](CATALOGO.md)**.
 
 ## Management center (26 new businesses)
 

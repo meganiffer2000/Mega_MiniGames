@@ -20,13 +20,25 @@ Controles gerais dentro de qualquer jogo: **R** reinicia, o botão **Voltar ao m
 
 # Gestão (34)
 
-## Negócios de atendimento — fila e preparo (10)
+## Pizzaria Expressa — simulação em pixel art (destaque)
+
+Jogo de gestão com **câmera lateral que segue o Steve**, mundo desenhado em pixels (gerados aos poucos e guardados ao sair da área) e **três abas** no topo. Não existe game over: erros só custam tempo e paciência.
+
+- **Andar:** setas ←/→ ou **A/D**; **E** interage com o que estiver por perto; **clique** nos clientes e nos itens do cardápio.
+- **1 a 0:** atalho para a pizza desbloqueada naquele slot (serve se houver cliente pedindo e estoque; senão tenta montar).
+- **Loja do outro lado da rua:** compre ingredientes (clique = 1, **Shift + clique** = 5). São 12 ingredientes.
+- **Bancada (crafttable 3×3):** mova ingredientes da despensa para a grade. A combinação certa forma um sabor — **as receitas não aparecem antes da primeira vez**. O resultado aparece no slot à direita; clique nele (ou aperte **Enter**) para assar.
+- **Fornalha:** as pizzas assam sozinhas, uma por slot (começa com 1 forno; até 5 no total).
+- **Clientes:** Villagers normais e **6 especiais** (pagam 50% a mais). Ao receber a pizza, dão dinheiro e **XP**; às vezes deixam um **colecionável**.
+- **Abas:** **Melhorias** (forno, pizzaria e Steve), **Coleção** (8 lembranças) e **Equipe** (3 garçons + 3 chefes, liberados por nível e com preço/ritmo diferentes).
+- **Nível:** cada nível libera melhorias e funcionários. A pizza de queijo já vem desbloqueada; as outras 9 precisam ser descobertas na bancada.
+
+## Negócios de atendimento — fila e preparo (9)
 
 Clientes chegam pedindo um dos três produtos da loja (mostrado no cartão). Aperte **1**, **2** ou **3** para preparar; o preparo leva alguns instantes e, se acertar o pedido, o cliente paga mais conforme o **combo**. Cliente sem paciência vai embora; **6 desistências** encerram o turno. Meta: **28 clientes** em 90 segundos. O **Espaço** não é usado aqui.
 
 | Jogo | O que é |
 | --- | --- |
-| **Pizzaria Expressa** | Pizzaria com fila de pedidos: Margherita (1), Calabresa (2) e Quatro Queijos (3). |
 | **Padaria da Esquina** | Balcão de padaria: Pão, Croissant e Bolo — vencer a fila da manhã. |
 | **Sorveteria Gelada** | Sorveteria: Baunilha, Chocolate e Morango, com clientes impacientes no calor. |
 | **Mercado do Bairro** | Mercadinho de bairro: Frutas, Padaria e Limpeza no mesmo caixa. |

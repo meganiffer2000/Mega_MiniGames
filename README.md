@@ -19,11 +19,23 @@ No hub, use as **setas ←/→** ou a **roda do mouse** para trocar de página, 
 
 📖 A lista completa dos 166 jogos, com descrição e controles, está em **[CATALOGO.md](CATALOGO.md)**.
 
-## Central de gestão (26 novos negócios)
+## Pizzaria Expressa — jogo de gestão em pixel art
 
-Os 26 negócios usam três motores de jogo diferentes — e cada um tem metas, clientes e decisões próprias.
+A **Pizzaria Expressa** ganhou tela própria e virou uma simulação de verdade: o **Steve** atende **Villagers** atrás do balcão, numa pizzaria pixel art com câmera lateral que segue o personagem. Não tem game over — o ritmo é seu.
 
-**Atendimento (fila e preparo por teclas 1–3):** Pizzaria Expressa, Padaria da Esquina, Sorveteria Gelada, Mercado do Bairro, Cinema Pipoca, Lanchonete Turbo, Floricultura Bella, Farmácia 24h, Sushi Rápido e Loja de Brinquedos.
+- **Mundo em pixels:** o cenário é gerado aos poucos (poucos blocos por quadro) e os pixels já desenhados são guardados ao sair; ao voltar, os pedaços são recarregados conforme o Steve caminha.
+- **Loja do outro lado da rua:** 12 ingredientes à venda (clique compra 1, **Shift + clique** compra 5).
+- **Bancada 3×3 (crafttable):** arraste ingredientes da despensa para a grade e teste combinações. **As receitas são secretas** — um sabor só aparece no cardápio depois de ser montado pela primeira vez. A pizza de **queijo** já vem liberada; são **10 sabores**.
+- **Fornalha:** a pizza montada vai para o forno e fica pronta sozinha. Começa com 1 forno e dá para chegar a 5.
+- **Clientes:** Villagers normais e 6 **especiais** (pagam 50% a mais). Cada venda dá dinheiro e **XP**; clientes especiais podem deixar **colecionáveis**.
+- **3 abas no topo:** **Melhorias** (forno, pizzaria e Steve), **Coleção** (8 itens deixados por clientes) e **Equipe** (3 garçons e 3 chefes, cada um com nível mínimo, preço e velocidade próprios — os chefes fazem pizzas sozinhos).
+- **Controles:** setas ←/→ ou **A/D** para andar, **E** para interagir, **1 a 0** para servir pelo cardápio, clique para servir e comprar, **ESC** para sair.
+
+## Central de gestão (25 negócios)
+
+Os 25 negócios usam três motores de jogo diferentes — e cada um tem metas, clientes e decisões próprias.
+
+**Atendimento (fila e preparo por teclas 1–3):** Padaria da Esquina, Sorveteria Gelada, Mercado do Bairro, Cinema Pipoca, Lanchonete Turbo, Floricultura Bella, Farmácia 24h, Sushi Rápido e Loja de Brinquedos.
 
 **Produção e mercado (comprar insumo, produzir e vender no preço alto):** Fábrica de Robôs, Porto Container, Fazenda Solar, Estufa Hidropônica, Apiário Doce Mel, Mineradora Profunda, Ferrovia Central, Fábrica de Sucos, Gráfica Expressa e Cerâmica Vila.
 
@@ -113,11 +125,23 @@ In the hub, use **←/→** or the **mouse wheel** to change pages, **R** to ope
 
 📖 The full list of all 166 games, with descriptions and controls, is in **[CATALOGO.md](CATALOGO.md)**.
 
-## Management center (26 new businesses)
+## Pizzeria Express — a pixel-art management game
 
-The 26 businesses run on three different play engines — each with its own goals, customers and decisions.
+**Pizzeria Express** got its own screen and became a real simulation: **Steve** serves **Villagers** behind the counter of a pixel-art pizzeria, with a side camera that follows the character. There is no game over — you set the pace.
 
-**Service rush (queue and prep with keys 1–3):** Pizzeria, Bakery, Ice Cream Shop, Corner Market, Popcorn Cinema, Turbo Diner, Flower Shop, 24h Pharmacy, Sushi Bar and Toy Store.
+- **Pixel world:** the scenery is drawn gradually (a few chunks per frame) and the generated pixels are saved when you leave; on your way back they reload as Steve walks.
+- **Shop across the street:** 12 ingredients for sale (click buys 1, **Shift + click** buys 5).
+- **3×3 workbench (crafting table):** move ingredients from the pantry into the grid and try combinations. **Recipes are secret** — a flavour only shows up on the menu after you make it for the first time. **Cheese** pizza is unlocked from the start; there are **10 flavours**.
+- **Oven:** a built pizza goes in and bakes by itself. You start with 1 oven and can reach 5.
+- **Customers:** regular Villagers plus 6 **specials** (they pay 50% more). Every sale gives money and **XP**; specials may leave **collectibles**.
+- **3 tabs at the top:** **Upgrades** (oven, pizzeria and Steve), **Collection** (8 items left by customers) and **Team** (3 waiters and 3 chefs, each with their own level requirement, price and speed — chefs make pizzas on their own).
+- **Controls:** ←/→ or **A/D** to walk, **E** to interact, **1 to 0** to serve from the menu, click to serve and buy, **ESC** to leave.
+
+## Management center (25 businesses)
+
+The 25 businesses run on three different play engines — each with its own goals, customers and decisions.
+
+**Service rush (queue and prep with keys 1–3):** Bakery, Ice Cream Shop, Corner Market, Popcorn Cinema, Turbo Diner, Flower Shop, 24h Pharmacy, Sushi Bar and Toy Store.
 
 **Production and market (buy input, produce, sell at the right price):** Robot Factory, Container Port, Solar Farm, Hydroponic Greenhouse, Honey Apiary, Deep Mine, Central Railway, Juice Factory, Print Shop and Ceramics Studio.
 
